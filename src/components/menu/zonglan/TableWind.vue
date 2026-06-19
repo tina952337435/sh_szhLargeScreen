@@ -1,0 +1,293 @@
+<template>
+  <div class="m-box">
+    <div
+      class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2"
+    >
+      <div class="d1"></div>
+      <div class="d2"></div>
+      <p class="base-p" id="title2" @click="fangda()">风情监测</p>
+      <span class="spanTitle"></span>
+    </div>
+    <div class="txt">
+      <div class="box">
+        <!-- 左边 -->
+        <div class="box-item box-itemleft">
+          <div class="text-name" style="margin-top: 50px; margin-left: 20px">
+            风情站点数
+          </div>
+          <div
+            class="text-num"
+            @click="open('all')"
+            style="
+              color: #57f1e9;
+              margin-top: 50px;
+              text-align: right;
+              cursor: pointer;
+            "
+          >
+            {{ strJsonData.length }}
+            <span></span>
+          </div>
+        </div>
+        
+        <div
+          class="box-item box-itemright"
+          style="margin-top: 50px; cursor: pointer"
+        >        
+          <div class="text-name">风力最大测站</div>
+          <div class="text-num" style="color: #57f1e9;padding-top:10px;" @click="openDanZhan()">
+            {{ maxStnm }}<span></span>
+          </div>
+        </div>
+
+        <!-- 左边 -->
+        <div class="box-item box-itemleft">
+          <div class="text-name" style="margin-top: -10px;">
+            ≥6级站数
+          </div>
+          <div
+            class="text-num"
+            @click="open('6')"
+            style="
+              color: #FEAF62;
+              margin-top: -13px;
+              text-align: right;
+              cursor: pointer;
+            "
+          >
+            {{ gradeCount }}
+            <span></span>
+          </div>
+        </div>
+        <div class="box-item box-itemright" style="margin-top:-25px">
+          <div class="text-num" style="color: #57f1e9">
+            {{ maxDir }}<span></span>
+          </div>
+          <!-- <div class="text-name">风力方向</div> -->
+        </div>
+      </div>
+    </div>
+    <div class="bot leftBottom-radius"></div>
+  </div>
+  <ComZujian
+    :showDialog="showDialog"
+    @close="showDialog = false"
+    :title="titleName"
+    :typeValue="typeValue"
+    style="width: 70%; height: 700px"
+  >
+    <TableWind />
+  </ComZujian>
+
+  <MyDialog
+    :showDialog="showDialogTJ"
+    @close="showDialogTJ = false"
+    :title="titleNameTJ"
+    style="width: 70%; height: 700px"
+  >
+    <WINDTJ :strJsonData="strJsonData" />
+  </MyDialog>
+</template>
+
+<script setup>
+import ComZujian from "@/components/ComZujian.vue";
+import MyDialog from "@/components/ComDialog.vue";
+import Echarts from "@/components/MyEcharts/echartsLine.vue";
+import WINDTJ from "@/components/danzhan/sq/WINDTJ.vue";
+
+import api from "@/api/zonglan/index.js";
+import ChartJs from "@/api/MyEcharts/ChartJs.js";
+import {
+  SetNull,
+  groupBy,
+  sortObjectArray,
+  getWindDirectionName,
+} from "@/api/ComUnit.js";
+import dayjs from "dayjs";
+import $ from "jquery";
+import { ElMessage, ElTimePicker } from "element-plus";
+import * as echarts from "echarts";
+
+import Dialog from "@/api/utils/Dialog.js";
+import {
+  ref,
+  onMounted,
+  reactive,
+  inject,
+  provide,
+  watch,
+  defineAsyncComponent,
+  h,
+} from "vue";
+// 获取当前主题
+const _theme = localStorage.getItem("curTheme");
+const datekey = ref(null);
+const lineOption = ref({});
+const trendsTooltip = ref();
+const dateid = ref("AreasurfaceWater");
+const Riverswiper = ref("year");
+const showDialog = ref(false);
+const stime = ref({});
+const etime = ref({});
+const strJsonData = ref([]);
+
+const showDialogTJ = ref(false);
+const titleNameTJ = ref("");
+
+//风力最大测站
+const maxStnm = ref(""),
+  maxStcd = ref(""),
+  maxDir = ref(""),
+  maxStcdTM=ref("");
+const gradeCount = ref(0);
+const gradeType = ref("all");
+
+const props = defineProps({
+  strJsonLHW: {
+    type: Array,
+    default: () => [],
+  },
+});
+onMounted(() => {
+  Weacontent();
+});
+function Weacontent() {
+  window.loadingShow();
+  var now = new Date();
+  etime.value = dayjs(now).add(1, "hour").format("YYYY-MM-DD HH:mm:ss");
+  stime.value = dayjs(dayjs(now).format("YYYY-MM-DD HH:mm:ss"))
+    .add(-2, "hour")
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  var strParam = {};
+  strParam["pid"] = "2026031114184492913-5";
+  strParam["stime"] = stime.value;
+  strParam["etime"] = etime.value;
+  api.selectListWind(strParam).then((res) => {
+    if (res.data.length > 0) {
+      strJsonData.value = sortObjectArray(res.data, ["wndv"], "desc");
+      maxStnm.value = strJsonData.value[0].stnm;
+      maxStcd.value = strJsonData.value[0].stcd;
+	  maxStcdTM.value= strJsonData.value[0].tm;
+      var wndpwr =
+        SetNull(strJsonData.value[0].wndpwr) != ""
+          ? strJsonData.value[0].wndpwr
+          : "-";
+      var wnddir =
+        SetNull(strJsonData.value[0].wnddir) != ""
+          ? strJsonData.value[0].wnddir
+          : "-";
+      var wnddirZN = getWindDirectionName(wnddir);
+      maxDir.value = wndpwr + "级\n\n" + wnddirZN;
+      gradeCount.value = strJsonData.value.filter(function (e) {
+        return e.wndpwr >= 6;
+      }).length;
+    }
+    window.loadingHide();
+  });
+}
+function fangda() {
+  var dialogClass = $(".dialog").css("display");
+  if (dialogClass == "block") {
+    return false;
+  }
+  $(".g-lside ").css({ "z-index": 90 });
+  $(".g-rside ").css({ "z-index": 99 });
+  showDialog.value = true;
+}
+function open(grade) {
+  gradeType.value = grade;
+  if (gradeType.value != "all") {
+    if (gradeCount.value == 0) {
+      ElMessage.error("无数据");
+      return;
+    }
+  }
+
+  $(".g-lside ").css({ "z-index": 90 });
+  $(".g-rside ").css({ "z-index": 99 });
+  showDialogTJ.value = true;
+  titleNameTJ.value = "站点统计";
+}
+function openDanZhan() {
+  const ChildVue = defineAsyncComponent(
+    () => import("@/components/danzhan/sq/DanZHanSel.vue"),
+  );
+  const props = {};
+  props["stcd"] = maxStcd.value;
+  props["stime"] = dayjs(new Date(maxStcdTM.value))
+    .add(-24, "hour")
+    .format("YYYY-MM-DD HH:mm:ss");
+  props["etime"] = dayjs(new Date(maxStcdTM.value))
+    .add(1, "hour")
+    .format("YYYY-MM-DD HH:mm:ss");
+  props["mtype"] ="BX";
+  props["type"] = "风场过程";
+  Dialog.open(
+    { title: maxStnm.value, widh: 1500, heig: 700 },
+    h(ChildVue, props),
+  ).then(() => {
+    console.log("弹窗关闭了");
+  });
+}
+</script>
+
+<style scoped>
+.box {
+  background-image: url(/images/windbg.png);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width: 98%;
+  height: 86%;
+  margin: 4% auto;
+  display: flex;
+  /* 添加flex布局 */
+  flex-wrap: wrap;
+  /* 允许换行 */
+  justify-content: space-around;
+  position: relative;
+}
+
+.box-item {
+  width: 36%;
+  /* height: 44%;
+	margin-bottom: 6%; */
+  /* background-color: rgba(255, 255, 255, 0.2); */
+  color: var(--mtablecolor);
+}
+
+.box-itemleft {
+  /* text-align: left; */
+  display: flex;
+}
+
+.box-itemright {
+  /* text-align: right; */
+}
+
+.text-name {
+  /* height: 3.5rem; */
+  /* line-height: 3.2rem; */
+  display: block;
+  width: 100%;
+  font-size: 0.9rem;
+  /* margin-left:35px; */
+  text-align: center;
+}
+
+.text-num {
+  /* height: 3rem; */
+  display: block;
+  font-size: 1.4rem;
+  font-weight: bold;
+  font-family: "number";
+  /* width: 100%; */
+  text-align: center;
+}
+.text-num span {
+  font-size: 0.9rem;
+  font-family: "微软雅黑";
+  font-weight: normal;
+  padding-left: 6px;
+}
+</style>

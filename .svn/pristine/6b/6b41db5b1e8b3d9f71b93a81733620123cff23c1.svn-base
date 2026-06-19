@@ -1,0 +1,47 @@
+<template>
+    <Table
+    :headers="tableHeaders"
+    :rows="tableData"
+    :key="datekey"
+    class="tableYQ"
+    :border="0"
+    :cellspacing="0"
+    :cellpadding="0"
+  />
+</template>
+
+<script setup>
+import Table from "@/components/Table/Table.vue";
+import api from "@/api/zonglan/index.js";
+import dayjs from "dayjs";
+import { SetNull, groupBy, Getmtype, sortObjectArray } from "@/api/ComUnit.js";
+
+import { ref, onMounted, reactive, inject } from "vue";
+const tableData = ref();
+const props = defineProps({
+  strJsonData: {
+    type: String,
+    default: "",
+  },
+});
+
+const datekey = ref(null);
+const tableHeaders = [
+  { name: "num", label: "序号" },
+  { name: "stnm", label: "站名" },
+  { name: "wndv", label: "风速(m³/s)" },
+  { name: "wnddir", label: "风向" },
+  { name: "wndpwr", label: "风力" },
+];
+onMounted(() => {
+  if (props.strJsonData != undefined) {
+    Weacontent();
+  }
+});
+function Weacontent() {    
+    for(var num=0;num<props.strJsonData.length;num++){
+        props.strJsonData[num].num=(num+1);
+    }
+    tableData.value=props.strJsonData;
+}
+</script>

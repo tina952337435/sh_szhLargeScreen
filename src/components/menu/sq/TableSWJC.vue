@@ -1,0 +1,229 @@
+<template>
+  <div class="m-box" style="position: relative">
+    <div class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2">
+      <div class="d1"></div>
+      <div class="d2"></div>
+      <p class="base-p" id="title2" @click="fangda()">水位监测</p>
+      <el-input v-model="searchKey" placeholder="请输入搜索站点" clearable @input="handleSearch"></el-input>
+    </div>
+    <div class="txt" style="overflow-y: auto">
+      <customTable :headers="tableHeaders" :rows="tableData" :key="datekey" class="m-table FirstTable" :border="0"
+        :cellspacing="0" :cellpadding="0" @click="handleclick" />
+    </div>
+    <div class="bot leftBottom-radius"></div>
+  </div>
+  <ComZujian :showDialog="showDialog" @close="showDialog = false" :title="titleName" :typeValue="typeValue"
+    style="width: 70%; height: 700px">
+    <TableSWJC :strJsonData="props.strJsonData"/>
+  </ComZujian>
+</template>
+<script setup>
+import '@/assets/styles/Table.css';
+import ComZujian from "@/components/ComZujian.vue";
+import TableSWJC from "@/components/menu/sq/TableSWJC.vue";
+import customTable from "@/components/Table/customTable.vue";
+import api from "@/api/zonglan/index.js";
+import dayjs from "dayjs";
+import $ from "jquery";
+import { useStore } from 'vuex'
+
+import Dialog from "@/api/utils/Dialog.js";
+import { ref, onMounted, reactive, defineAsyncComponent, h,defineProps, watch } from "vue";
+import { SetNull } from "@/api/ComUnit";
+import { ElMessage } from "element-plus";
+
+const store = useStore();
+const { viewer } = store.state;
+const datekey = ref(null);
+const tableHeaders = ref([
+  { name: "stnm", label: "名称" },
+  { name: "upz", label: "水位(m)" },
+  { name: "wrz", label: "警戒(m)" },
+  { name: "wrzCha", label: "超警(m)" },
+  { name: "tm", label: "时间" },
+]);
+const tableData = ref([]);
+const tableDataAll = ref([]);
+
+// 判断弹窗是否显示,默认隐藏
+const showDialog = ref(false);
+const stime = ref({});
+const etime = ref({});
+
+const props = defineProps({
+  strJsonData: {
+    type: String,
+    default: ""
+  }
+});
+
+function Weacontent() {
+  // var nowTM = new Date();
+  // var strParam = {};
+  // strParam["pid"] = "2026031114184492913-3";
+  // strParam["stime"] = stime.value;
+  // strParam["etime"] = etime.value;
+  // api.stPptnWater(strParam).then((res) => {
+    // var strJson =res.data;
+    var strJson=props.strJsonData;
+    var result = [];
+    for (var num = 0; num < strJson.length; num++) {
+      var item = strJson[num];
+      var wrz = SetNull(item.wrz) != "" ? Number(item.wrz).toFixed(2) : "—";
+      var grz = SetNull(item.grz) != "" ? Number(item.grz).toFixed(2) : "—";
+      var upz = SetNull(item.upz) != "" ? Number(item.upz).toFixed(2) : "—";
+      var wrzCha = "—";
+      var colorCss = "";
+      if (wrz != "—" && upz != "—") {
+        wrzCha = Number(Number(upz) - Number(wrz)).toFixed(2);
+        if (Number(wrzCha) > 0) {
+          colorCss = "#F9C33D";
+        }
+      }
+
+      if (grz != "—" && upz != "—") {
+        if (Number(Number(upz) - Number(grz)).toFixed(2) > 0) {
+          colorCss = "#F70019";
+        }
+      }
+
+      var tm = "—";
+      if (item.tm != undefined) {
+        tm = dayjs(item.tm).format("HH:mm");
+      }
+      var _strParam = {};
+      _strParam["stnm"] = SetNull(item["stnm"]).replaceAll(" ", "");
+      _strParam["upz"] = upz;
+      _strParam["wrz"] = wrz;
+      _strParam["grz"] = grz;
+      _strParam["wrzCha"] = wrzCha;
+      _strParam["tm"] = tm;
+      _strParam["stcd"] = item.stcd;
+      _strParam["lgtd"] = item.lgtd;
+      _strParam["lttd"] = item.lttd;
+      _strParam["colorCss"] = colorCss;
+      _strParam["mtype"] = item.mtype;
+      _strParam["q"] = item.q;
+      _strParam["dwz"] = item.dwz;
+      _strParam["BZtm"] = item.tm;
+      result.push(_strParam);
+      // result.push([item.stnm, upz, grz, wrzCha, tm]);      
+    }
+    tableData.value = result;
+    tableDataAll.value = result;
+  // }).catch((err) => { });
+}
+const emit = defineEmits(['parentMethodshowDynamicLayers']);
+function handleclick(evt) {
+  const name = evt.target.innerText;
+  const strJson = tableData.value.find(item => item.stnm === name);
+  if(strJson==undefined){
+    return;
+  }
+  if (SetNull(strJson["lgtd"]) == "" && SetNull(strJson["lttd"]) == "") {
+    ElMessage.error("缺少经纬度坐标");
+  }
+  else {
+    let _lgtd = Number(strJson["lgtd"]);
+    let _lttd = Number(strJson["lttd"]);
+    var evt=[_lgtd,_lttd];
+    emit("parentMethodshowDynamicLayers", evt);
+    
+  }
+  const ChildVue = defineAsyncComponent(() =>
+    import("@/components/danzhan/sq/DanZHanSel.vue")
+  );
+  const strWhere = {};
+  strWhere["stcd"] = strJson["stcd"];
+  strWhere["stime"] = stime.value;
+  strWhere["etime"] = etime.value;
+  strWhere["mtype"] = strJson["mtype"];
+  strWhere["type"]="水位过程";
+  //ChildVue为弹窗中嵌入的slot
+  Dialog.open({ title: strJson["stnm"], widh: 1500, heig: 700 }, h(ChildVue, strWhere)).then(() => { console.log('弹窗关闭了') })
+}
+const searchKey = ref('')
+function handleSearch(evt) {
+  searchKey.value = evt;
+  tableData.value = tableDataAll.value.filter(function (e) {
+    return (e.stnm).includes(evt) == true;
+  })
+}
+function fangda() {
+  var dialogClass = $(".dialog").css("display");
+  if (dialogClass == "block") {
+    return false;
+  }
+  $(".g-lside ").css({ "z-index": 99 });
+  $(".g-rside ").css({ "z-index": 90 });
+  showDialog.value = true;
+}
+onMounted(() => {
+  var nowTM = new Date();
+  etime.value = dayjs(dayjs(nowTM).format("YYYY-MM-DD HH:mm:ss"))
+      .add(1, "hour")
+      .format("YYYY-MM-DD HH:mm:ss");
+  stime.value = dayjs(dayjs(nowTM).format("YYYY-MM-DD HH:mm:ss"))
+      .add(-24, "hour")
+      .format("YYYY-MM-DD HH:mm:ss");
+  if (props.strJsonData != undefined) {
+    Weacontent();
+  }
+});
+</script> 
+<style scoped>
+.m-table tr th:nth-child(1),
+.m-table tr td:nth-child(1) {
+  width: 100px;
+}
+
+.m-table tr td:nth-child(2) {
+  width: 80px;
+}
+
+tr td:nth-child(3) {
+  width: 10vh;
+}
+
+tr td:nth-child(4) {
+  width: 10vh;
+}
+
+tr td:nth-child(5) {
+  width: 12vh;
+}
+
+/* 自定义滚动条样式 */
+.txt::-webkit-scrollbar {
+  width: 2px;
+}
+
+.txt::-webkit-scrollbar-thumb {
+  /* 滚动条手柄 */
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  right: -4px;
+  top: 0px;
+  background: var(--mtabletrcolor);
+  z-index: 2;
+}
+
+:deep(.el-input) {
+  --el-input-border-color: var(--popContentHeadbg) !important;
+  width: 160px;
+  border-radius: 6px;
+  margin-left: 150px;
+  height: 1.8rem;
+  vertical-align: 0.8rem;
+}
+
+:deep(.el-input__wrapper:hover),
+:deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+}
+
+:deep(.el-input__inner) {
+  color: var(--mtablecolor);
+}
+</style>

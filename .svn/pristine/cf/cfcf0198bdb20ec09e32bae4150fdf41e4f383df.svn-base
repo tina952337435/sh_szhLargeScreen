@@ -1,0 +1,23 @@
+<template>
+<div class="m-box" style="position: relative">
+        <div class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2">
+            <div class="d1"></div>
+            <div class="d2"></div>
+            <p class="base-p" id="title2" @click="fangda()">总蓄量</p>
+        </div>
+        <div class="txt">
+            <EchartZXSLZI 
+            title="站点潮位监测 (轮播)"
+            :data="tideData"
+            :items-per-page="3" 
+            :auto-play-interval="4000"
+            width="100%"
+            />
+        </div>
+        <div class="bot leftBottom-radius"></div>
+    </div>
+</template>
+<script setup>
+import { ref } from 'vue';
+import EchartZXSLZI from '@/components/menu/cxl/EchartZXSLZI.vue';
+</script>

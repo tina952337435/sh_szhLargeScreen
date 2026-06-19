@@ -1,0 +1,551 @@
+.MapTextNew {
+    position: absolute;
+    pointer-events: auto;
+    transform-style: preserve-3d;
+    transform: scale(.9);
+    width: auto;
+    position: relative;
+    padding: 5px;
+    color: #fff;
+    text-transform: uppercase;
+    transition: .5s;
+    cursor: pointer;
+    overflow: hidden;
+    text-align: left;
+    /* transform: translateY(0px); */
+}
+
+
+.gcText {
+    /* border: 1px solid rgb(221, 221, 221); */
+    color: rgb(28, 28, 28);
+    background: url(/images/PopupSmall.png) no-repeat 100% 100%;
+    background-size: 100% 100%;
+
+    /* box-shadow: rgb(136, 134, 134) 0px 5px 10px; */
+    /* box-shadow: rgb(136, 134, 134) 0px px 10px; */
+    text-align: center !important;
+    font-size: 14px;
+    color: #fff;
+}
+.gcText span{
+    line-height: 18px;
+    border-radius: 5px 0 0 0;
+}
+
+.level_zc {
+    /* background: url(/images/border.png); */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 4px 15px 12px 15px;
+
+}
+
+.level_zc .amap-ui-district-cluster-marker-body {
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    background: #40fc00;
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    
+    /* 新加 */
+    width: fit-content;
+    margin: 0px auto;
+
+}
+
+.level_zc .amap-ui-district-cluster-marker-title {
+    color: #FFFFFF;
+    text-align: center;
+    padding-top: 8px;
+}
+
+.level_zcnull {
+    /*width: 70px;
+    height: 52px;*/
+    /* background: url(/images/border.png); */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 10px 15px 15px 15px;
+}
+
+.level_zcnull .amap-ui-district-cluster-marker-body {
+    text-align: center;
+    background-color: none !important;
+    background: none !important;
+    color: black !important;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    color: #C1C1C1 !important;
+    padding-bottom: 8px;
+}
+
+.level_zcnull .amap-ui-district-cluster-marker-title {
+    color: #C1C1C1;
+    text-align: center;
+    padding-top: 8px;
+}
+
+
+
+.level_wrz {
+    width: 70px;
+    height: 52px;
+    /* background: url(/images/border.png); */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 0px 15px;
+}
+
+.level_wrz .amap-ui-district-cluster-marker-body {
+    /* text-align: center; */
+    /*background-image: radial-gradient(ellipse farthest-corner at 30% 30%, #FDCF73 0%,#F7B90B 150%);*/
+    /* border-radius: 5px;
+    background: #F7BC00;
+    padding: 0px 8px;
+    color: #000 !important;
+    padding-bottom: 8px;
+    background: none !important; */
+
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    background: #F7BC00;
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+}
+
+.level_wrz .amap-ui-district-cluster-marker-title {
+    color: #ffffff; 
+    text-align: center;
+    padding-top: 8px;
+}
+
+
+.level_grz {
+    width: 70px;
+    height: 52px;
+    /* background: url(/images/border.png); */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 0px 15px;
+}
+
+.level_grz .amap-ui-district-cluster-marker-body {
+    /* text-align: center; */
+    /*background: red;*/
+    /* border-radius: 5px;
+    padding: 0px 8px;
+    color: #f34c5e !important;
+    padding-bottom: 8px;
+    background: none !important; */
+
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    background: #f34c5e;
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+}
+
+.level_grz .amap-ui-district-cluster-marker-title {
+    color: #fff;
+    text-align: center;
+    padding-top: 8px;
+}
+
+.rainText{
+    margin-left: -18px;
+}
+
+.rainText .amap-ui-district-cluster-marker-title {
+    text-align: center;
+    padding-top: 8px;
+}
+
+.rainText .amap-ui-district-cluster-marker-body {
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    background: rgba(6, 111, 165, 0.8);
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    /* font-weight: 700; */
+    color: #ffffff;
+}
+
+.MapText {
+    min-width: 30px;
+    border-radius: 3px;
+    position: absolute;
+    text-align: left;
+    padding: 5px;
+    line-height: 14px;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.waterText {
+    /*border: 1px solid rgb(151,166,151);*/
+    min-width: 30px;
+    position: absolute;
+    text-align: left;
+    padding: 5px;
+    line-height: 14px;
+    font-size: 14px;
+    pointer-events: none;
+    color: black;
+    color: white;
+}
+
+.waterTextNorth {
+    background: url("/images/icon_10.png");
+    background-size: 100% 100%;
+    width: 235px;
+    height: 80px;
+    color: #03F0A4;
+}
+
+.waterTextWest {
+    background: url("/images/icon_18.png");
+    background-size: 100% 100%;
+    width: 235px;
+    height: 80px;
+    color: #DEAD0E;
+}
+
+.waterTextEast {
+    background: url("/images/icon_22.png");
+    background-size: 100% 100%;
+    width: 235px;
+    height: 80px;
+    color: #34D2FF;
+}
+
+.waterTextSouth {
+    background: url("/images/icon_49.png");
+    background-size: 100% 100%;
+    width: 235px;
+    height: 80px;
+    color: #A7E60F;
+}
+
+.waterTextTitle {
+    padding-left: 60px;
+    font-size: 20px;
+    padding-top: 17px;
+    font-weight: 500;
+}
+
+.waterTextContent {
+    color: #fff;
+    padding-left: 130px;
+    position: absolute;
+    top: 15px;
+    font-size: 0.9rem;
+}
+
+
+
+.Grentsquare {
+    display: inline-block;
+    width: 10px;
+    height: 15px !important;
+    padding: 4px;
+    border: 2px solid #00DB00;
+    background-color: #00DB00;
+    font-size: 14px !important;
+    margin-left: 2px;
+    margin-top: 5px;
+}
+
+.HUIsquare {
+    display: inline-block;
+    width: 10px;
+    height: 15px !important;
+    padding: 4px;
+    border: 2px solid #A1A1A1;
+    background-color: #A1A1A1;
+    font-size: 14px !important;
+    margin-left: 2px;
+    margin-top: 5px;
+}
+
+
+.waterTextNorth {
+    background: url("/images/icon_10.png");
+    background-size: 100% 100%;
+    width: 260px;
+    height: 86px;
+    color: #03F0A4;
+}
+
+.waterTextWest {
+    background: url("/images/icon_18.png");
+    background-size: 100% 100%;
+    width: 260px;
+    height: 86px;
+    color: #DEAD0E;
+}
+
+.waterTextEast {
+    background: url("/images/icon_222.png");
+    background-size: 100% 100%;
+    width: 260px;
+    height: 86px;
+    color: #34D2FF;
+}
+
+
+
+.waterTextSouth {
+    background: url("/images/icon_49.png");
+    background-size: 100% 100%;
+    width: 260px;
+    height: 86px;
+    color: #A7E60F;
+}
+
+.waterTextTitle {
+    padding-left: 60px;
+    font-size: 19px;
+    padding-top: 20px;
+    font-weight: 500;
+}
+
+.waterTextContent {
+    color: #fff;
+    padding-left: 126px;
+    position: absolute;
+    top: 20px;
+    font-size: 0.9rem;
+}
+
+.waterTextEast .waterTextTitle {
+    position: absolute;
+    right: 70px;
+}
+
+.waterTextEast .waterTextContent {
+    left: 22px;
+    padding-left: 0px;
+}
+
+
+
+.level_SL .amap-ui-district-cluster-marker-title {
+    color: white;
+    text-align: center;
+    font-size: 16px;
+    margin: 0 auto;
+    width: 75px;
+}
+
+
+.level_zc_New .amap-ui-district-cluster-marker-body {
+    text-align: center;
+    background: #40FC00;
+    border-radius: 5px;
+    padding: 0px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+    max-width: 62px;
+}
+
+.level_zc_New .amap-ui-district-cluster-marker-title {
+    color: white;
+    text-align: center;
+}
+
+.level_wrz_New .amap-ui-district-cluster-marker-body {
+    text-align: center;
+    background-image: radial-gradient(ellipse farthest-corner at 30% 30%, #FDCF73 0%, #F7B90B 150%);
+    border-radius: 5px;
+    padding: 0px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+    max-width: 62px;
+}
+
+.level_wrz_New .amap-ui-district-cluster-marker-title {
+    color: white;
+    text-align: center;
+}
+
+.level_grz_New .amap-ui-district-cluster-marker-body {
+    text-align: center;
+    background: red;
+    border-radius: 5px;
+    padding: 0px 8px;
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+    max-width: 62px;
+}
+
+.level_grz_New .amap-ui-district-cluster-marker-title {
+    color: white;
+    text-align: center;
+}
+
+.level_zcnull_New .amap-ui-district-cluster-marker-body {
+    text-align: center;
+    background: #C1C1C1;
+    border-radius: 5px;
+    padding: 0px 8px;
+    color: #000;
+    max-width: 62px;
+}
+
+.level_zcnull_New .amap-ui-district-cluster-marker-title {
+    color: white;
+    text-align: center;
+    padding-top: 8px;
+}
+
+.markerright {
+    padding: 0px;
+}
+
+.markerbottom {
+    padding: 0px;
+    padding-left: 10px;
+    margin-top: -10px;
+}
+
+.markerbottom_left {
+    padding: 0px;
+}
+
+.markerbottom_right {
+    padding: 0px;
+    margin-top: -20px;
+    margin-left: -10px;
+}
+
+.markerleft {
+    padding: 0px;
+}
+
+.markertop {
+    padding: 0px;
+    padding-left: 10px;
+}
+
+.markertop_right {
+    padding: 0px;
+    margin-top: 6px;
+    margin-left: -10px;
+}
+
+.TipBox {
+    position: absolute;
+    width: auto;
+    /* min-height: 80px; */
+    z-index: 99;
+    border: 4px solid rgba(30, 49, 74, 1);
+    border-radius: 20px;
+    background-color: rgba(30, 49, 74, 0.9);
+    max-width: 300px;
+    /* margin-top: -105px;
+    margin-left: 10px; */
+}
+
+/* .TipBox:before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-right: 20px solid rgba(30, 49, 74, 1);
+} */
+
+.TipTitle {
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    margin-top: 0px;
+    margin-bottom: -5px;
+    height: 25px;
+    color: white;
+    text-align: left;
+    line-height: 25px;
+    text-indent: 18px;
+    padding-right: 16px;
+    font-size: 16px;
+
+    /* 新加 */
+    color: var(--titled1);
+}
+
+.TipClass {
+    margin-right: 15px;
+    margin-bottom: 5px;
+    margin-left: 6px;
+    margin-top: 4px;
+    text-indent: 15px;
+    color: white;
+    font-size: 14px;
+}
+.level_ll {
+    background: url(/images/border.png);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 0px 15px 15px 15px;
+}
+.level_ll .amap-ui-district-cluster-marker-body {
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    /* background: #40fc00; */
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.level_ll .amap-ui-district-cluster-marker-title {
+    color: #FFFFFF;
+    text-align: center;
+    padding-top: 8px;
+}
+.none {
+    display: none !important;
+}

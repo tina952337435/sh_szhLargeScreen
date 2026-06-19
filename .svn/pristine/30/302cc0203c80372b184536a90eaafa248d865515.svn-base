@@ -1,0 +1,66 @@
+.table1 {
+    width: 100%;
+    font-size: 16px;
+}
+
+.table1 tr td:nth-child(odd) {
+    border: 1px solid var(--portal);
+    /* line-height: 44px; */
+    height: 44px;
+    width: 10%;
+}
+
+.table1 tr td:nth-child(even) {
+    border: 1px solid var(--portal);
+    /* line-height: 44px; */
+    height: 44px;
+    /* width: 35%; */
+    
+    width: 30%;
+}
+
+.CssTitle {
+    font-size: 16px;
+    font-weight: 600;
+    height: 60px;
+    text-align: center;
+    width: 100%;
+    color: #fff;
+}
+
+.lie1 {
+    /* background: rgb(4 64 103); */
+    background: var(--mtabletrcolor);
+    text-align: center;
+    /* color: #fff; */
+
+    color: var(--widgetcolor);
+}
+
+.lie2 {
+    text-align: left;
+    font-size: 14px;
+    font-size: 16px;
+    padding: 10px;
+    width: 35%;
+    color: var(--widgetcolor);
+    /* color: #fff; */
+}
+
+/* 自定义滚动条样式 */
+.form1::-webkit-scrollbar {
+    width: 1px;
+    /* 设置滚动条宽度 */
+}
+
+.form1::-webkit-scrollbar-thumb {
+    /* 滚动条手柄 */
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    right: -4px;
+    top: 0px;
+    background: var(--mtabletrcolor);
+    border-radius: 50%;
+    z-index: 2;
+}

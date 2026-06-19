@@ -1,0 +1,552 @@
+<template>
+    <div style="text-align: center;height:100%;position: relative;">
+        <!-- 右侧悬浮标签导航 -->
+        <div class="section-tabs-right" :class="{ collapsed: isCollapsed }">
+            <span class="toggle-btn" @click="isCollapsed = !isCollapsed">
+                {{ isCollapsed ? '<' : '>' }}
+            </span>
+            <template v-if="!isCollapsed">
+                <span
+                    v-for="(tab, index) in tabs"
+                    :key="index"
+                    class="tab-item"
+                    :class="{ active: activeTab === index }"
+                    @click="scrollToSection(index)"
+                >
+                    {{ tab }}
+                </span>
+            </template>
+        </div>
+        <div class="form1" style=" float:left; width:100%;display: inline-block;overflow-y: auto;height: 100%;">
+            <!-- 区块1: 基础资料 -->
+            <div class="section-block">
+                <div id="section-0" class="ListTitle" @click="toggleSection(0)">
+                    <span class="ysts-numorder">1</span>基础资料
+                    <span class="collapse-icon">{{ collapsedSections[0] ? '+' : '-' }}</span>
+                </div>
+                <div v-show="!collapsedSections[0]">
+                <ul>
+                    <li>
+                        <div class="ClassName">测站编码：<span class="View">{{ tableData.basic_info.station_code }}</span></div>
+                        <div class="ClassName">级别：<span class="View">{{ tableData.basic_info.level }}</span></div>
+                        <div class="ClassName">设立日期：<span class="View">{{ tableData.basic_info.establishment_date }}</span></div>                        
+                        <div class="ClassName">站别：<span class="View">{{ tableData.basic_info.station_type }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName">所在河流：<span class="View">{{ tableData.basic_info.river_location }}</span></div>
+                        <div class="ClassName">岸别：<span class="View">{{ tableData.basic_info.bank_side }}</span></div>
+                        <div class="ClassName">流域：<span class="View">{{ tableData.basic_info.basin }}</span></div>
+                        <div class="ClassName">水系：<span class="View">{{ tableData.basic_info.water_system }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName">流入河流：<span class="View">{{ tableData.basic_info.inflow_river }}</span></div>
+                        <div class="ClassName">测亭面积：<span class="View">{{ tableData.basic_info.gauge_house_area }}</span></div>
+                        <div class="ClassName">站点面积：<span class="View">{{ tableData.basic_info.land_area }}</span></div>
+                        <div class="ClassName">管理房面积：<span class="View">{{ tableData.basic_info.management_house_area }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName">观测场面积：<span class="View">{{ tableData.basic_info.observation_field_area }}</span></div>
+                        <div class="ClassName">报汛级别：<span class="View">{{ tableData.basic_info.flood_report_level }}</span></div>
+                        <div class="ClassName">经度(E)：<span class="View">{{ tableData.basic_info.longitude_e }}</span></div>
+                        <div class="ClassName">纬度(N)：<span class="View">{{ tableData.basic_info.latitude_n }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName">监测方式：<span class="View">{{ tableData.basic_info.monitoring_method }}</span></div>
+                        <div class="ClassName">数据传输方式：<span class="View">{{ tableData.basic_info.data_transmission_mode }}</span></div>                        
+                        <div class="ClassName">测站地址：<span class="View">{{ tableData.basic_info.station_address }}</span></div>
+                        <div class="ClassName">管理机构：<span class="View">{{ tableData.basic_info.management_agency }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:98%">观测项目：<span class="View">{{ tableData.basic_info.observation_items }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:98%">建设项目：<span class="View">{{ tableData.basic_info.construction_project }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:98%">水文监测环境保护范围：<span class="View">{{ tableData.basic_info.hydrological_monitoring_environment_protection_scope }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:98%">测站位置特点：<span class="View">{{ tableData.basic_info.station_location_characteristics }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:98%">测验河段特征：<span class="View">{{ tableData.basic_info.measurement_reach_characteristics }}</span></div>
+                    </li>
+                </ul>
+                </div>
+            </div>
+            <!-- 区块2: 特征值 -->
+            <div class="section-block">
+                <div id="section-1" class="ListTitle" @click="toggleSection(1)">
+                    <span class="ysts-numorder">2</span>特征值
+                    <span class="collapse-icon">{{ collapsedSections[1] ? '+' : '-' }}</span>
+                </div>
+                <div v-show="!collapsedSections[1]">
+                <ul>
+                    <li>
+                        <div class="ClassName" style="width:49%">水位编码：<span class="View">{{ tableData.characteristic_values.water_level_code }}</span></div>
+                        <div class="ClassName" style="width:49%">降蒸编码：<span class="View">{{ tableData.characteristic_values.evaporation_code }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:98%">现流量测验方法：<span class="View">{{ tableData.characteristic_values.current_flow_measurement_method }}</span></div> 
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:49%">多年平均径流量：<span class="View">{{ tableData.characteristic_values.multi_year_average_annual_runoff }}</span></div>
+                        <div class="ClassName" style="width:49%">统计时段：<span class="View">{{ tableData.characteristic_values.multi_year_average_annual_runoff_year }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最大年径流量：<span class="View">{{ tableData.characteristic_values.historical_max_annual_runoff }}</span></div>
+                        <div class="ClassName" style="width:49%">出现年份：<span class="View">{{ tableData.characteristic_values.historical_max_annual_runoff_year }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最小年径流量：<span class="View">{{ tableData.characteristic_values.historical_min_annual_runoff }}</span></div>
+                        <div class="ClassName" style="width:49%">出现年份：<span class="View">{{ tableData.characteristic_values.historical_min_annual_runoff_year }}</span></div>
+                    </li>                    
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最高水位：<span class="View">{{ tableData.characteristic_values.historical_highest_water_level }}</span></div>
+                        <div class="ClassName" style="width:49%">出现日期：<span class="View">{{ tableData.characteristic_values.historical_highest_water_level_date }}</span></div>
+                    </li>
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最低水位：<span class="View">{{ tableData.characteristic_values.historical_lowest_water_level }}</span></div>
+                        <div class="ClassName" style="width:49%">出现日期：<span class="View">{{ tableData.characteristic_values.historical_lowest_water_level_date }}</span></div>
+                    </li>                    
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最大年降水量：<span class="View">{{ tableData.characteristic_values.historical_max_annual_precipitation }}</span></div>
+                        <div class="ClassName" style="width:49%">出现年份：<span class="View">{{ tableData.characteristic_values.historical_max_annual_precipitation_year }}</span></div>
+                    </li>
+                    
+                    <li>
+                        <div class="ClassName" style="width:49%">多年平均降水量：<span class="View">{{ tableData.characteristic_values.multi_year_average_annual_precipitation }}</span></div>
+                        <div class="ClassName" style="width:49%">统计时段：<span class="View">{{ tableData.characteristic_values.statistical_period_precipitation }}</span></div>
+                    </li>                    
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最大年蒸发量：<span class="View">{{ tableData.characteristic_values.historical_max_annual_evaporation }}</span></div>
+                        <div class="ClassName" style="width:49%">出现年份：<span class="View">{{ tableData.characteristic_values.historical_max_annual_evaporation_year }}</span></div>
+                    </li>                                        
+                    <li>
+                        <div class="ClassName" style="width:49%">多年平均蒸发量：<span class="View">{{ tableData.characteristic_values.multi_year_average_annual_evaporation }}</span></div>
+                        <div class="ClassName" style="width:49%">统计时段：<span class="View">{{ tableData.characteristic_values.statistical_period_evaporation }}</span></div>
+                    </li>
+                    
+                    <li>
+                        <div class="ClassName" style="width:49%">历史最高水温：<span class="View">{{ tableData.characteristic_values.historical_highest_water_temperature }}</span></div>
+                        <div class="ClassName" style="width:49%">历史最低水温：<span class="View">{{ tableData.characteristic_values.historical_lowest_water_temperature }}</span></div>
+                    </li>      
+                </ul>
+                </div>
+            </div>
+            <!-- 区块3: 主要任务 -->
+            <div class="section-block">
+                <div id="section-2" class="ListTitle" @click="toggleSection(2)">
+                    <span class="ysts-numorder">3</span>主要任务
+                    <span class="collapse-icon">{{ collapsedSections[2] ? '+' : '-' }}</span>
+                </div>
+                <div v-show="!collapsedSections[2]">
+                <ul>
+                    <li>
+                        <div class="ClassName" style="width:98%"><span class="View">{{ tableData.main_tasks }}</span></div>
+                    </li>   
+                </ul>
+                </div>
+            </div>
+            <!-- 区块4: 功能作用 -->
+            <div class="section-block">
+                <div id="section-3" class="ListTitle" @click="toggleSection(3)">
+                    <span class="ysts-numorder">4</span>功能作用
+                    <span class="collapse-icon">{{ collapsedSections[3] ? '+' : '-' }}</span>
+                </div>
+                <div v-show="!collapsedSections[3]">
+                <ul>
+                    <li>
+                        <div class="ClassName" style="width:98%"><span class="View">{{ tableData.function_role }}</span></div>
+                    </li>   
+                </ul>
+                </div>
+            </div>
+            <!-- 区块5: 历史沿革 -->
+            <div class="section-block">
+                <div id="section-4" class="ListTitle" @click="toggleSection(4)">
+                    <span class="ysts-numorder">5</span>历史沿革
+                    <span class="collapse-icon">{{ collapsedSections[4] ? '+' : '-' }}</span>
+                </div>
+                <div v-show="!collapsedSections[4]">
+                 <Table :headers="tableHeaders" :rows="changestableData" :key="datekey" class="tableYQ" :border="0" :cellspacing="0"
+                :cellpadding="0" />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script setup>
+import Table from "@/components/Table/Table.vue";
+import api from "@/api/zonglan/index.js";
+import ChartJs from "@/api/MyEcharts/ChartJs.js";
+import { sortObjectArray } from "@/api/ComUnit.js";
+import dayjs from "dayjs";
+import $ from "jquery";
+
+import { ref, onMounted, defineAsyncComponent, inject, nextTick } from "vue";
+import { isTomorrow } from "date-fns";
+// 获取当前主题
+const _theme = localStorage.getItem("curTheme");
+const stcd = inject("stcdzm")
+const changestableData=ref();
+const datekey = ref(null);
+
+// 标签页相关
+const tabs = ['基础资料', '特征值', '主要任务', '功能作用', '历史沿革'];
+const activeTab = ref(0);
+const tabRefs = ref([]);
+const isCollapsed = ref(false);
+
+// 每个区块的折叠状态
+const collapsedSections = ref([false, false, false, false, false]);
+
+const toggleSection = (index) => {
+    collapsedSections.value[index] = !collapsedSections.value[index];
+};
+
+const scrollToSection = (index) => {
+    activeTab.value = index;
+    const element = document.getElementById(`section-${index}`);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
+const tableHeaders = ref([
+    { name: "event", label: "设立或变动" },
+    { name: "date", label: "发生年月" },
+    { name: "station_name_at_time", label: "测站名称" },
+    { name: "station_type", label: "站别" },
+    { name: "leading_authority", label: "领导机关" },
+    { name: "remark", label: "说明" },
+]);
+const tableData = ref({
+        "station_name": "松浦大桥水文站",
+        "basic_info": {
+            "station_code": "63401120",
+            "level": "国家重要水文站",
+            "establishment_date": "1989.1",
+            "station_type": "水文",
+            "river_location": "黄浦江",
+            "bank_side": "右岸",
+            "basin": "太湖",
+            "water_system": "黄浦江",
+            "inflow_river": "长江",
+            "gauge_house_area": "41 m²",
+            "land_area": "950 m²",
+            "management_house_area": "736 m²",
+            "observation_field_area": "16m×18m",
+            "flood_report_level": "中央",
+            "longitude_e": "121° 18′ 23.1″",
+            "latitude_n": "30° 58′ 10.5″",
+            "monitoring_method": "定期巡查、自动测报",
+            "data_transmission_mode": "4G",
+            "station_address": "上海市松江区叶榭镇团结村",
+            "management_agency": "上海市水文总站",
+            "observation_items": ["流量", "水位", "降水量", "蒸发量", "水温", "水质"],
+            "construction_project": "黄浦江大桥水文站工程",
+            "hydrological_monitoring_environment_protection_scope": "测站基本水尺断面上下游各500m，沿河横向河道管理范围6m，水文气象观测场周围30m。",
+            "station_location_characteristics": "河道航运发达，船只往来频繁。上游两岸约1km处有北泖泾和南泖泾汇入，并建有水闸。下游约260m处有松浦大桥桥梁(水中四孔三墩)，下游右岸约500m处有叶榭塘汇入，建有水闸。",
+            "measurement_reach_characteristics": "测验河段基本顺直，河槽为单式河槽，两岸为直立式钢筋混凝土护岸。河床土质为粘土，土质较硬，河道两岸低水位时有浅滩无水草。"
+        },
+        "characteristic_values": {
+            "water_level_code": "63401120",
+            "evaporation_code": "63422570",
+            "current_flow_measurement_method": "HADCP",
+            "multi_year_average_annual_runoff": "188 亿 m³",            
+            "multi_year_average_annual_runoff_year": "2007-2023年",
+            "historical_max_annual_runoff": "236 亿 m³",
+            "historical_max_annual_runoff_year": "2015 年",
+            "historical_min_annual_runoff": "64.5 亿 m³",
+            "historical_min_annual_runoff_year": "1992 年",
+            "historical_highest_water_level": "4.92m",
+            "historical_highest_water_level_date": "2021.7.26",
+            "historical_lowest_water_level": "1.04m",
+            "historical_lowest_water_level_date": "1996.1.5",
+            "historical_max_annual_precipitation": "1860.1mm",
+            "historical_max_annual_precipitation_year": "1999 年",
+            "multi_year_average_annual_precipitation": "1263.1mm",
+            "statistical_period_precipitation": "1990-2023 年",
+            "historical_max_annual_evaporation": "943.7mm",
+            "historical_max_annual_evaporation_year": "2013 年",
+            "multi_year_average_annual_evaporation": "845.7mm",
+            "statistical_period_evaporation": "2006-2023 年",
+            "historical_highest_water_temperature": "34.4℃",
+            "historical_lowest_water_temperature": "1.9℃"
+        },
+        "main_tasks": "长期监测太湖流域黄浦江干流松浦大桥站流量、水位、降水量、水温等水文要素，向中央、流域、市级报讯，开展基本水文观测、水文情报、资料整编等。",
+        "function_role": "掌握黄浦江干流水情变化，掌握黄浦江河流特性及水文规律，为太湖流域防洪调度、水文情报提供基本资料。为上海地区水资源管理、城市运维管理、国民经济建设提供基础支撑。",
+        "history_changes": [
+            {
+            "event": "设立",
+            "date": "1989.1",
+            "station_name_at_time": "黄浦江大桥",
+            "station_type": "水文",
+            "leading_authority": "上海市水文总站",
+            "remark": ""
+            },
+            {
+            "event": "更改站名",
+            "date": "1995.1",
+            "station_name_at_time": "松浦大桥",
+            "station_type": "水文",
+            "leading_authority": "上海市水文总站",
+            "remark": ""
+            }
+        ]
+    })
+changestableData.value=tableData.value.history_changes;
+function Weacontent() {
+    // var strParam = {};
+    // strParam["stcd"] = stcd.value;
+    // api.stPptnGQWagaBase(strParam).then((res) => {
+    //     if (res.result.length > 0) {
+    //         res.result[0].stcd = stcd.value;
+    //         var item = res.result[0];
+    //         if (item.waga_TYPE == "1") {
+    //             item.waga_TYPE = "分（泄）洪闸"
+    //         } else if (item.waga_TYPE == "2") {
+    //             item.waga_TYPE = "节制闸"
+    //         } else if (item.waga_TYPE == "3") {
+    //             item.waga_TYPE = "排（退）水闸"
+    //         } else if (item.waga_TYPE == "4") {
+    //             item.waga_TYPE = "引（进）水闸"
+    //         } else if (item.waga_TYPE == "5") {
+    //             item.waga_TYPE = "当潮"
+    //         } else if (item.waga_TYPE == "6") {
+    //             item.waga_TYPE = "船闸"
+    //         } else if (item.waga_TYPE == "9") {
+    //             item.waga_TYPE = "其他"
+    //         }
+
+    //         if (item.is_HUB == "1") {
+    //             item.is_HUB = "是"
+    //         } else if (item.is_HUB == "0") {
+    //             item.is_HUB = "否"
+    //         }
+
+    //         if (item.is_MONI_WAGA == "1") {
+    //             item.is_MONI_WAGA = "是"
+    //         } else if (item.is_MONI_WAGA == "0") {
+    //             item.is_MONI_WAGA = "否"
+    //         }
+    //         tableData.value = res.result[0]
+    //     }
+    // }).catch((err) => { });
+}
+
+onMounted(() => {
+    $(".componentdiv").css({
+        height: "calc(100% - 30px)"
+    });
+    Weacontent();
+});
+</script>
+<style scoped>
+.lie2 {
+    width: 80%;
+}
+
+.CssTitle {
+    color: white;
+}
+
+.table1 tr td:nth-child(odd),
+.table1 tr td:nth-child(even) {
+    /* border: 1px solid #767d83; */
+    border: none;
+}
+
+.table1 .trClass {
+    background-color: cadetblue;
+}
+
+.lie1 {
+    opacity: .8;
+    background: none;
+    text-align: center;
+    color: #ccc;
+}
+
+.lie2 {
+    color: #fff;
+}
+
+ul {
+    padding: 0px;
+    margin: 20px 0px 0px 0px;
+}
+
+ul li {
+    list-style: none;
+    height: 50px;
+    line-height: 50px;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+ul li div {
+    display: inline-block;
+    width: 24.5%;
+}
+
+.ClassName {
+    background: linear-gradient(to right, #022e53 0%, #012849 20%, #011933 65%, #02131B 100%);
+    font-weight: normal;
+    color: #ccc;
+    font-size: 14px;
+    text-align: left;
+    padding-left: 30px;
+}
+
+.ClassName span {
+    font-weight: bold;
+    color: #fff;
+}
+
+.classID {
+    background: linear-gradient(to right, #023864 0%, #011933 90%);
+    /* margin-left: 1%; */
+}
+
+.View {
+    color: aqua !important;
+}
+
+/* 自定义滚动条样式 */
+.form1::-webkit-scrollbar {
+    width: 1px;
+    /* 设置滚动条宽度 */
+}
+
+.form1::-webkit-scrollbar-thumb {
+    /* 滚动条手柄 */
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    right: -4px;
+    top: 0px;
+    background: var(--mtabletrcolor);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.ListTitle{
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #ffffff;
+    list-style: none;
+    border-radius: 10px;
+    /* background: rgba(0, 0, 0, 0.5); */
+    padding: 10px 8px;
+    font-size: 19px !important;
+    font-family: "number";
+    text-align:left;
+  
+}
+.ListTitle .ysts-numorder{
+    width: 26px;
+    height: 26px;
+    border-radius: 20px;
+    display: block;
+    /* background: #09469d82; */
+    background: var(--mtabletrcolor);
+    color: var(--mtablecolor) !important;
+    line-height: 28px;
+    text-align: center;
+    float: left;
+    margin-right: 10px;
+    font-size: 0.9rem;
+    z-index: 99;
+}
+
+.ListTitle .collapse-icon {
+    float: right;
+    margin-right: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #38bdf8;
+}
+
+/* 标签页导航 - 右侧悬浮 */
+.section-tabs-right {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    z-index: 10;
+    transition: all 0.3s;
+    border-radius: 8px 0 0 8px;
+    overflow: hidden;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-right: none;
+}
+
+.section-tabs-right.collapsed {
+    width: 28px;
+}
+
+.section-tabs-right .toggle-btn {
+    /* width: 28px; */
+    height: 28px;
+    background: rgba(2, 41, 77, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #38bdf8;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.section-tabs-right .toggle-btn:hover {
+    background: rgba(56, 189, 248, 0.2);
+}
+
+.section-tabs-right .tab-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 13px;
+    transition: all 0.3s;
+    background: rgba(2, 41, 77, 0.9);
+    text-align: center;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.section-tabs-right .tab-item:last-child {
+    border-bottom: none;
+}
+
+.section-tabs-right .tab-item:hover {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.2);
+}
+
+.section-tabs-right .tab-item.active {
+    color: #fff;
+    background: rgba(56, 189, 248, 0.3);
+}
+
+/* 区块折叠样式 */
+.section-block {
+    margin-bottom: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.section-block .ListTitle {
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.section-block .ListTitle:hover {
+    /* background: rgba(56, 189, 248, 0.1); */
+}
+</style>

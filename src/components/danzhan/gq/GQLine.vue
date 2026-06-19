@@ -1,0 +1,446 @@
+<template>
+  <div class="topClass">
+    <span style="margin-left: 20px">开始时间：</span>
+    <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+      showTime="true" showOkButton="true" showClearButton="false" />
+    <span style="margin-left: 20px">结束时间：</span>
+    <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+      showTime="true" showOkButton="true" showClearButton="false" />
+
+    <span style="margin-left: 20px">机组：</span>
+    <div style="vertical-align: -3px;display: inline-block;">
+      <el-checkbox-group v-model="checkedValues" style="vertical-align: -3px;color: #FFFFFF;">
+        <el-checkbox v-for="item in exkeyData" :label="item.id" :value="item.id" :key="item.id"
+          @change="getType($event, item.id)">
+          {{ item["label"] }}
+        </el-checkbox>
+      </el-checkbox-group>
+    </div>
+    <el-button type="primary" style="margin-left: 20px" @click="BtnSearch()">查询</el-button>
+    <span style="
+        position: absolute;
+        right: 20px;
+        width: 70px;
+        height: 30px;
+        margin: 5px 0px;
+        background: rgb(238 238 238 / 60%);
+        border-radius: 5px;
+      ">
+      <span class="switch" style="border-radius: 5px 0px 0px 5px" @click="OnBoot('fit1')"
+        :class="tabName == 'fit1' && 'handleon'">
+        <img :src="img1" />
+      </span>
+      <span class="switch" style="border-radius: 0px 5px 5px 0px; margin-left: 35px" @click="OnBoot('fit2')"
+        :class="tabName == 'fit2' && 'handleon'">
+        <img :src="img2" />
+      </span>
+    </span>
+  </div>
+  <div style="height: calc(100% - 80px); width: 100%; margin-top: 10px">
+    <div class="content-echarts">
+      <Echarts :width="'100%'" :height="'100%'" :option="lineOption" :key="datekey" id="GQLine" />
+    </div>
+    <div class="content-table">
+      <Table :headers="tableHeaders" :rows="tableData" :key="datekey" class="tableYQ" :border="0" :cellspacing="0"
+        :cellpadding="0" />
+    </div>
+  </div>
+</template>
+<script setup>
+import Table from "@/components/Table/Table.vue";
+import api from "@/api/zonglan/index.js";
+import Echarts from "@/components/MyEcharts/echartsLine.vue";
+import ChartJs from "@/api/MyEcharts/ChartJs.js";
+import { SetNull, sortObjectArray } from "@/api/ComUnit.js";
+// ElConfigProvider：时间选择框汉化
+import { ElDatePicker, ElCheckboxGroup, ElCheckbox, ElButton, ElConfigProvider } from "element-plus";
+import dayjs from "dayjs";
+import { groupBy } from "@/api/ComUnit.js";
+import $ from "jquery";
+
+import { ref, onMounted, reactive, inject } from "vue";
+// 获取当前主题
+const _theme = localStorage.getItem("curTheme");
+const datekey = ref(null);
+const lineOption = ref({});
+const GQdata = ref({});
+const stime = ref("");
+const etime = ref("");
+const stcd = ref("");
+const exkey = ref("");
+const eqptp = ref("");
+const pathname1 = ref(false);
+const pathname2 = ref(false);
+const pathname3 = ref(false);
+const pathname4 = ref(false);
+const pathname5 = ref(false);
+const pathname6 = ref(false);
+const checkedValues = ref([]);
+const tabName = ref("fit1");
+const img1 = ref("/images/line-chart.png");
+const img2 = ref("/images/line-table4.png");
+
+const tableHeaders = ref([
+  { name: "num", label: "序号" },
+  { name: "tm", label: "时间" },
+  { name: "gtq", label: "状态" },
+]);
+const exkeyData = reactive([]);
+const tableData = ref();
+const strJsonAll = ref();
+const resultEchart = ref();
+// 获取雨型的类型：1:(小~中雨);2:(中雨);3:(暴雨);4:(大暴雨);5:(特大暴雨);
+const props = defineProps({
+  stcd: {
+    type: String,
+    default: "",
+  },
+  exkey: {
+    type: String,
+    default: "",
+  },
+  eqptp: {
+    type: String,
+    default: "",
+  },
+  stime: {
+    type: String,
+    default: "",
+  },
+  etime: {
+    type: String,
+    default: "",
+  },
+});
+
+function Weacontent() {
+  var strParam = {};
+  strParam["stcd"] = stcd.value;
+  strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  api
+    .stPptnGQDanZhan(strParam)
+    .then((res) => {
+      var strJsonList = groupBy(res.data, "exkey");
+      // exkeyData.value = strJsonList;
+      strJsonAll.value = res.data;
+
+      exkeyData.length = 0;
+      if (strJsonList.length > 0) {
+        for (var num = 0; num < strJsonList.length; num++) {
+          var item = strJsonList[num];
+          exkeyData.push({ "id": (num + 1), "label": (num + 1) + '#', "value": (num + 1) });
+        }
+      }
+      checkedValues.value.push(parseInt(exkey.value))
+      getType()
+    })
+    .catch((err) => {
+
+    });
+}
+function GQload() {
+  var columns = []
+  columns.push({ name: "num", label: "序号" },
+    { name: "tm", label: "时间" },)
+
+  var resultJson = [], strNote = [], resultJsonEchart = [];
+  var max_min_Name = "";
+  var tempData = GQdata.value;
+  // console.error("GQdata.value",GQdata.value)
+  if (tempData.length > 0) {
+    strNote.push({ name: "时间", codename: "tm", tableV: "0", isShow: true });
+    for (var num = 0; num < tempData.length; num++) {
+      var _strJsonTable = {}, _strJsonEchart = {};
+      for (var i = 0; i < tempData[num].length; i++) {
+        _strJsonTable["num"] = num + 1;
+        _strJsonTable["tm"] = tempData[num][i].tm;
+        if ((eqptp.value).includes("泵")) {
+          if (Number(tempData[num][i].gtq) > 0) {
+            _strJsonTable["gtq" + tempData[num][i].exkey + ""] = "开";
+          } else {
+            _strJsonTable["gtq" + tempData[num][i].exkey + ""] = "关";
+          }
+        } else {
+          _strJsonTable["gtq" + tempData[num][i].exkey + ""] = tempData[num][i].gtq;
+        }
+
+        _strJsonEchart["tm"] = tempData[num][i].tm;
+        _strJsonEchart["gtq" + tempData[num][i].exkey + ""] = tempData[num][i].gtq;
+
+        if (num < 1) {
+          strNote.push({ name: tempData[num][i].exkey + "#" + eqptp.value, codename: "gtq" + tempData[num][i].exkey + "", tableV: "0", isShow: true });
+          if ((eqptp.value).includes("泵")) {
+            max_min_Name = "泵站流量(m³/s)"
+            columns.push({ name: "gtq" + tempData[num][i].exkey, label: tempData[num][i].exkey + "#状态" })
+          } else if ((eqptp.value).includes("闸")) {
+            max_min_Name = "闸门开度(m)";
+            columns.push({ name: "gtq" + tempData[num][i].exkey, label: tempData[num][i].exkey + "#开度(m)" })
+          }
+        }
+
+      }
+      resultJson.push(_strJsonTable);
+      resultJsonEchart.push(_strJsonEchart);
+    }
+  }
+
+  tableHeaders.value = columns;
+  tableData.value = resultJson;
+  var LineColor = [
+    "#00fd6d",
+    "#efc30a",
+    "#0264FD",
+    "#ECAEFD",
+    "#EC30FD",
+    "#EC3032",
+  ];
+  const _Option = ChartJs.chartGQ(
+    "",
+    resultJsonEchart.reverse(),
+    strNote,
+    LineColor,
+    max_min_Name,
+    "Mouth",
+    _theme,
+    100,
+    20
+  );
+
+  lineOption.value = _Option;
+  datekey.value = Date.now();
+}
+function getType() {
+  var checkedValuesList = checkedValues.value;
+  var checkedList = "";
+
+  for (var num = 0; num < checkedValuesList.length; num++) {
+    checkedList += checkedValuesList[num] + ","
+  }
+  var strJson = (strJsonAll.value).filter(function (e) {
+    if ((eqptp.value).includes("泵")) {
+      return checkedList.includes(e.exkey) == true && e.eqptp == "泵站状态";
+    } else {
+      return checkedList.includes(e.exkey) == true;
+    }
+  });
+  console.error("strJson", strJson)
+  var tempData = groupBy(strJson, "tm");
+  GQdata.value = tempData.reverse();
+  GQload();
+}
+function BtnSearch() {
+  Weacontent();
+}
+function OnBoot(e) {
+  tabName.value = e;
+  GQload();
+  if (e == "fit1") {
+    $(".content-echarts").css({ display: "block" });
+    $(".content-table").css({ display: "none" });
+
+    img1.value = "/images/line-chart.png";
+    img2.value = "/images/line-table4.png";
+  } else if (e == "fit2") {
+    $(".content-echarts").css({ display: "none" });
+    $(".content-table").css({ display: "block" });
+
+    img1.value = "/images/line-chart1.png";
+    img2.value = "/images/line-table3.png";
+  }
+}
+onMounted(() => {
+  mini.parse();
+  stime.value = "2024-08-06 08:00:00";
+  etime.value = "2024-08-08 08:00:00";
+
+  if (props.stcd != "") {
+    stcd.value = props.stcd;
+  } else {
+    stcd.value = inject("gqstcd").value;
+  }
+  if (props.stime != "") {
+    stime.value = props.stime
+  } else {
+    stime.value = inject("stime").value;
+  }
+  if (props.etime != "") {
+    etime.value = props.etime
+  } else {
+    etime.value = inject("etime").value;
+  }
+  if (props.exkey != "") {
+    exkey.value = props.exkey
+  } else {
+    exkey.value = inject("typeExkey").value;
+  }
+  if (props.eqptp != "") {
+    eqptp.value = props.eqptp
+  } else {
+    eqptp.value = inject("typeEqptp").value;
+  }
+  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
+  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+  Weacontent();
+});
+</script>
+<style scoped>
+.topClass {
+  height: 45px;
+  line-height: 40px;
+  color: var(--widgetcolor);
+}
+
+.datatime {
+  width: 180px !important;
+  height: 36px !important;
+}
+
+.content-echarts {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.content-table {
+  display: none;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* 自定义滚动条样式 */
+.content-table::-webkit-scrollbar {
+  width: 4px;
+  /* 设置滚动条宽度 */
+}
+
+.content-table::-webkit-scrollbar-thumb {
+  /* 滚动条手柄 */
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  right: -4px;
+  top: 0px;
+  background: var(--mtabletrcolor);
+  z-index: 2;
+}
+
+.tableYQ {
+  width: 100%;
+  /* table-layout: fixed; */
+  margin-top: 0rem;
+  margin: 0 auto;
+  /* 表格里面显示省略号必须加fixed，td设置的宽度会失效，宽度限定写在th中*/
+}
+
+.tableYQ tr th {
+  background: var(--mtabletrcolor);
+  color: var(--mtablecolor);
+}
+
+.tableYQ tr {
+  height: 38px;
+  line-height: 38px;
+}
+
+.tableYQ tr th {
+  font-size: 0.8rem;
+  font-weight: bold;
+  height: 2.1rem;
+  text-align: center;
+}
+
+.tableYQ tr td {
+  height: 1.6rem;
+  font-size: 14px;
+  text-align: center;
+}
+
+.tableYQ tr td {
+  color: var(--widgetcolor);
+}
+
+.tableYQ .trSelect {
+  background: rgba(0, 255, 255, 0.5) !important;
+}
+
+.tableYQ tbody tr td {
+  width: 15vh !important;
+}
+
+.tableYQ tbody tr td:nth-child(1) {
+  width: 80px !important;
+}
+
+.tableYQ tbody tr td:nth-child(2) {
+  width: 20vh !important;
+}
+
+.switch {
+  position: fixed;
+  height: 30px;
+  width: 35px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.switch img {
+  width: 22px;
+  height: 22px;
+}
+
+.handleon {
+  background-size: 100% 100%;
+  background: var(--popContentHeadbg);
+}
+
+:deep(.el-radio) {
+  margin-right: 20px;
+  --el-radio-input-bg-color: #d5141400;
+}
+
+:deep(.el-radio__label) {
+  color: var(--widgetcolor);
+}
+
+:deep(.el-date-editor.el-input),
+:deep(.el-date-editor.el-input__wrapper) {
+  width: 160px;
+}
+
+:deep(.el-input__prefix-inner) {
+  margin-left: -9px;
+}
+
+:deep(.el-input__suffix) {
+  margin-right: -9px;
+}
+
+:deep(.el-input__wrapper) {
+  background-color: #d5141400;
+  box-shadow: 0 0 0 1.5px var(--popContentHeadbg);
+  ;
+}
+
+:deep(.el-input__inner) {
+  color: var(--widgetcolor);
+}
+
+:deep(.el-button) {
+  background-color: var(--popContentHeadbg);
+  border-color: var(--popContentHeadbg);
+  color: #fff;
+}
+
+:deep(.el-checkbox__input.is-checked+.el-checkbox__label),
+:deep(.el-radio__input.is-checked+.el-radio__label) {
+  color: var(--swDivSelectcolor);
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner),
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  background-color: var(--swDivSelectcolor);
+  border-color: var(--swDivSelectcolor)
+}
+</style>

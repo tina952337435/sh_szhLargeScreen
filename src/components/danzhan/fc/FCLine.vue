@@ -1,0 +1,861 @@
+<template>
+    <div class="topClass">
+        <span style="margin-left: 20px">站点选择：</span>
+        <el-select style="max-width: 120px;" v-model="value" filterable placeholder="请选择站点" @change="handleChange">
+            <el-option v-for="item in Liststnm" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+        <span style="margin-left: 20px">开始时间：</span>
+        <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+            showTime="true" showOkButton="true" showClearButton="false" />
+        <span style="margin-left: 20px">结束时间：</span>
+        <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+            showTime="true" showOkButton="true" showClearButton="false" />
+        <!-- <el-radio-group style="margin-left: 20px">
+            <el-radio @click="TypeeChange('Minute')" v-model="pathname" label="Minute">分钟</el-radio>
+            <el-radio @click="TypeeChange('HOUR')" v-model="pathname" label="HOUR">小时</el-radio>
+            <el-radio @click="TypeeChange('DAY')" v-model="pathname" label="DAY">8时</el-radio>
+        </el-radio-group> -->
+        <ul class="toptabTop" style="margin-right: 20px;margin-left: 20px;">
+            <li :class="TMtype == 'week' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="geTMtType('week')"
+                style="border-right: 1px solid var(--swDivSelectcolor);">一周</li>
+            <li :class="TMtype == 'month' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="geTMtType('month')"
+                style="border-right: 1px solid var(--swDivSelectcolor);">一月
+            </li>
+            <li :class="TMtype == 'year' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="geTMtType('year')">一年
+            </li>
+        </ul>
+        <el-button type="primary" @click="BtnSearch()">查询</el-button>
+        <span
+            style="position: absolute;right: 20px;width: 105px;height: 30px;margin: 5px 0px;background: rgb(238 238 238 / 60%);border-radius: 5px;">
+            <span class="switch" style="border-radius: 5px 0px 0px 5px" @click="OnBoot('fit1')"
+                :class="tabName == 'fit1' && 'handleon'">
+                <img :src="img1" />
+            </span>
+            <span class="switch" style="border-radius: 5px 0px 0px 5px; margin-left: 35px" @click="OnBoot('fit3')"
+                :class="tabName == 'fit3' && 'handleon'">
+                <img :src="img3" />
+            </span>
+            <span class="switch" style="border-radius: 0px 5px 5px 0px; margin-left: 70px" @click="OnBoot('fit2')"
+                :class="tabName == 'fit2' && 'handleon'">
+                <img :src="img2" />
+            </span>
+        </span>
+    </div>
+    <div style="height:450px; width: 100%; margin-top: 10px">
+        <div class="content-echarts">
+            <Echarts :width="'100%'" :height="'100%'" :option="lineOption" :key="datekey" id="FCLine" />
+        </div>
+        <div class="content-table">
+            <Table :headers="tableHeaders" :rows="tableData" :key="datekey" class="tableYQ" :border="0" :cellspacing="0"
+                :cellpadding="0" />
+        </div>
+        <div class="content-pie">
+            <Echarts :width="'100%'" :height="'100%'" :option="lineOptionMGT" :key="datekeyMGT" id="FCMGTLine" />
+        </div>
+        
+    </div>
+    <div id="divEchartsData" class="echartsmaxmindata">
+    </div>
+</template>
+<script setup>
+import Table from "@/components/Table/Table.vue";
+import MyDialog from "@/components/ComDialog.vue";
+import SQLineDuo from "@/components/danzhan/sq/SQLineDuo.vue";
+import SQLineYB from "@/components/danzhan/sq/SQLineYB.vue";
+import api from "@/api/zonglan/index.js";
+import Echarts from "@/components/MyEcharts/echartsLine.vue";
+import ChartJs from "@/api/MyEcharts/ChartJs.js";
+import { SetNull, sortObjectArray,getWindDirectionName,groupBy } from "@/api/ComUnit.js";
+import { Postcard } from "@element-plus/icons-vue";
+// ElConfigProvider：时间选择框汉化
+import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElSelect, ElOption, ElMessage } from "element-plus";
+import dayjs from "dayjs";
+import $ from "jquery";
+
+import { ref, onMounted, provide, inject } from "vue";
+// 获取当前主题
+const _theme = localStorage.getItem("curTheme");
+const datekey = ref(null);
+const lineOption = ref({});
+const datekeyMGT = ref("FCMGTLine");
+const lineOptionMGT=ref({});
+
+const SQdata = ref({});
+const stime = ref("");
+const etime = ref("");
+const stcd = ref("");
+const stnm = ref("");
+const pathname = ref("Minute");
+const mtype = ref("");
+const TMtype = ref("");
+const tabName = ref("fit1");
+const img1 = ref("/images/line-chart.png");
+const img2 = ref("/images/line-table4.png");
+const img3 = ref("/images/line-pie.png");
+const Liststnm = ref([]);
+const value = ref([])
+const tableHeaders = ref([
+    { name: "num", label: "序号" },
+    { name: "tm", label: "时间" },
+    { name: "upz", label: "风速(m³/s)" },
+    { name: "WindDirName", label: "风向" },
+    { name: "wndpwr", label: "风力等级" },
+]);
+const tableData = ref();
+// 获取雨型的类型：1:(小~中雨);2:(中雨);3:(暴雨);4:(大暴雨);5:(特大暴雨);
+const props = defineProps({
+    stcd: {
+        type: String,
+        default: "",
+    },
+    mtype: {
+        type: String,
+        default: "",
+    },
+    stime: {
+        type: String,
+        default: "",
+    },
+    etime: {
+        type: String,
+        default: "",
+    },
+});
+function loadZhan() {
+    value.value = stcd.value;
+    api.QuSel({ "pid": "2026031114184492913-5" }).then((res) => {
+        // console.error("res", res.data)
+        var strJson = [];
+        if (res.data.length > 0) {
+            for (var i = 0; i < res.data.length; i++) {
+                var strTemp = {
+                    value: res.data[i].stcd,
+                    label: res.data[i].stnm,
+                    children: []
+                }
+                strJson.push(strTemp)
+            }
+        }
+        Liststnm.value = strJson;
+    });
+
+}
+
+function Weacontent() {
+    window.loadingShow();
+    var strParam = {};
+    strParam["stcd"] = stcd.value;
+    strParam["pathname"] = pathname.value;
+    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+    strParam["datasource"] = mtype.value;
+    api
+      .stwdwvrFengLine(strParam)
+      .then((res) => {        
+        const strJson = res.data;
+        SQdata.value = strJson;
+        SQload();
+        loadChart();
+        window.loadingHide();
+    })
+    .catch((err) => { });
+}
+function SQload() {
+    var xflfxDataNew=[],flfxDataNew=[];
+    const strJson = SQdata.value;
+    var result = [];
+    var maxZ = -1, maxTM = null;
+    var minZ = 999, minTM = null;    
+    // console.error("1",strJson);
+    try {
+        for (var num = 0; num < strJson.length; num++) {
+        var item = strJson[num];
+        var res=strJson[num];
+        xflfxDataNew.push(res.tm);
+        var WindDirName=SetNull(res.wnddir)==""?"-":getWindDirectionName(res.wnddir);
+        var itemNew = {
+            "TimePoint": res.tm,
+            "WindDir": res.wnangle,
+            "WindSpeed": res.wndv,
+            "WindDirName": WindDirName
+        }
+        flfxDataNew.push(itemNew);
+        var upz = item.wndv;
+        var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
+        if (SetNull(upz) != "") {
+            if (SetNull(upz) != "—") {
+                if (upz > maxZ) {
+                    maxZ = upz;
+                    maxTM = tm;
+                }
+                if (upz < minZ) {
+                    minZ = upz;
+                    minTM = tm;
+                }
+            }
+        }
+        result.push({ tm: tm, upz: upz,WindDirName:WindDirName,wndpwr:res.wndpwr});
+    }
+    } catch (error) {
+        console.error('error',error);
+    }
+    
+    // console.error("2",result);
+    var LineColor = [
+        "#19A3DF",
+        "#4EFF4E",
+        "#FF0000",
+        "green",
+        "#1CB8B2",
+        "#01DDFF",
+        "#F9C823",
+        "#0264FD",
+        "#FE7923",
+        "#8E30FF",
+    ];
+    const _Option = ChartJs.chartFX(
+        flfxDataNew,
+        xflfxDataNew,
+        LineColor,
+        "水位",
+        "Mouth",
+        _theme,
+        80,
+        20
+    );
+    lineOption.value = _Option;
+    datekey.value = Date.now();
+     console.error("3",_Option);
+    var strMsg = `最低风速：<span style='color:#0cdc0c;font-size: 18px;'>${minZ}</span>m³/s（${minTM}）
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+最高风速：<span style='color:#0cdc0c;font-size: 18px;'>${maxZ}</span>m³/s（${maxTM}）
+    `;
+    if(minZ==999){
+        strMsg = `最低风速：<span style='color:#0cdc0c;font-size: 18px;'>-</span>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+最高风速：<span style='color:#0cdc0c;font-size: 18px;'>-</span>
+    `;
+    }
+    $("#divEchartsData").html(strMsg);
+    // tableData.value = sortObjectArray(result, ["tm"], "desc");
+    let _index = 0;
+    tableData.value = sortObjectArray(result, ["tm"], "desc").filter(res => {
+        _index = _index + 1;
+        res.num = _index;
+        return res;
+    });
+}
+var dataFXNM= ["北", "北东北", "东北", "东东北", "东", "东东南", "东南", "南东南", "南", "南西南", "西南", "西西南", "西", "西西北", "西北", "北西北"];
+var dataFX=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+var jibieArr = [
+  [0, 5],
+  [5.0, 10.0],
+  [10.0, 15.0],
+  [15.0, 20.0],
+  [20.0, 25.0],
+  [25.0, 30.0],
+  [30.0, 100000],
+];
+var legendName = [];
+function loadChart() {
+  var swresult=sortObjectArray(SQdata.value,["tm"],"asc");
+  var fxflData = [];
+  swresult.map((item) => {
+    var winddir = item.wnddir;
+    var dirName =SetNull(winddir)==""?null:getWindDirectionName(winddir);
+    var dirYName = winddir;
+    fxflData.push({
+      dirName: dirName,
+      dirYName: dirYName,
+      wind: item.wndv,
+      winddir: winddir,
+    });
+  });
+  jibieArr.map((u) => {
+    if (u[1] < 100000) {
+      legendName.push(u[0] + "-" + u[1] + " m/s");
+    } else {
+      legendName.push(">" + u[0] + " m/s");
+    }
+  });
+  var fxflDataTemp = fxflData;
+  var seriesData = [];
+  var maxValue = 0;
+  var fxflDataTempG = groupBy(fxflDataTemp, "dirYName");
+  fxflDataTempG.map((u) => {
+    const sum = u.length;
+    if (maxValue < sum) {
+      maxValue = sum;
+    }
+  });
+  // console.error("fxflDataTempG",fxflDataTempG);
+  // --- 修改 Weacontent 函数中的 series 构建部分 ---
+  for (var i = 0; i < jibieArr.length; i++) {
+    var fxflDataTempTemp = fxflDataTemp.filter(function (e) {
+      var fs = parseFloat(e["wind"]);
+      // console.error('fs',fs);
+      return fs > jibieArr[i][0] && fs <= jibieArr[i][1];
+    });
+    var dataZui = [];
+    dataFX.map((u) => {
+      var fxflDataTempTempTemp = fxflDataTempTemp.filter(function (e) {
+        // 确保这里的解析逻辑能正确提取到 "N", "NNE" 等
+        var fx = e["dirYName"];
+        return fx == u;
+      });
+      dataZui.push(fxflDataTempTempTemp.length);
+    });
+    var seriesItem = {
+      type: "bar",
+      data: dataZui,
+      coordinateSystem: "polar",
+      name: legendName[i],
+      stack: "a",
+      barWidth: "100%", // 【修复】填满扇区
+      roundCap: false, // 【修复】直角边缘，利于闭合
+      itemStyle: {
+        borderWidth: 0, // 【修复】无边框
+      },
+    };
+    seriesData.push(seriesItem);
+  }
+  var startDate= dayjs(swresult[0].tm).format("M月D日H时");
+  var endDate= dayjs(swresult[swresult.length-1].tm).format("M月D日H时");
+  var title=startDate+"至"+endDate;
+  var optionTide =ChartJs.chartFXMGTU(title, seriesData, maxValue + 20,legendName,dataFXNM);
+  lineOptionMGT.value = optionTide;
+  datekeyMGT.value = new Date();
+}
+function getType(obj) {
+    mtype.value = obj;
+    Weacontent();
+}
+function geTMtType(obj) {
+    TMtype.value = obj;
+    var now = new Date();
+    etime.value = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
+    if (obj == "week") {
+        stime.value = dayjs(etime.value).add(-6, "day").format("YYYY-MM-DD HH:mm:ss");
+    } else if (obj == "month") {
+        stime.value = dayjs(etime.value).add(-1, "month").format("YYYY-MM-DD HH:mm:ss");
+    } else if (obj == "year") {
+        stime.value = dayjs(etime.value).add(-1, "year").format("YYYY-MM-DD HH:mm:ss");
+    }
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+    Weacontent();
+}
+function handleChange(value) {
+    stcd.value = value;
+    Weacontent();
+}
+function TypeeChange(e) {
+    pathname.value = e;
+    Weacontent();
+}
+function BtnSearch() {
+    Weacontent();
+}
+function OnBoot(e) {
+    tabName.value = e;
+    SQload();
+    if (e == "fit1") {
+        $(".content-echarts").css({ display: "block" });
+        $(".content-pie").css({ display: "none" });
+        $(".content-table").css({ display: "none" });
+
+        img1.value = "/images/line-chart.png";
+        img2.value = "/images/line-table4.png";
+        img3.value = "/images/line-pie.png";
+    } else if (e == "fit2") {
+        $(".content-echarts").css({ display: "none" });
+        $(".content-pie").css({ display: "none" });
+        $(".content-table").css({ display: "block" });
+
+        img1.value = "/images/line-chart1.png";
+        img2.value = "/images/line-table3.png";
+        img3.value = "/images/line-pie.png";
+    }
+    else if(e=="fit3"){
+        $(".content-echarts").css({ display: "none" });
+        $(".content-table").css({ display: "none" });
+        $(".content-pie").css({ display: "block" });
+        img1.value = "/images/line-chart1.png";
+        img2.value = "/images/line-table4.png";
+        img3.value = "/images/line-pie1.png";
+
+        datekeyMGT.value = new Date();
+    }
+}
+onMounted(() => {
+    mini.parse();
+    if (props.stcd != "") {
+        stcd.value = props.stcd;
+    } else {
+        stcd.value = inject("stcd").value;
+    }
+    if (props.stime != "") {
+        stime.value = props.stime
+    } else {
+        stime.value = inject("stime").value;
+    }
+    if (props.etime != "") {
+        etime.value = props.etime
+    } else {
+        etime.value = inject("etime").value;
+    }
+    // if (props.mtype != "") {
+    //   mtype.value = props.mtype;
+    // } else {
+    //   mtype.value = inject("mtype").value;
+    // }
+    // 确保 MiniUI 资源加载完成后再操作
+    stime.value = dayjs(etime.value).add(-24, "hour").format("YYYY-MM-DD HH:00");
+    // 尝试获取组件实例
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+    loadZhan();
+    Weacontent();
+});
+provide("typestcd", stcd);
+</script>
+<style scoped>
+.topClass {
+    height: 45px;
+    line-height: 40px;
+    color: var(--widgetcolor);
+}
+
+.toptabTop {
+    list-style: none;
+    color: #00feff;
+    border-color: #00feff;
+    width: auto !important;
+    left: 0px;
+    bottom: 0px;
+    top: 5px;
+    padding: 0px;
+    display: inline-block;
+    vertical-align: -12px;
+    list-style: none
+}
+
+.toptabToponlyli {
+    float: left;
+    height: 32px;
+    width: 40px;
+    text-align: center;
+    line-height: 32px;
+    cursor: pointer;
+    background-color: var(--portal);
+    border: 1px solid var(--portal);
+    color: var(--sel_wraplabelcolor);
+}
+
+.toptabTop li:first-child {
+    border-radius: 5px 0 0 5px;
+}
+
+.toptabTop li:last-child {
+    border-radius: 0 5px 5px 0;
+}
+
+.toptabToponlyliHover {
+    background-color: var(--swDivSelectcolor);
+    border: 1px solid var(--swDivSelectcolor);
+    color: var(--sel_wraplabelcolorSel);
+}
+
+.datatime {
+    width: 180px !important;
+    height: 36px !important;
+}
+
+.content-echarts {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.content-pie{
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.content-table {
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* 自定义滚动条样式 */
+.content-table::-webkit-scrollbar {
+    width: 4px;
+    /* 设置滚动条宽度 */
+}
+
+.content-table::-webkit-scrollbar-thumb {
+    /* 滚动条手柄 */
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    right: -4px;
+    top: 0px;
+    background: var(--mtabletrcolor);
+    z-index: 2;
+}
+
+.tableYQ {
+    width: 100%;
+    /* table-layout: fixed; */
+    margin-top: 0rem;
+    margin: 0 auto;
+    /* 表格里面显示省略号必须加fixed，td设置的宽度会失效，宽度限定写在th中*/
+}
+
+.tableYQ tr th {
+    background: var(--mtabletrcolor);
+    color: var(--mtablecolor);
+}
+
+.tableYQ tr {
+    height: 38px;
+    line-height: 38px;
+}
+
+.tableYQ tr th {
+    font-size: 0.8rem;
+    font-weight: bold;
+    height: 2.1rem;
+    text-align: center;
+}
+
+.tableYQ tr td {
+    height: 1.6rem;
+    font-size: 14px;
+    text-align: center;
+}
+
+.tableYQ tr td {
+    color: var(--widgetcolor);
+}
+
+.tableYQ .trSelect {
+    background: rgba(0, 255, 255, 0.5) !important;
+}
+
+.tableYQ tbody tr td {
+    width: 15vh !important;
+}
+
+.tableYQ tbody tr td:nth-child(1) {
+    width: 80px !important;
+}
+
+.tableYQ tbody tr td:nth-child(2) {
+    width: 20vh !important;
+}
+
+.switch {
+    position: fixed;
+    height: 30px;
+    width: 35px;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.switch img {
+    width: 22px;
+    height: 22px;
+}
+
+.handleon {
+    background-size: 100% 100%;
+    background: var(--popContentHeadbg);
+}
+
+:deep(.el-radio) {
+    margin-right: 20px;
+    --el-radio-input-bg-color: #d5141400;
+    min-width: 50px;
+}
+
+:deep(.el-radio__label) {
+    color: var(--widgetcolor);
+}
+
+:deep(.el-date-editor.el-input),
+:deep(.el-date-editor.el-input__wrapper) {
+    width: 160px;
+}
+
+:deep(.el-input__prefix-inner) {
+    margin-left: -9px;
+}
+
+:deep(.el-input__suffix) {
+    margin-right: -9px;
+}
+
+:deep(.el-input__wrapper) {
+    background-color: #d5141400;
+    box-shadow: 0 0 0 1.5px var(--popContentHeadbg);
+    ;
+}
+
+:deep(.el-input__inner) {
+    color: var(--widgetcolor);
+}
+
+:deep(.el-button) {
+    /* background-color: var(--popContentHeadbg);
+  border-color: var(--popContentHeadbg); */
+    color: #fff;
+}
+
+:deep(.el-checkbox__input.is-checked+.el-checkbox__label),
+:deep(.el-radio__input.is-checked+.el-radio__label) {
+    color: var(--swDivSelectcolor);
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner),
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+    background-color: var(--swDivSelectcolor);
+    border-color: var(--swDivSelectcolor)
+}
+
+.echartsmaxmindata {
+    width: 100%;
+    font-size: 16px;
+    margin: 0 auto;
+    border: 1.5px solid var(--popContentHeadbg);
+    height: auto;
+    margin-top: 10px;
+    height: 40px;
+    line-height: 40px;
+    color: var(--mtablecolor);
+    text-align: center;
+}
+</style>
+<style lang="scss">
+/* 站点选择 */
+.el-cascader-node {
+    padding: 0 0px 0 10px;
+    width: 118px;
+    color: var(--widgetcolor);
+}
+
+.el-cascader-menu {
+    min-width: 20px;
+}
+
+.el-cascader-menu:last-child .el-cascader-node {
+    padding-right: 0px;
+}
+
+
+.el-cascader-node__prefix {
+    left: 0px !important;
+}
+
+.el-cascader-node__label {
+    padding: 0 4px;
+}
+
+.el-input {
+    height: 29px;
+}
+
+.el-input__suffix {
+    color: var(--popContentHeadbg);
+}
+
+.el-cascader__dropdown.el-popper,
+.el-cascader-node:not(.is-disabled):focus,
+.el-cascader-node:not(.is-disabled):hover {
+    background: none;
+}
+
+.el-cascader__dropdown.el-popper {
+    box-shadow: var(--popContentHeadbg);
+}
+
+.el-popper.is-light,
+.el-popper.is-light .el-popper__arrow:before {
+    border: 1px solid var(--popContentHeadbg);
+    background: var(--boxtitlebg);
+}
+
+.el-cascader:not(.is-disabled):hover .el-input__wrapper,
+.el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+    cursor: pointer;
+}
+
+// 站点选择 - el-select 适配
+.el-select {
+    height: 29px;
+    width: 120px;
+
+    .el-select__wrapper {
+        min-height: 29px;
+        height: 29px;
+        background-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+
+        &:hover {
+            box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+        }
+    }
+
+    &.is-hovering {
+        .el-select__wrapper {
+            box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+        }
+    }
+
+    .el-select__selection {
+        line-height: 27px;
+    }
+
+    .el-select__placeholder {
+        color: var(--widgetcolor);
+    }
+
+    .el-select__input {
+        color: var(--widgetcolor);
+    }
+}
+
+.el-select-dropdown {
+    max-height: 300px;
+    overflow-y: auto;
+
+    .el-select-dropdown__item {
+        padding: 0 10px;
+        width: 118px;
+        color: var(--widgetcolor);
+
+        &.hover,
+        &:hover {
+            background: var(--popContentHeadbg);
+        }
+
+        &.is-selected {
+            color: var(--widgetcolor) !important;
+            background: var(--popContentHeadbg) !important;
+        }
+    }
+}
+
+.el-popper.is-light.el-select-dropdown {
+    border: 1px solid var(--popContentHeadbg);
+    background: var(--boxtitlebg);
+}
+
+// 时间选择框
+.el-date-picker,
+.el-picker-panel__footer {
+    // width: 174px;
+    background: none;
+    color: var(--widgetcolor);
+}
+
+.el-date-picker .el-picker-panel__content {
+    // width: 160px;
+}
+
+.el-date-picker__header,
+.el-picker-panel__content {
+    // margin: 6px;
+}
+
+.el-date-table td {
+    padding: 0;
+}
+
+.el-date-picker table {
+    width: none !important;
+}
+
+.el-date-picker__time-header {
+    background: var(--boxtitlebg);
+    // display: block;
+}
+
+.el-picker-panel__icon-btn {
+    // padding: 0;
+    color: var(--widgetcolor);
+}
+
+.el-input--small .el-input__inner,
+.el-date-table th,
+.el-date-picker__header-label,
+.el-button.is-text,
+.el-button.is-plain {
+    color: var(--widgetcolor);
+}
+
+.el-cascader .el-input.is-focus .el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+}
+
+.el-cascader-node.in-active-path,
+.el-cascader-node.is-selectable.in-checked-path,
+.el-year-table td .cell:hover,
+.el-date-picker__header-label:hover {
+    color: var(--swDivSelectcolor);
+}
+
+.el-date-table th {
+    border-bottom: 1px solid var(--popContentHeadbg);
+}
+
+.el-picker-panel__footer {
+    border-top: 1px solid var(--popContentHeadbg);
+}
+
+.el-button.is-plain,
+.el-button.is-text:not(.is-disabled):hover,
+.el-scrollbar__thumb {
+    background-color: var(--popContentHeadbg);
+    border-color: var(--popContentHeadbg);
+    color: #fff;
+}
+
+.el-date-picker__editor-wrap:nth-child(1) .el-input--small .el-input__wrapper {
+    width: 90px;
+}
+
+.el-date-picker__editor-wrap {
+    width: 50%;
+}
+
+.el-year-table td {
+    padding: 0px;
+}
+
+.el-cascader-node.is-active .el-cascader-node__label,
+.el-cascader-node.is-active {
+    font-size: 1rem;
+    color: var(--swDivSelectcolor);
+}
+
+.el-date-table td.current:not(.disabled) .el-date-table-cell__text,
+.el-year-table td.current:not(.disabled) .cell {
+    background-color: var(--swDivSelectcolor);
+    border-color: var(--swDivSelectcolor);
+    color: #fff;
+}
+
+.el-date-table td.today .el-date-table-cell__text,
+.el-date-table td.available:hover {
+    color: var(--swDivSelectcolor);
+}
+
+.el-year-table td .cell,
+.el-month-table td .cell {
+    color: #fff;
+}
+</style>

@@ -1,0 +1,60 @@
+@font-face {
+    font-family: 'FZZYJW';
+    src: url('@/assets/fonts/FZZYJW.TTF');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'largeFont';
+    src: url('@/assets/fonts/largeFont.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'number';
+    src: url('@/assets/fonts/number.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open24DisplaySt';
+    src: url('@/assets/fonts/Open24DisplaySt.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'REEJI-ZhenyanGB2.0';
+    src: url('@/assets/fonts/REEJI-ZhenyanGB2.0.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'RTWSBANHEIG0V1-REGULAR';
+    src: url('@/assets/fonts/RTWSBANHEIG0V1-REGULAR.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SJzemu-Regular';
+    src: url('@/assets/fonts/SJzemu-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SJzemu-Regular';
+    src: url('@/assets/fonts/SJzemu-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: '"Microsoft YaHei';
+    src: url('@/assets/fonts/MicrosoftYaHei.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+  
+  body {
+    font-family: "arial", "Hiragino Sans GB", "Helvetica Neue", Helvetica, tahoma, arial, "WenQuanYi Micro Hei", Verdana, sans-serif, "\5B8B\4F53";
+  }
+  

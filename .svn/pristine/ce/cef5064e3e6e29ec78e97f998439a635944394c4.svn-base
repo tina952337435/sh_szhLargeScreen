@@ -1,0 +1,162 @@
+/* 科技主题样式 */
+:root {
+  --body_bg: white;
+  --nav_bg: white;
+  --nav_color: white;
+  --main_bg: val(--nav-color);
+  --tophead: linear-gradient(to bottom,
+      rgb(9 27 44) 20%,
+      rgb(9, 26, 48, 0.9) 30%,
+      rgb(10, 28, 44, 0.8) 80%),
+    url(/images/indexNew2-2.png) no-repeat top center;
+  --boxtitlebt: url(/images/index_05_1.png) no-repeat bottom left;
+  --boxtitlebg: #031426bf;
+  --mboxtxtcolor: #031426;
+  --mtablecolor: #def1ff;
+  --mtablecolorIm: #ffffff;
+  --mtabletrcolor: rgba(8, 82, 134, 0.3);
+  --mtabletrcolorgc: rgba(8, 82, 134, 0.1);
+  --mtablethcolor: #a3edff;
+  --boxbot: 0.8;
+  --widgetcolor: #fff;
+  --def1ff: #def1ff;
+  --ztitemtit1: #036e9c;
+  --ztboxbg: url(/images/ztboxbg.png) 0 0 no-repeat;
+  /* --indexseven: url(/images/index_07.png) no-repeat; */
+  --indexseven: url(/images/bg2-8Selected.png) no-repeat;
+  /* --indexeight: url(/images/index_08.png) no-repeat; */
+  --indexeight: url(/images/bg2-8.png) no-repeat;
+  --portal: #1C375A;
+  --portalborder: 1px solid #0C78A4;
+  /* --swDivSelectcolor: #059BC7; */
+  --swDivSelectcolor: #0cdc0c;
+  --swDivSelectFontcolor: #000;
+  --liuyupjbg: url(/images/liuyupjbg_box2.png);
+  --spanTitle: url(/images/titleImg16.png) no-repeat left center;
+  --titleborder: 1px solid #303030;
+  --titled1: #00e4ff;
+  --titled2: rgba(0, 224, 250, .3);
+  --titlemenu: #16a4f3;
+  --warningTitle: #def1ff;
+  --title2: #def1ff;
+  /* 弹窗的背景色 */
+  --dialogColor: #031426e6;
+  /* 配置设置标题栏背景色 */
+  --dividerColor: #0314260f;
+  /* 雨情：统计信息背景色 */
+  --widgetColor: rgba(1, 202, 217, 0.2);
+  /* 侧边栏颜色 */
+  --labelColor: #cbcccc;
+  /* 圩区行政分区botton背景色 */
+  --wqbotton: #013B56;
+  /* 主题颜色 */
+  --themeColor: #00ffff;
+  /* 工情边界交换水量 */
+  --ystsName: #a5cdde;
+  /* 项目配置选择颜色 */
+  --innerColor: rgb(0, 255, 255);
+  /* 行政分区背景色 */
+  --areaColor: #013b56;
+  /* 行政分区旋转背景色 */
+  --areaSelectColor: #059bc7;
+  /*气象背景色*/
+  --qixiangmainbg: #070F29;
+  /*气象右边背景图*/
+  --qixiangrightbg: url(/images/qixiangbg.png);
+  --qixianglefttitlebg: #022a66;
+  --qixianglefttitlebglabel: #23fffb;
+  --qixianglefttitlebghover: #00e4ff;
+  --eldropdownmenubg: #022a66;
+  /* 工情统计背景色 */
+  --ClassNameBcak: linear-gradient(to right, #022e53 0%, #012849 40%, #011933 85%, #02131B 100%);
+  /* --ClassNameBcakSelect: linear-gradient(to right, #1676c7 0%, #012849 40%, #011933 85%, #02131B 100%); */
+  --ClassNameBcakSelect: linear-gradient(to right, #0CDC0C 0%, #23c123 40%, #307a30 85%, #2c522c 100%);
+  /* 引/排水量统计统计字体颜色 */
+  --textXiaolv: #ABF8FF;
+
+  /*圩区单站*/
+  --wqtitleline: #0e5892;
+  --wqdanzhanboxallbg: rgba(255, 255, 255, 0.04);
+  --wqdanzhanboxallbordercolor: rgba(25, 186, 139, 0.17);
+  --wqdanzhanboxallbeforeafter: #02a6b5;
+  --wqdanzhansycmspancolor: #fff;
+  --wqdanzhansycmspancoloropacity: 0.5;
+  --wqdanzhansycmsh2color: #00ffff;
+  --wqdanzhansycmsh2colorfontsizeWhite: white !important;
+  --wqdanzhanalltitlebordercolor: rgba(255, 255, 255, .2);
+  --wqdanzhanclearfixbordercolor: rgba(255, 255, 255, .2);
+  /*圩区单站*/
+
+  /*弹出框标题背景*/
+  --popContentHeadbg: #00a3ff99;
+  --popContentHeadbgyb: #afcfcf;
+  /*弹出框标题背景*/
+  --popContentDiv: #00ffff;
+
+  /* 文本框 */
+  --el-inputbg: #d5141400;
+  --el-inputbox-shadow: rgba(0, 163, 255, 0.6);
+
+  /* 查询按钮背景色 */
+  --buttonsearchbg: #1C375A;
+  --buttonsearchbordercolor: 1px solid #0C78A4;
+
+
+  --btnListcurListspan: rgba(0, 0, 0, 0.5);
+  --btnListlicolor: #fff;
+  --btnListlicolorSeleted: #fff;
+
+  --sel_wraplabelcolor: #cbcccc;
+  --sel_wraplabelcolorSel: #000;
+
+  --el-table-bg-colornew: #031426e6;
+  --el-table-tr-bg-colornew: #031426e6;
+
+  --wqInformation-bg: #031426;
+  --wqInformation-li-bg: #0220418f;
+  --conter-nayuimg: url(/images/gongshuirenkou.png);
+  --conter-nayulabel: #00e4ff;
+
+  /* 树形菜单 */
+  --el-tree-bg: none;
+  --el-fill-color-blank: none;
+  --el-tree-text-colornew: #00ffff !important;
+  --el-tree-node-hover-bg-colornew: rgba(8, 82, 134, 0.6);
+  /* 弹出框头部背景色 */
+  --popupContentTitlebg: rgba(0, 163, 255, 0.6);
+  /* --popupContentTitleColor: #239d9d; */
+  --popupContentTitleColor: #89e4fa;
+  /* 响应消息通知 */
+  --messageIamge: url(/images/qxjz/message_default.png);
+  /* 搜索框关闭图片 */
+  --popupCloseImg: url(/images/qxjz/missWhite.png);
+  /* 图例背景 */
+  --tuli-bg: rgba(0, 0, 0, 0.2);
+  --typhoonMenuItem-bg: rgba(0, 16, 30, 0.8);
+  /* 弹窗tab的切换 */
+  --menuTop: url(/images/menuTop.png);
+  --menuTopSelected: url(/images/menuTopSelected.png);
+  /* 圩区左侧的切换 */
+  --caseBtnWind: url(/images/weatherMap/caseBtn_wind.png);
+  --caseBtnWindCur: url(/images/weatherMap/caseBtn_wind_cur.png);
+  --caseBtnRain: url(/images/weatherMap/caseBtn_rain.png);
+  --caseBtnRainCur: url(/images/weatherMap/caseBtn_rain_cur.png);
+  --caseBtnDD: url(/images/weatherMap/caseBtn_DD.png);
+  --caseBtnDDCur: url(/images/weatherMap/caseBtn_DD_cur.png);
+  --caseBtnTemp: url(/images/weatherMap/caseBtn_temp.png);
+  --caseBtnTempCur: url(/images/weatherMap/caseBtn_temp_cur.png);
+  --caseBtnWater: url(/images/weatherMap/caseBtn_Water.png);
+  --caseBtnWaterCur: url(/images/weatherMap/caseBtn_Water_cur.png);
+  /* swpier切换 */
+  --swiperSlide: url(/images/index_09.png);
+  --swiperSlideActive: url(/images/index_10.png);
+  --ystsVvalue: #a5cdde;
+  /* 分区预报降雨图例文字颜色 */
+  --yubaoyqColor: #ccc;
+  /* 评估背景图 */
+  --pingguLeftBack: url(/images/arightboxtop.png);
+  --pingguRightBack: url(/images/amiddboxttop.png);
+  --pingguSelectFangAn: rgba(12, 220, 12, 0.5);
+  /* 站网 */
+  --bgYear: #0ce0f8bb;
+}

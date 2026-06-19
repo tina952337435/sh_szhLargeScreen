@@ -1,0 +1,479 @@
+<template>
+<div class="m-box" style="position: relative">
+        <div class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2">
+            <div class="d1"></div>
+            <div class="d2"></div>
+            <p class="base-p" id="title2" @click="fangda()">水位槽蓄量关系</p>
+        </div>
+        <div class="txt">
+           <Echarts :width="'100%'" :height="'100%'" :option="lineOption" :key="datekey" :id="dateid" />
+        </div>
+        <div class="bot leftBottom-radius"></div>
+    </div>
+</template>
+<script setup>
+import { ref,onMounted } from 'vue';
+import Echarts from "@/components/MyEcharts/echartsLine.vue";
+import * as echarts from 'echarts'
+import dayjs from "dayjs";
+const datekey = ref(null);
+const lineOption = ref({});
+const dateid = ref("echartcxlswgx");
+var  data =[
+        {
+            "ID": "20230914001",
+            "UPZ": 1.500,
+            "AREA": 43.980,
+            "S": 71.660,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914002",
+            "UPZ": 1.600,
+            "AREA": 44.960,
+            "S": 76.110,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914003",
+            "UPZ": 1.700,
+            "AREA": 46.200,
+            "S": 80.690,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914004",
+            "UPZ": 1.800,
+            "AREA": 47.190,
+            "S": 85.380,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914005",
+            "UPZ": 1.900,
+            "AREA": 48.090,
+            "S": 90.150,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914006",
+            "UPZ": 2.000,
+            "AREA": 48.880,
+            "S": 95.000,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914007",
+            "UPZ": 2.100,
+            "AREA": 49.580,
+            "S": 99.930,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914008",
+            "UPZ": 2.200,
+            "AREA": 50.320,
+            "S": 104.930,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914009",
+            "UPZ": 2.300,
+            "AREA": 50.840,
+            "S": 109.990,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914010",
+            "UPZ": 2.400,
+            "AREA": 51.240,
+            "S": 115.100,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914011",
+            "UPZ": 2.500,
+            "AREA": 51.560,
+            "S": 120.240,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914012",
+            "UPZ": 2.600,
+            "AREA": 51.850,
+            "S": 125.410,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914013",
+            "UPZ": 2.700,
+            "AREA": 52.080,
+            "S": 130.610,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914014",
+            "UPZ": 2.800,
+            "AREA": 52.260,
+            "S": 135.820,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914015",
+            "UPZ": 2.900,
+            "AREA": 52.420,
+            "S": 141.060,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914016",
+            "UPZ": 3.000,
+            "AREA": 52.560,
+            "S": 146.310,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914017",
+            "UPZ": 3.100,
+            "AREA": 52.710,
+            "S": 151.570,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914018",
+            "UPZ": 3.200,
+            "AREA": 52.850,
+            "S": 156.850,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914019",
+            "UPZ": 3.300,
+            "AREA": 53.010,
+            "S": 162.140,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914020",
+            "UPZ": 3.400,
+            "AREA": 53.170,
+            "S": 167.450,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914021",
+            "UPZ": 3.500,
+            "AREA": 53.320,
+            "S": 172.780,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914022",
+            "UPZ": 3.600,
+            "AREA": 53.490,
+            "S": 178.120,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914023",
+            "UPZ": 3.700,
+            "AREA": 53.650,
+            "S": 183.470,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914024",
+            "UPZ": 3.800,
+            "AREA": 53.820,
+            "S": 188.850,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914025",
+            "UPZ": 3.900,
+            "AREA": 54.000,
+            "S": 194.240,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914026",
+            "UPZ": 4.000,
+            "AREA": 54.190,
+            "S": 199.650,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914027",
+            "UPZ": 4.100,
+            "AREA": 54.390,
+            "S": 205.080,
+            "TYPE": "嘉宝北片"
+        },
+        {
+            "ID": "20230914028",
+            "UPZ": 4.200,
+            "AREA": 54.610,
+            "S": 210.530,
+            "TYPE": "嘉宝北片"
+        }
+    ]
+var maxArr = [], wrzDataS = [], grzDataS = [];
+for (var num = 0; num < data.length; num++) {
+     maxArr.push(192.62);
+     wrzDataS.push(154.47);
+     grzDataS.push(192.62);
+}
+onMounted(() => {
+    loadChart();
+});
+
+function loadChart() {
+    var dataX = [],dataXL=[],dataMJ=[];
+    for (var num = 0; num < data.length; num++) {
+        dataX.push(data[num].UPZ);
+        dataXL.push(data[num].S);
+        dataMJ.push(data[num].AREA);
+    }
+            
+    lineOption.value=chartNHXNew(dataX,dataXL,dataMJ);
+    datekey.value = Date.now();
+}
+
+function getCXL() {
+            var keyValue =2.85;
+            var cxlValue="";
+            if (keyValue != "") {
+                cxlValue = getStorageValue(keyValue);
+                //$("#jisuanCXL").html(cxlValue + "百万方");
+            }
+            return cxlValue;
+}
+function getStorageValue(upz) {
+            upz = parseFloat(upz);
+            var dataTempMax = data.filter(function (res) {
+                return res.UPZ >= upz;
+            });
+            var dataTempMin = data.filter(function (res) {
+                return res.UPZ <= upz;
+            });
+            var minUpz = dataTempMin[dataTempMin.length - 1].UPZ;
+            var maxUpz = dataTempMax[0].UPZ;
+            var S = dataTempMax[0].S;
+            if (minUpz != maxUpz) {
+                var cha = Number(parseFloat(maxUpz - minUpz).toFixed(2));//总差值
+                var scha = Number(parseFloat(upz - minUpz).toFixed(2));//距离上一个差值;
+                var upzBili = scha / cha;
+
+                var minS = dataTempMin[dataTempMin.length - 1].S;
+                var maxS = dataTempMax[0].S;
+                var chaS = maxS - minS;//蓄量总差值
+                var sscha = chaS * upzBili;
+                S = (minS + sscha).toFixed(2);
+            }
+            return S;
+}
+
+function chartNHXNew( dataX,dataXL,dataMJ) {
+            var titleText = "嘉宝北片水位～面积～蓄量关系曲线";
+            // echarts.registerTransform(ecStat.transform.regression);
+        
+            var xAxisVal=0,formatterVal=0;
+            formatterVal=getCXL();
+            if (formatterVal != "") {
+                var startUpz = Number(data[0].UPZ);
+                var endUpz = data[data.length - 1].UPZ;
+                var curUpz =Number(2.85);
+                xAxisVal=((curUpz - startUpz) * 10);
+            }
+            var option = {
+                title: {
+                    // text: titleText,
+                    textStyle: {
+                        color: '#fff',
+                    },
+                    // subtext: subtext,
+                    subtextStyle: {
+                        color: '#497DBB',
+                        fontSize: 14,
+                        fontWeight: 'normal'
+                    },
+                    left: 'center',
+                    top:0,
+                },
+                grid: {
+                    left: '5%',
+                    right: '5%',
+                    bottom: '12%',
+                    top: '20%',
+                    containLabel: true
+                },
+                tooltip: {
+                    show: true,
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                legend: {
+                    data: ['水面面积','蓄量'],
+                    itemWidth: 8,
+                    itemHeight: 8,
+                    textStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    x:'center',
+                    y:10
+                },
+                xAxis: {
+                    name: "水位(m)",
+                    nameLocation:'center',
+                    boundaryGap: false,
+                    nameTextStyle:{
+                        padding:[15,0],
+                        fontSize:13,
+                        color: "#00FFFF",
+                    },
+                    data:dataX,
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed',
+                        }
+                    },
+                    axisLabel: {
+                        formatter: function (v) {
+                            return Number( v).toFixed(1);
+                        },
+                        color: "#00FFFF",
+                    },
+                },
+                yAxis: [
+                    {
+                    name: "面积(平方公里)",
+                    min: 43,
+                    max: 55,
+                    // 坐标刻度线
+                        axisTick: {
+                            show: true,
+                            lineStyle: {
+                                type: 'solid', //y轴分割线类型
+                                color: "#00FFFF",
+                                // width: 2.5,
+                            },
+                        },
+                        // 坐标 轴线
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                type: 'solid',
+                                // color: 'rgba(66, 192, 255, .3)',
+                                color: "#00FFFF",
+                                // width: 2.5
+                                // color: 'red'
+                            },
+                        },
+                    splitLine: {
+                        lineStyle: {
+                            // type: 'dashed',
+                             color: "#074159",
+                        }
+                    },
+                    axisLabel: {
+                        formatter: function (v) {
+                            return v.toFixed(0);
+                        }
+                    },
+                },
+                {
+                    name: "蓄量(百万方)",
+                    min: 70,
+                    max: 220,
+                    // 坐标刻度线
+                    axisTick: {
+                            show: true,
+                            lineStyle: {
+                                type: 'solid', //y轴分割线类型
+                                color: "#00FFFF",
+                                // width: 2.5,
+                            },
+                        },
+                        // 坐标 轴线
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                type: 'solid',
+                                // color: 'rgba(66, 192, 255, .3)',
+                                color: "#00FFFF",
+                                // width: 2.5
+                                // color: 'red'
+                            },
+                        },
+                    splitLine: {
+                        show:false,
+                        lineStyle: {
+                            type: 'dashed'
+                        }
+                    },
+                    axisLabel: {
+                        formatter: function (v) {
+                            return v.toFixed(0);
+                        }
+                    },
+                }
+                ],
+                series: [
+                    {
+                        name: '水面面积',
+                        type: 'line',
+                        yAxisIndex:0,
+                        smooth: true,
+                        symbol: 'circle',
+                        color: '#5B9BD5',//#497DBB
+                        lineStyle: {
+                            //type: 'dashed'
+                        },
+                        data:dataMJ,
+                        label: {
+                            show: false,
+                            fontSize: 16,
+                        },
+                    },
+                    {
+                        name: '蓄量',
+                        type: 'line',
+                        markLine: {
+                            symbol: ["none", "none"], //箭头
+                            data: [{
+                                xAxis: xAxisVal,
+                            },
+                            ],
+                            label: {
+                                formatter: function () {
+                                    return formatterVal; //"当前蓄量："+formatterVal;
+                                },
+                                color:'red',
+                                distance:-2
+                            },
+                            lineStyle: {
+                                color: "red",
+                                width:2,
+                            },
+                        },
+                        yAxisIndex:1,
+                        smooth: true,
+                        symbol: 'circle',
+                        color: 'red',//#497DBB
+                        lineStyle: {
+                            //type: 'dashed'
+                        },
+                        data:dataXL,
+                        label: {
+                            show: false,
+                            fontSize: 16,
+                        }
+                    }
+                ]
+            };
+           return option;
+        }
+</script>
