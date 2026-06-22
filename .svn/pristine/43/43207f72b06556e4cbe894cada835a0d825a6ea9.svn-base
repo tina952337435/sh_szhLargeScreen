@@ -1,0 +1,11 @@
+.custom-cascader .el-popper.is-pure {
+    max-width: 120px !important;
+}
+
+.custom-cascader .el-cascader-node {
+    padding: 8px 12px;
+}
+
+.custom-cascader .el-cascader-menu {
+    background-color: #f5f7fa;
+}

@@ -1,0 +1,473 @@
+<template>
+    <div class="m-box">
+        <div class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2">
+            <div style="line-height:30px;">
+                <div class="d1"></div>
+                <div class="d2"></div>
+                <p class="base-p" id="title2" @click="fangda()">一河四片</p>
+            </div>
+            <!-- <div style="width:calc(100% - 170px);" class="div-swiper">
+                <div class="swiper-slide" style="width: 50%;"
+                    :class="Typeswiper == 'district' && 'swiper-slide swiper-slide-thumb-active'"
+                    @click="GetType('district')">
+                    水利片区</div>
+                <div class="swiper-slide" style="width: 50%;"
+                    :class="Typeswiper == 'river' && 'swiper-slide swiper-slide-thumb-active'" @click="GetType('river')">
+                    骨干河道</div>
+            </div> -->
+        </div>
+        <div class="txt" style="overflow-y: auto">
+            <Table :headers="tableHeaders" :rows="tableData" :key="datekey" class="m-table river-table" :border="0"
+                :cellspacing="0" :cellpadding="0" @click="handleclick" />
+        </div>
+        <div class="bot leftBottom-radius"></div>
+    </div>
+    <ComZujian :showDialog="showDialog" @close="showDialog = false" :title="titleName" :typeValue="typeValue"
+        style="width: 70%; height: 700px">
+        <TableRiver />
+    </ComZujian>
+</template>
+<script setup>
+import '@/assets/styles/swiper.css';
+import ComZujian from "@/components/ComZujian.vue";
+import Table from "@/components/Table/Table.vue";
+import api from "@/api/zonglan/index.js";
+import dayjs from "dayjs";
+import $ from "jquery";
+import { ref, onMounted, watch } from "vue";
+import { SetNull, groupBy } from "@/api/ComUnit";
+import { convertToDate } from "@/api/dateUtil.js";
+const Typeswiper = ref('district')
+const datekey = ref(null);
+const emit = defineEmits(['passValue']);
+const tableHeaders = ref([
+    {
+        name: "num",
+        label: "序号"
+    },
+    {
+        name: "hd_name",
+        label: "名称"
+    },
+    {
+        name: "hd_index",
+        label: "类别"
+    },
+]);
+const tableData = ref([]);
+// 判断弹窗是否显示,默认隐藏
+const showDialog = ref(false);
+const props = defineProps({
+    GCtableDataAll: {
+        type: Array,
+        default: () => []
+    },
+});
+watch(props.GCtableDataAll, () => {
+    GetType("district");
+});
+function WeacontentRiver() {
+    var strParam = {};
+    strParam["state"] = "1";
+    var res = {
+        "result": [
+            {
+                "hd_base_id": "2025071501955",
+                "hd_base_bianma": "1955",
+                "hd_name": "黄浦江",
+                "hd_zhen": "高新区、千灯镇、张浦镇、陆家镇、开发区、花桥镇",
+                "hd_startpoint": "北界浦港",
+                "hd_endpoint": "花桥泗港口",
+                "hd_length": 80465.032,
+                "hd_area": 5223481.254,
+                "hd_width": "0",
+                "hd_waterarea": 7199.96,
+                "hd_index": "流域性河道",
+                "lgtd": "120.97963",
+                "lttd": "31.308391",
+                "isvisble": "1",
+                "sort": 10
+            },
+            {
+                "hd_base_id": "2025071501955",
+                "hd_base_bianma": "1955",
+                "hd_name": "太浦河",
+                "hd_zhen": "高新区、千灯镇、张浦镇、陆家镇、开发区、花桥镇",
+                "hd_startpoint": "北界浦港",
+                "hd_endpoint": "花桥泗港口",
+                "hd_length": 80465.032,
+                "hd_area": 5223481.254,
+                "hd_width": "0",
+                "hd_waterarea": 7199.96,
+                "hd_index": "流域性河道",
+                "lgtd": "120.97963",
+                "lttd": "31.308391",
+                "isvisble": "1",
+                "sort": 10
+            }, ,
+            {
+                "hd_base_id": "2025071501955",
+                "hd_base_bianma": "1955",
+                "hd_name": "吴淞江",
+                "hd_zhen": "高新区、千灯镇、张浦镇、陆家镇、开发区、花桥镇",
+                "hd_startpoint": "北界浦港",
+                "hd_endpoint": "花桥泗港口",
+                "hd_length": 80465.032,
+                "hd_area": 5223481.254,
+                "hd_width": "0",
+                "hd_waterarea": 7199.96,
+                "hd_index": "流域性河道",
+                "lgtd": "120.97963",
+                "lttd": "31.308391",
+                "isvisble": "1",
+                "sort": 10
+            }, ,
+            {
+                "hd_base_id": "2025071501955",
+                "hd_base_bianma": "1955",
+                "hd_name": "蕰藻浜",
+                "hd_zhen": "高新区、千灯镇、张浦镇、陆家镇、开发区、花桥镇",
+                "hd_startpoint": "北界浦港",
+                "hd_endpoint": "花桥泗港口",
+                "hd_length": 80465.032,
+                "hd_area": 5223481.254,
+                "hd_width": "0",
+                "hd_waterarea": 7199.96,
+                "hd_index": "流域性河道",
+                "lgtd": "120.97963",
+                "lttd": "31.308391",
+                "isvisble": "1",
+                "sort": 10
+            }, ,
+            {
+                "hd_base_id": "2025071501955",
+                "hd_base_bianma": "1955",
+                "hd_name": "苏州河",
+                "hd_zhen": "高新区、千灯镇、张浦镇、陆家镇、开发区、花桥镇",
+                "hd_startpoint": "北界浦港",
+                "hd_endpoint": "花桥泗港口",
+                "hd_length": 80465.032,
+                "hd_area": 5223481.254,
+                "hd_width": "0",
+                "hd_waterarea": 7199.96,
+                "hd_index": "流域性河道",
+                "lgtd": "120.97963",
+                "lttd": "31.308391",
+                "isvisble": "1",
+                "sort": 10
+            },
+        ],
+        "total": 10,
+        "Message": "操作成功",
+        "success": "true"
+    }
+    // api.HdbaseSel(strParam).then((res) => {
+    var strJson = res.result;
+    let _index = 0;
+    var result = strJson.filter(res => {
+        _index = _index + 1;
+        res.num = _index;
+        res.id = res.hd_base_id;
+        return res;
+    });
+    tableData.value = result;
+    // }).catch((err) => { });
+}
+function WeacontentDistrict() {
+    // console.error("工程信息", props.GCtableDataAll)
+    var strParam = {};
+    strParam["pid"] = "2023081314031642213";
+    // api.SelectMenu(strParam).then((res) => {
+    var res = {
+        "result": [
+            // {
+            //     "id": "2024051914412986902",
+            //     "title": "全部",
+            //     "pid": "2023081314031642213",
+            //     "tm": "2024-05-19 14:41:29",
+            //     "pathname": "站点关联配置",
+            //     "orderbyid": 1.0
+            // },
+            {
+                "id": "2024051914420157904",
+                "title": "苏州河",
+                "pid": "2023081314031642213",
+                "tm": "2024-05-19 14:42:01",
+                "pathname": "站点关联配置",
+                "orderbyid": 2.0
+            },
+            {
+                "id": "2024051914432485643",
+                "title": "嘉宝北片",
+                "pid": "2023081314031642213",
+                "tm": "2024-05-19 14:43:24",
+                "pathname": "站点关联配置",
+                "orderbyid": 11.0
+            },
+            {
+                "id": "2024051914433174810",
+                "title": "蕰南片",
+                "pid": "2023081314031642213",
+                "tm": "2024-05-19 14:43:31",
+                "pathname": "站点关联配置",
+                "orderbyid": 14.0
+            },
+            {
+                "id": "2024051914433174810",
+                "title": "淀北片",
+                "pid": "2023081314031642213",
+                "tm": "2024-05-19 14:43:31",
+                "pathname": "站点关联配置",
+                "orderbyid": 15.0
+            },
+            {
+                "id": "2024051914420754734",
+                "title": " 青松片",
+                "pid": "2023081314031642213",
+                "tm": "2024-05-19 14:42:07",
+                "pathname": "站点关联配置",
+                "orderbyid": 3.0
+            },
+            {
+                "id": "2024051914421591894",
+                "title": " 中心城",
+                "pid": "2023081314031642213",
+                "tm": "2024-05-19 14:42:15",
+                "pathname": "站点关联配置",
+                "orderbyid": 4.0
+            }
+        ],
+        "total": 12,
+        "Message": "操作成功",
+        "success": "true"
+    }
+
+    var strJson = res.result
+    if (props.GCtableDataAll.length > 0) {
+        var data = props.GCtableDataAll;
+        for (var num = 0; num < data.length; num++) {
+            var item = data[num];
+            var gtopnum = SetNull(item.gtopnum) != "" ? Number(item.gtopnum) : 0;  //闸门个数
+            var omcnum = SetNull(item.omcnum) != "" ? Number(item.gtopnum) : 0;  //泵站个数
+            var gateListdata = item.st_gate_r;
+            var tempTM = dayjs(new Date()).format("YYYY-MM-DD 00:00:00");
+            var tm = "—";
+            var total = gtopnum + omcnum; //闸、泵总数
+            var count = 0;//当前闸、泵开启个数
+            if (gateListdata.length > 0) {
+                tm = SetNull(gateListdata[0].tm) != "" ? dayjs(convertToDate(gateListdata[0].tm)).format("YYYY-MM-DD HH:mm") : "—";
+                // if (tm > tempTM) {
+                    var bzdataALL = gateListdata.filter(function (e) {
+                        return Number(e.eqpno) == 2;
+                    })
+                    var zmdataALL = gateListdata.filter(function (e) {
+                        return Number(e.eqpno) == 1;
+                    })
+
+                    if (bzdataALL.length > 0) {
+                        for (var i = 0; i < bzdataALL.length; i++) {
+                            if (Number(bzdataALL[i].gtq) > 0) {
+                                count = count + 1;
+                            }
+                        }
+                    }
+                    if (zmdataALL.length > 0) {
+                        for (var i = 0; i < zmdataALL.length; i++) {
+                            if (Number(zmdataALL[i].gtq) > 0) {
+                                count = count + 1;
+                            }
+                        }
+                    }
+                // }
+            }
+            item.countNum = count;
+            item.totalNum = total;
+        };
+        // console.error(data)
+
+        var result = [];
+        for (var i = 0; i < strJson.length; i++) {
+            var _index = i + 1;
+            var Temp = data.filter(function (e) {
+                return e.district == strJson[i].title;
+            })
+            var total = 0, count = 0;
+            if (Temp.length > 0) {
+                // console.error(Temp)
+                Temp.forEach(element => {
+                    // console.error(element.stnm, element.totalNum, element.countNum)
+                    total += element.totalNum;
+                    count += element.countNum;
+                });
+                // console.error(total, count)
+            }
+            var value = count > 0 ? (Number(count) / Number(total) * 100) : count;
+            result.push({
+                num: _index,
+                title: strJson[i].title,
+                paiBili: value,
+                total:count+"/"+total
+            })
+
+        }
+        // var result = strJson.filter(res => {
+        //     if (SetNull(res.title) != "全部") {
+        //         _index = _index + 1;
+        //         res.num = _index;
+        //         return res;
+        //     }
+        // });
+        tableData.value = result;
+    }
+    // }).catch((err) => { });
+}
+function GetType(obj) {
+    Typeswiper.value = obj;
+    if (obj == "river") {
+        tableHeaders.value = [
+            {
+                name: "num",
+                label: "序号"
+            },
+            {
+                name: "hd_name",
+                label: "河道名称"
+            },
+            {
+                name: "hd_index",
+                label: "类别"
+            },
+        ];
+        WeacontentRiver();
+    } else if (obj == "district") {
+        tableHeaders.value = [
+            {
+                name: "num",
+                label: "序号"
+            },
+            {
+                name: "title",
+                label: "名称"
+            },
+            {
+                name: "total",
+                label: "工程数量"
+            },
+            {
+                name: "paiBili",
+                label: "运行情况"
+            },
+        ];
+        WeacontentDistrict();
+    }
+    emit('passValue', Typeswiper.value, "", "");
+}
+const lastClickedRow = ref(null); // 新增：用于记录当前选中的河道行
+function handleclick(evt) {
+    // 找到点击的 tr 元素
+    let targetTr = evt.target.closest('tr');
+    console.log("targetTr", targetTr)
+    if (!targetTr) return;
+
+    // 移除所有 tr 元素的 active 类名
+    const allTrs = document.querySelectorAll('.river-table tr');
+    allTrs.forEach(tr => {
+        tr.classList.remove('liSelected');
+    });
+
+    // 获取行索引
+    var _rowindex = Array.from(allTrs).indexOf(targetTr) - 1;
+    const currentRow = tableData.value[_rowindex];
+    if (lastClickedRow.value && lastClickedRow.value.id === currentRow.id) {
+        // 再次点击同一行，取消点击事件
+        lastClickedRow.value = null;
+        emit('passValue', Typeswiper.value, "", "", "");
+    } else {
+        if (targetTr) {
+            // 给当前点击的 tr 元素添加 active 类名
+            targetTr.classList.add('liSelected');
+
+            // console.error("sasdasasdasdasdas", currentRow, Typeswiper.value)
+            if (Typeswiper.value == "river") {
+                emit('passValue', Typeswiper.value, currentRow.hd_base_id, currentRow.hd_zhen, currentRow.hd_name);
+            } else if (Typeswiper.value == "district") {
+                if (currentRow.title == "花桥经济开发区") {
+                    currentRow.title = "花桥镇"
+                }
+                emit('passValue', Typeswiper.value, currentRow.id, currentRow.title);
+            }
+        }
+    }
+    lastClickedRow.value = currentRow;
+}
+function fangda() {
+    var dialogClass = $(".dialog").css("display");
+    if (dialogClass == "block") {
+        return false;
+    }
+    $(".g-lside ").css({
+        "z-index": 99
+    });
+    $(".g-rside ").css({
+        "z-index": 90
+    });
+    showDialog.value = true;
+}
+onMounted(() => {
+    // WeacontentDistrict();
+    GetType("district");
+});
+</script>
+<style src="@/assets/styles/Table.css"></style>
+<style scoped>
+:deep(tr td:nth-child(1)) {
+    width: 20vh !important;
+}
+
+tr td:nth-child(2) {
+    width: 15vh;
+}
+
+tr td:nth-child(3) {
+    width: 15vh;
+}
+
+tr td:nth-child(4) {
+    width: 10vh;
+}
+
+tr td:nth-child(5) {
+    width: 12vh;
+}
+
+/* 自定义滚动条样式 */
+.txt::-webkit-scrollbar {
+    width: 2px;
+    /* 设置滚动条宽度 */
+}
+
+.txt::-webkit-scrollbar-track {
+    /* 滚动条轨道 */
+    /* background: rgb(49, 139, 167); */
+}
+
+.txt::-webkit-scrollbar-thumb {
+    /* 滚动条手柄 */
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    right: -4px;
+    top: 0px;
+    background: var(--popContentHeadbg);
+    z-index: 2;
+}
+
+:deep(.liSelected) {
+    color: var(--sel_wraplabelcolorSel) !important;
+    background: var(--swDivSelectcolor) !important;
+}
+
+:deep(.liSelected td span) {
+    color: var(--sel_wraplabelcolorSel) !important;
+}
+</style>

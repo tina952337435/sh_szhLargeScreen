@@ -1,0 +1,66 @@
+/* 标题栏开始 */
+.dialog-content .m-box .title {
+    height: 60px;
+}
+
+.dialog-content .layout_title .d1 {
+    width: 20px;
+    height: 20px;
+}
+
+.dialog-content .layout_title .d2 {
+    width: 20px;
+    height: 20px;
+    left: 10px;
+    top: 5px
+}
+
+.dialog-content .layout_title .base-p {
+    margin-left: 50px;
+    font-size: 1.6rem;
+    line-height: 10px;
+}
+
+/* 标题栏结束 */
+/* 内容的高度 */
+.dialog-content .m-box .txt {
+    height: 570px;
+}
+
+/* table样式开始 */
+.dialog-content .m-table {
+    width: 98%;
+}
+
+.dialog-content .m-table tr {
+    height: 50px;
+    line-height: 50px;
+}
+
+.dialog-content .m-table tr th,
+.dialog-content .m-table tr td {
+    font-size: 1rem;
+}
+
+/* table样式结束 */
+
+
+/* 工情边界水量交换样式 */
+.dialog-content .ysts-name {
+    font-size: 1.6rem;
+}
+
+.dialog-content .ysts-value:before {
+    left: -2vh;
+    top: 2vh;
+    width: 1.5vh;
+    height: 1.5vh;
+}
+
+.dialog-content .ysts-num {
+    font-size: 2rem;
+}
+
+.dialog-content .ysts-unit {
+    font-size: 1rem;
+}

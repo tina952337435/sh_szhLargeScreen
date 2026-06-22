@@ -2,6 +2,7 @@
 node_modules/
 dist/
 build/
+swzzLargeScreenSzhGQ/
 
 # === 备份压缩包 (根据你截图里的文件名) ===
 *.rar

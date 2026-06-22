@@ -1,0 +1,209 @@
+<template>
+  <div class="storage-card">    
+    <div class="card-body">
+      <!-- 左侧：水球图容器 -->
+      <div ref="chartRef" class="liquid-chart"></div>
+      
+      <!-- 右侧：详细数据 -->
+      <div class="data-info">
+        <div class="main-value">
+          <span class="number">{{ formattedValue }}</span>
+          <span class="unit">百万m³</span>
+        </div>
+        
+        <div class="sub-stats">
+          <div class="stat-item up">
+            <span class="label">较昨日</span>
+            <span class="val">+{{ delta }}%</span>
+          </div>
+          <!-- <div class="stat-item">
+            <span class="label">库容占比</span>
+            <span class="val">{{ percentage }}%</span>
+          </div> -->
+        </div>
+        
+        <div class="trend-text">
+          距警戒水位还有 <span class="highlight">{{ remaining }}</span> 百万m³
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import * as echarts from 'echarts'
+import * as echartsliquidfill from 'echarts-liquidfill'
+
+const props = defineProps({
+  currentValue: { type: Number, default: 125.89 },
+  totalCapacity: { type: Number, default: 154.47 },
+  yesterdayValue: { type: Number, default: 120 }
+});
+
+const chartRef = ref(null);
+let myChart = null;
+
+// 计算属性
+const percentage = computed(() => ((props.currentValue / props.totalCapacity) * 100).toFixed(1));
+const delta = computed(() => (((props.currentValue - props.yesterdayValue) / props.yesterdayValue) * 100).toFixed(1));
+const remaining = computed(() => (props.totalCapacity - props.currentValue).toFixed(1));
+const formattedValue =props.currentValue; //computed(() => props.currentValue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+
+const initChart = () => {
+  if (!chartRef.value) return;
+  myChart = echarts.init(chartRef.value);
+  
+  const ratio = props.currentValue / props.totalCapacity;
+  
+  const option = {
+    series: [{
+      type: 'liquidFill',
+      data: [ratio, ratio - 0.05, ratio - 0.1], // 多层波浪效果
+      radius: '95%',
+      center: ['50%', '50%'],
+      waveLength: '20%',
+      phase: 'auto',
+      amplitude: '5%',
+      itemStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: '#38bdf8' }, // 浅蓝
+            { offset: 1, color: '#0ea5e9' }  // 深蓝
+          ]
+        },
+        opacity: 0.8
+      },
+      backgroundStyle: {
+        color: 'rgba(255, 255, 255, 0.05)',
+        borderColor: 'rgba(56, 189, 248, 0.3)',
+        borderWidth: 1
+      },
+      label: {
+        show: true,
+        position: 'inside',
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        formatter: `{a|${percentage.value}%}`,//\n{b|蓄水量}
+        rich: {
+          a: { fontSize: 20, lineHeight: 30, fontWeight: 'bold' },
+          b: { fontSize: 10, color: '#fff' }
+        }
+      },
+      outline: {
+        show: false
+      }
+    }]
+  };
+  
+  myChart.setOption(option);
+};
+
+onMounted(() => {
+  initChart();
+  window.addEventListener('resize', () => myChart?.resize());
+});
+
+onUnmounted(() => {
+  myChart?.dispose();
+});
+</script>
+
+<style scoped>
+.storage-card {
+  /* background: rgba(16, 33, 60, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 12px; */
+  padding: 20px;
+  color: #fff;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 固定高度 */
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.card-body {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 15px;
+}
+
+.liquid-chart {
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+}
+
+.data-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.main-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.number {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: 'Consolas', monospace;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.unit {
+  font-size: 14px;
+  color: #fff;
+}
+
+.sub-stats {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.stat-item .label { color: #fff; }
+.stat-item .val { font-weight: bold; font-family: monospace;
+  font-size: 15px; }
+.stat-item.up .val { color: #4ade80; } /* 绿色表示增加 */
+
+.trend-text {
+  font-size: 14px;
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.highlight {
+  color: #fbbf24;
+  font-weight: bold;
+}
+</style>

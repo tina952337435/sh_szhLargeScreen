@@ -1,0 +1,273 @@
+<template>
+  <!-- <div class="index" id="particlesId">
+    <div class="login-header">
+      <img ondragstart="return false;" src="/images/BT1-2.png">
+    </div>
+    <div class="wrapper">
+      <div class="login-banner">
+      </div>
+      <div class="login-content">
+        <div class="login-model">
+          <div class="computer">
+            <div class="pc-check">
+              <div class="check-tabs">
+                <div class="tab">
+                  <div class="word">系统登录</div>
+                  <div class="bottom-line"></div>
+                </div>
+              </div>
+            </div>
+            <div class="form-submit">
+              <form action="#" class="message-login">
+                <div class="fill-in-item">
+                  <img src="/images/pwd.png" alt>
+                  <input type="text" name="username" id="username" value placeholder="请输入登录名">
+                </div>
+                <div class="fill-in-item">
+                  <img src="/images/usr.png" alt class="icon-img">
+                  <input type="password" name="pwd" id="pwd" value placeholder="请输入密码">
+                </div>
+                <div class="action-button" @click="login()">登录</div>
+              </form>
+            </div>
+          </div>
+
+          <div id="downloadBtn" class="download-btn">
+            <img ondragstart="return false;" src="/images/phone.png">移动app下载
+          </div>
+          <div id="downloadWrapper" class="download-wrapper">
+            <div class="download-item">
+              <div>安卓App</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="graphics" id="particles-js" style="position: absolute;height: 100%;width:100%;left: 0;"></div>
+    <canvas id="wave" class="wave" width="100%" height="150"></canvas>
+
+    <vue-particles id="tsparticles" :particlesInit="particlesInit" :particlesLoaded="particlesLoaded"
+      :options="data.options" />
+
+  </div> -->
+  <!-- <div class="login">
+    <div
+      class="login-form"
+      style="
+        margin: 200px auto;
+        background-color: #fff;
+        width: 350px;
+        height: 280px;
+        padding: 20px;
+        border-radius: 10px;
+      "
+    >
+      <div style="margin: 20px 0; text-align: center; font-size: 24px"><b>登 录</b></div>
+
+      <el-form :model="user" :rules="rules" ref="userForm">
+        <el-form-item prop="username">
+          <el-input prefix-icon="el-icon-user" v-model="user.username"></el-input>
+        </el-form-item>
+
+        <el-form-item prop="password">
+          <el-input
+            prefix-icon="el-icon-lock"
+            show-password
+            v-model="user.password"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          style="width: 100%; margin: 0 auto; text-align: center; margin-left: 120px"
+        >
+          <el-button type="primary" class="btn-submit" @click="login">登录</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>-->
+</template>
+
+<script setup>
+// import '@/assets/styles/loginUser.css';
+import $ from "jquery";
+import { ref, onMounted, reactive, inject, provide, toRefs } from "vue";
+//背景动画 
+// import * as waterWave from "@/utils/share/waterWave.js";
+import api from "@/api/login/index.js";
+import md5 from "js-md5";
+import { ElMessage } from "element-plus";
+
+import { loadFull } from "tsparticles"
+
+const data = reactive({
+  options: {
+    fpsLimit: 100,
+    interactivity: {
+      events: {
+        onClick: {
+          enable: true,
+          mode: "push",
+        },
+        onHover: {
+          enable: true,
+          mode: "grab",
+        },
+        resize: true,
+      },
+      modes: {
+        bubble: {
+          distance: 400,
+          duration: 2,
+          opacity: 0.6,
+          size: 10,
+        },
+        push: {
+          quantity: 4,
+        },
+        repulse: {
+          distance: 200,
+          duration: 0.4,
+        },
+      },
+    },
+    particles: {
+      color: {
+        value: "#ffffff",
+      },
+      links: {
+        color: "#ffffff",
+        distance: 150,
+        enable: true,
+        opacity: 0.5,
+        width: 1,
+      },
+      collisions: {
+        enable: true,
+      },
+      move: {
+        direction: "none",
+        enable: true,
+        outMode: "bounce",
+        random: false,
+        speed: 2,
+        straight: false,
+      },
+      number: {
+        density: {
+          enable: true,
+          value_area: 800,
+        },
+        value: 60,
+      },
+      opacity: {
+        value: 0.5,
+      },
+      shape: {
+        type: "circle",
+      },
+      size: {
+        random: true,
+        value: 3,
+      },
+    },
+    detectRetina: true,
+  },
+})
+
+// 粒子效果
+const particlesInit = async (engine) => {
+  await loadFull(engine)
+}
+const particlesLoaded = async (container) => {
+}
+
+var user = ref({});
+var rules = ref({
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 3, max: 10, message: "长度在 3 到 5 个字符", trigger: "blur" }
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 1, max: 50, message: "长度在 1 到 20 个字符", trigger: "blur" }
+  ]
+});
+
+onMounted(() => {
+  // login();
+  // $("#cesiumContainer").hide();
+  // waterWave.initAll(); //水波
+  window.location.href = "/zonglan";
+});
+
+function login() {
+  //去请求登录
+  // window.location.href = "/loginApi";
+  // fetch('/loginApi'); // 实际会代理到 http://localhost:8080/users
+  window.location.href = "/loginApi";
+
+  // var pwd = document.getElementById("pwd");
+  // var username = document.getElementById("username");
+  // var strParam = {};
+  // strParam["username"] = username.value;//this.user.username;
+  // strParam["password"] = md5(pwd.value);//md5(this.user.password);
+  // strParam["platform"] = "PC";
+  // api.useLogin(strParam).then(res => {
+  //   // 判断登录请求是否成功
+  //   if (res.result.length > 0) {
+  //     ElMessage.success("登录成功");
+  //     let strJson = res.result;
+  //     localStorage.setItem("token", strJson[0].token);
+  //     var oneLogin="";
+  //     if (strJson.length > 0) {
+  //       var item = strJson[0];
+  //       SetCookie("LOGINNAME", item.name, 3);
+  //       SetCookie("GROUPID", item.groupid, 3);
+  //       SetCookie("USERID", item.id, 3);
+  //       SetCookie("USERNAME", item.qx_login, 3);
+  //       oneLogin=item["memo2"];
+  //     }
+
+  //     // this.$router.push("/home");
+  //     if(oneLogin=="szlogin"){
+  //       window.location.href = "sz/index.html?Menu=NO07";
+  //     }
+  //     else{
+  //       window.location.href = "/zonglan";
+  //     }
+  //   } else {
+  //     ElMessage.error("登录失败");
+  //   }
+  // });
+}
+function SetCookie(name, value, Days) {
+  var exp = new Date();
+  exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+  document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+}
+</script> 
+<style scoped>
+.login {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: azure url(/images/loginbj1.jpg) no-repeat fixed;
+  background-size: 100% 100%;
+}
+
+.login-form {
+  height: 550px;
+  width: 800px;
+  box-sizing: border-box;
+  background-color: #fff;
+  /* opacity: 0.8; */
+  padding: 20px 50px;
+}
+
+#particles-js {
+  width: 100%;
+  height: calc(100% - 100px);
+  position: absolute;
+}
+</style>

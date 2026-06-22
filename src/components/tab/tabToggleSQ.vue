@@ -1,4 +1,11 @@
 <template>
+  <!-- 底图图层切换 -->
+  <div id="pointMap"
+    style="cursor: pointer;margin-left: 30px;width: 40px;  height: 40px; text-align: center; border-radius: 30%; background: rgb(28 177 195 / 40%);margin-top: 5px;"
+    @click="reductionSystem" title="全屏">
+    <el-icon style="font-size:25px;color:var(--sel_wraplabelcolor);padding-top:13px;"><FullScreen /></el-icon>
+  </div>
+
  <div class="shdswDiv">
     <div id="tabzl" @click="changeTab('tabzl')" class="swDiv">
       <div class="sel_wrap">
@@ -48,7 +55,7 @@ import $ from "jquery";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
-import { MapLocation } from "@element-plus/icons-vue";
+import { FullScreen } from "@element-plus/icons-vue";
 import { addAreaLineQS } from "@/utils/ArcGis/MapComm.js";
 
 const router = useRouter();
@@ -159,8 +166,13 @@ function changeTabMoreZW(disType) {
   }
   return;
 }
+//是否全屏
+const FullScreenFalse = ref(false);
 function reductionSystem() {
-  addAreaLineQS();
+  FullScreenFalse.value = !FullScreenFalse.value;
+  // addAreaLineQS();
+  localStorage.setItem("FullScreenType", FullScreenFalse.value);
+  FullScreen_Type(localStorage.getItem("FullScreenType"));
 }
 onMounted(() => {
   // @mouseover="changeTabMoreSZY(true)" @mouseout="changeTabMoreSZY(false)"

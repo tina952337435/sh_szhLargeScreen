@@ -1,0 +1,12 @@
+import request from "@/utils/requestDzxm";
+const serveName = '';
+// 获取当前主题
+export default {
+  // 加载边界
+  rainfallshanghaiSel: (params) => {
+    return request.get(`${serveName}/rainfall/shanghai`, params)
+  },  
+  rainfallprocessSel: (params) => {
+    return request.post(`${serveName}/rainfall/process`, params)
+  },
+} 

@@ -1,0 +1,130 @@
+import { fileURLToPath, URL } from 'node:url'
+
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { visualizer } from 'rollup-plugin-visualizer';
+
+
+// ElementPlus自动导入
+// import AutoImport from 'unplugin-auto-import/vite'
+// import Components from 'unplugin-vue-components/vite'
+// import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    visualizer({
+      open: true, //在默认用户代理中打开生成的文件
+      gzipSize: true, // 收集 gzip 大小并将其显示
+      brotliSize: true, // 收集 brotli 大小并将其显示
+      filename: "stats.html", // 分析图生成的文件名
+    }),
+  ],
+  base: './',
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: {//server
+    // 允许IP访问
+    host: "0.0.0.0",
+    // 应用端口 (默认:3000)
+    port: 4014,
+    // port: 3000,
+    // 运行是否自动打开浏览器
+    open: true,
+    proxy: {
+      /** 代理前缀为 /dev-api 的请求  */
+      ['/api']: {
+        target: "http://10.91.5.63/swzz/", // 目标地址
+        //target: "http://127.0.0.1:8808/", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/api'), ""), // 替换
+        // pathRewrite: {
+        //    '^/api': '/'
+        // }
+      },
+      ['/HuishuiApi']: {
+        target: "http://10.91.5.63/modelproyx/HuishuiApi/", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/HuishuiApi'), ""), // 替换
+      },
+      //等值线面
+      ['/dzxmApi']: {
+        target: "http://192.168.1.11:5002/api", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/dzxmApi'), ""), // 替换
+      },
+      //经纬度在线转换
+      ['/arcgisonApi']: {
+        target: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/project", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/arcgisonApi'), ""), // 替换
+      },
+      
+      // ['/ArcGis']: {
+      //   target: "http://localhost:8115", // 目标地址
+      //   changeOrigin: true, // 是否换源， true 换源
+      //   secure: false,
+      //   rewrite: (path) => path.replace(new RegExp('^' + '/ArcGis'), ""), // 替换
+      // },
+      ['/UploadDoc']: {
+        target: "http://2.46.42.143:8160/UploadDoc", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/UploadDoc'), ""), // 替换
+      },
+      ['/systemIndex']: {//验证cas登录的地址：统一登录
+        target: "http://localhost:4012/", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/systemIndex'), ""), // 替换
+      },
+    },
+  },
+  build: {
+    //npm install --save-dev compression-webpack-plugin@1.1.12
+    productionGzip:true,
+    productionGzipExtensions:['js','css'],
+    bundleAnalyzerReport: process.env.npm_config_report,
+    
+    chunkSizeWarningLimit: 1500,
+    outDir: 'swzzLargeScreenSzhGQ', // 打包文件的输出目录
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // 将@arcgis/core和esri-loader打包到一个chunk中
+          if (id.includes('@arcgis/core') || id.includes('esri-loader')) {
+            return 'arcgis';
+          }
+          if (id.includes('node_modules')) {
+            return id
+              .toString()
+              .split('node_modules/')[1]
+              .split('/')[0]
+              .toString()
+          }
+        }
+      },
+      //  // 用于从入口点创建的块的打包输出格式[name]表示文件名,[hash]表示该文件内容hash值
+      //  entryFileNames: 'js/[name].[hash].js',
+      //  // 用于命名代码拆分时创建的共享块的输出命名
+      //  // 　　chunkFileNames: 'js/[name].[hash].js',
+      //  // 用于输出静态资源的命名，[ext]表示文件扩展名
+      //  assetFileNames: '[ext]/[name].[hash].[ext]',
+      //  // 拆分js到模块文件夹
+      //  chunkFileNames: (chunkInfo) => {
+      //    const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/') : [];
+      //    const fileName = facadeModuleId[facadeModuleId.length - 2] || '[name]';
+      //    return `js/${fileName}/[name].[hash].js`;
+      //  }
+
+    }
+  }
+})

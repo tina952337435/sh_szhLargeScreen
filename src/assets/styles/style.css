@@ -816,7 +816,8 @@ screen and (max-device-width: 820px) and (orientation: landscape) {
   height: auto;
   position: absolute;
   /* top: 6.5rem; */
-  top: 8.5rem;
+  /* top: 8.5rem; */
+  top: 6rem;
   right: 29rem;
   z-index: 2;
 }

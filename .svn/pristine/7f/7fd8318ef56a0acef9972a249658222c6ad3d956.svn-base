@@ -1,0 +1,42 @@
+<template>
+<div class="m-box" style="position: relative">
+        <div class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2">
+            <div class="d1"></div>
+            <div class="d2"></div>
+            <p class="base-p" id="title2" @click="fangda()">站点潮位统计信息</p>
+        </div>
+        <div class="txt">
+            <TideStationCarousel 
+            title="站点潮位监测 (轮播)"
+            :data="tideData"
+            :items-per-page="3" 
+            :auto-play-interval="4000"
+            width="100%"
+            />
+        </div>
+        <div class="bot leftBottom-radius"></div>
+    </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import TideStationCarousel from '@/components/menu/tfzt/TideStationCarousel.vue';
+
+const tideData = ref([
+  { name: "高桥", level: 5.47, time: "07-26 01:10", increase: 1.69, incTime: "22:20", highIncrease: 1.05, alarmCount: 3 },
+  { name: "米市渡", level: 4.79, time: "07-26 03:30", increase: 1.47, incTime: "00:50", highIncrease: 1.05, alarmCount: 4 },
+  { name: "黄浦公园", level: 5.49, time: "07-26 01:50", increase: 1.69, incTime: "23:10", highIncrease: 1.18, alarmCount: 4 },
+  { name: "吴淞口", level: 5.55, time: "07-26 01:15", increase: 1.73, incTime: "22:25", highIncrease: 1.10, alarmCount: 4 },
+  { name: "芦潮港", level: 5.57, time: "07-26 00:30", increase: 1.43, incTime: "18:40", highIncrease: 0.91, alarmCount: 5 },
+  { name: "金山嘴", level: 6.33, time: "07-26 00:55", increase: 1.74, incTime: "20:00", highIncrease: 1.26, alarmCount: 5 }
+]);
+</script>
+
+<style>
+.dashboard-right {
+  width: 400px; /* 右侧栏宽度 */
+  height: 500px; /* 确保有足够高度容纳两屏内容 */
+  background: #0b1120;
+  padding: 20px;
+}
+</style>

@@ -128,8 +128,11 @@ onMounted(() => {
 });
 const mapType=ref( "上海市");//地图的默认显示范围
 function initMapArcGis(container) {
-  // arcgis CSS 按需加载，登录页不阻塞
-  import("@arcgis/core/assets/esri/themes/dark/main.css");
+  // 等待 ArcGIS AMD require 就绪（app.mount 提前后，ArcGIS SDK 可能尚未加载完成）
+  if (typeof require === 'undefined') {
+    setTimeout(() => initMapArcGis(container), 300);
+    return;
+  }
   require(["esri/config", "esri/tasks/GeometryService"], function (esriConfig, GeometryService) {
     //esriConfig.defaults.geometryService = new GeometryService("https://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer");
     //esriConfig.defaults.io.alwaysUseProxy = true;

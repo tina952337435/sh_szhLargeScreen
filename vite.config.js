@@ -56,12 +56,12 @@ export default defineConfig({
         rewrite: (path) => path.replace(new RegExp('^' + '/HuishuiApi'), ""), // 替换
       },
       //等值线面
-      ['/dzxmApi']: {
-        // target: "http://192.168.1.11:5003/api", // 目标地址
-        target: "http://192.168.1.11:5008/api",
+      ['/dzxmTrae']: {
+        // target: "http://192.168.1.11:5008/api", // 目标地址
+        target: "http://10.91.3.242:9090/dzxmTrae/",
         changeOrigin: true, // 是否换源， true 换源
         secure: false,
-        rewrite: (path) => path.replace(new RegExp('^' + '/dzxmApi'), ""), // 替换
+        rewrite: (path) => path.replace(new RegExp('^' + '/dzxmTrae'), ""), // 替换
       },
       //经纬度在线转换
       ['/arcgisonApi']: {

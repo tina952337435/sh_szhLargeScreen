@@ -1,0 +1,47 @@
+/* tooltip 样式*/
+.tooltipdiv-inner {
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+/* 向左 */
+.toolTip-left {
+  position: absolute;
+  width: auto;
+  /* min-height: 80px; */
+  z-index: 99;
+  border: 4px solid rgba(30, 49, 74, 1);
+  border-radius: 20px;
+  background-color: rgba(30, 49, 74, 0.9);
+  max-width: 300px;
+}
+
+.toolTip-left:before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  border-right: 20px solid rgba(30, 49, 74, 1);
+}
+
+/*内容样式*/
+.con {
+  font-size: 16px;
+  color: #ffff;
+  line-height: 25px;
+}
+
+.toolTipCss {
+  font-size: 14px;
+  /* color: #00A3FF; */
+
+  color: #ffffff;
+}
+
+.toolTipFont {
+  font-size: 14px;
+}

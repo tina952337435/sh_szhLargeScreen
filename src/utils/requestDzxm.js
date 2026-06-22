@@ -2,7 +2,7 @@ import axios from "axios";
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: "/dzxmApi/",
+  baseURL: "/dzxmTrae/",
   timeout: 30000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
   // headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },

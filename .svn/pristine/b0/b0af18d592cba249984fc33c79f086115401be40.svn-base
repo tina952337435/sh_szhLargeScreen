@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="42px" height="42px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>weilaijiangyu_hover</title>
+    <desc>Created with Sketch.</desc>
+    <g id="weilaijiangyu_hover" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M35.2,35.95 L5.6,35.95 L5.6,7.275 C5.6,6.911525 5.3872,6.5 4.8,6.5 C4.2128,6.5 4,6.936325 4,7.275 L4,36.725 C4,37.274475 4.2128,37.5 4.8,37.5 L35.2,37.5 C35.7128,37.5 36,37.063675 36,36.725 C36,36.386325 35.7872,35.95 35.2,35.95 Z" id="路径" fill="#FFF70D" fill-rule="nonzero"></path>
+        <path d="M14.5,15.5 C14.32,15.5 12,18.2782222 12,19.98 C12,21.4134444 13.115,22.5 14.5,22.5 C14.5,22.5 17,22.3864444 17,19.98 C17,18.2782222 14.68,15.5 14.5,15.5 Z" id="路径" fill="#FFF70D" fill-rule="nonzero"></path>
+        <polyline id="路径-6" stroke="#FFF70D" stroke-width="2" points="10 33 16.969697 25.5 22.9829545 32.5 33 22.5"></polyline>
+        <path d="M30.5,12 C30.32,12 28,14.7782222 28,16.48 C28,17.9134444 29.115,19 30.5,19 C30.5,19 33,18.8864444 33,16.48 C33,14.7782222 30.68,12 30.5,12 Z" id="路径" fill="#FFF70D" fill-rule="nonzero"></path>
+        <path d="M23.5,18 C23.32,18 21,20.7782222 21,22.48 C21,23.9134444 22.115,25 23.5,25 C23.5,25 26,24.8864444 26,22.48 C26,20.7782222 23.68,18 23.5,18 Z" id="路径" fill="#FFF70D" fill-rule="nonzero"></path>
+    </g>
+</svg>
