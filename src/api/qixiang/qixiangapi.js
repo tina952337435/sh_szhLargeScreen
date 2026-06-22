@@ -1,4 +1,4 @@
-import request from "@/utils/request";
+import request from "@/utils/requestWXXS";
 const serveName = '' 
   //雷达图、降雨预报图等
   function TFPICWeacontent (params) {

@@ -55,14 +55,15 @@
       <span style="vertical-align: -10px; margin-left: 50px"> 等值面 </span>
     </div>
     <div style="padding: 8px 10px">
+      <div style="color: var(--popupContentTitleColor);">-------站点类型-------</div>
       <div style="height: 25px; line-height: 25px">
-        <input
-          style="vertical-align: 4px"
+        <!-- <input
+          style=""
           @click="getTLObj('rainfall0')"
           v-model="rainfall0"
           type="checkbox"
           checked="checked"
-        />
+        /> -->
         <img
           alt=""
           src="/images/rain/d_white.png"
@@ -73,23 +74,77 @@
             display: inline-block;
           "
         />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        <span style="padding-left: 2px; color: var(--title2);vertical-align: 4px; ">
+          防汛站(<span
+            id="countFX"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
+          ></span
+          >)
+        </span>
+      </div>
+      <div style="height: 25px; line-height: 25px">
+        <!-- <input
+          style="vertical-align:2px"
+          @click="getTLObj('rainfall0')"
+          v-model="rainfall0"
+          type="checkbox"
+          checked="checked"
+        /> -->
+        <img
+          alt=""
+          src="/images/rain/0.png"
+          style="
+            width: 13px;
+            height: 13px;
+            display: inline-block;
+          "
+        />
+        <span style="padding-left: 2px; color: var(--title2); vertical-align:2px">
+          共享站(<span
+            id="countGX"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
+          ></span
+          >)
+        </span>
+      </div>
+      <div style="padding:5px 0px;color: var(--popupContentTitleColor);">-------雨量等级-------</div>
+      <div style="height: 25px; line-height: 25px">
+        <input
+          style=""
+          @click="getTLObj('rainfall0')"
+          v-model="rainfall0"
+          type="checkbox"
+          checked="checked"
+        />
+        <span class="colorSpan" style="background-color:#ffffff"></span>
+        <!-- <img
+          alt=""
+          src="/images/rain/d_white.png"
+          style="
+            width: 14px;
+            height: 18px;
+            margin-top: 2px;
+            display: inline-block;
+          "
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           无雨(<span
             id="value0"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
       </div>
       <div style="height: 25px; line-height: 25px">
         <input
-          style="vertical-align: 4px"
+          style=""
           @click="getTLObj('rainfall0_10')"
           v-model="rainfall0_10"
           type="checkbox"
           checked="checked"
         />
-        <img
+        <span class="colorSpan" style="background-color:#A7F387"></span>
+        <!-- <img
           alt=""
           src="/images/rain/d_grey.png"
           style="
@@ -98,24 +153,25 @@
             margin-top: 2px;
             display: inline-block;
           "
-        />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           &lt;10(<span
             id="value0_10"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
       </div>
       <div style="height: 25px; line-height: 25px">
         <input
-          style="vertical-align: 4px"
+          style=""
           @click="getTLObj('rainfall10_25')"
           v-model="rainfall10_25"
           type="checkbox"
           checked="checked"
         />
-        <img
+        <span class="colorSpan" style="background-color:#00FFFF"></span>
+        <!-- <img
           alt=""
           src="/images/rain/d_sky.png"
           style="
@@ -124,24 +180,25 @@
             margin-top: 2px;
             display: inline-block;
           "
-        />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           10~25(<span
             id="value10_25"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
       </div>
       <div style="height: 25px; line-height: 25px">
         <input
-          style="vertical-align: 4px"
+          style=""
           @click="getTLObj('rainfall25_50')"
           v-model="rainfall25_50"
           type="checkbox"
           checked="checked"
         />
-        <img
+        <span class="colorSpan" style="background-color:#0000FF"></span>
+        <!-- <img
           alt=""
           src="/images/rain/d_blue.png"
           style="
@@ -150,24 +207,25 @@
             margin-top: 2px;
             display: inline-block;
           "
-        />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           25~50(<span
             id="value25_50"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
       </div>
       <div style="height: 25px; line-height: 25px">
         <input
-          style="vertical-align: 4px"
+          style=""
           @click="getTLObj('rainfall50_100')"
           v-model="rainfall50_100"
           type="checkbox"
           checked="checked"
         />
-        <img
+        <span class="colorSpan" style="background-color:#E7D220"></span>
+        <!-- <img
           alt=""
           src="/images/rain/d_yellow.png"
           style="
@@ -176,24 +234,25 @@
             margin-top: 2px;
             display: inline-block;
           "
-        />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           50~100(<span
             id="value50_100"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
       </div>
       <div style="height: 25px; line-height: 25px">
         <input
-          style="vertical-align: 4px"
+          style=""
           @click="getTLObj('rainfall100_250')"
           v-model="rainfall100_250"
           type="checkbox"
           checked="checked"
         />
-        <img
+        <span class="colorSpan" style="background-color:#FF0000"></span>
+        <!-- <img
           alt=""
           src="/images/rain/d_red.png"
           style="
@@ -202,24 +261,25 @@
             margin-top: 2px;
             display: inline-block;
           "
-        />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           100~200(<span
             id="value100_250"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
       </div>
       <div style="height: 25px; line-height: 25px">
         <input
-          style="vertical-align: 4px"
+          style=""
           @click="getTLObj('rainfall250')"
           v-model="rainfall250"
           type="checkbox"
           checked="checked"
         />
-        <img
+        <span class="colorSpan" style="background-color:#800140"></span>
+        <!-- <img
           alt=""
           src="/images/rain/d_black.png"
           style="
@@ -228,11 +288,11 @@
             margin-top: 2px;
             display: inline-block;
           "
-        />
-        <span style="padding-left: 2px; color: white; vertical-align: 4px">
+        /> -->
+        <span style="padding-left: 2px; color: var(--title2); ">
           &gt;200(<span
             id="value250"
-            style="color: rgb(6 255 255); font-size: 14px"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
           ></span
           >)
         </span>
@@ -371,6 +431,7 @@
       <el-radio-group v-model="typenameRadio" @change="handleChange">
         <el-radio :value="1">全部</el-radio>
         <el-radio :value="5">代表站</el-radio>
+        <el-radio :value="4">防汛站</el-radio>
         <el-radio :value="2">气象站</el-radio>
         <!-- <el-radio :value="3">报汛</el-radio>
         <el-radio :value="4">遥测</el-radio> -->
@@ -478,7 +539,7 @@ const tmCenter = ref(null);
 const store = useStore();
 const { viewer } = store.state;
 const riverLX = ref(true);
-const riverMarker = ref(true);
+const riverMarker = ref(false);
 const RainDZMMarker = ref(false);
 const rainfall0 = ref(false),
   rainfall0_10 = ref(true),
@@ -627,6 +688,9 @@ function handleChange(val) {
   else if (val == 2) {
     pid.value = "201901101419326076-5"; //236个气象站
   }
+  else if(val == 4) {
+    pid.value = "201901101419326076-1-1"; //354个防汛站
+  }
   Weacontent();
 }
 //自动刷新
@@ -719,6 +783,7 @@ function YLload() {
     count50_100 = 0,
     count100_250 = 0,
     count250 = 0;
+  var countFX=0,countGX=0;//防汛站，共享站（气象站）
   var strJson = strJsonData.value;
 
   resultPptnRain = reactive([]);
@@ -766,6 +831,13 @@ function YLload() {
         }
       }
 
+      if(item.atcunit=="上海水文总站"){
+        countFX++;
+      }
+      else{
+        countGX++;
+      }
+
       if (f > 0) {
         if (SetNull(item.lgtd) != "" && SetNull(item.lttd) != "") {
           RainfallStr.push({ lon: item.lgtd, lat: item.lttd, value: f });
@@ -781,6 +853,10 @@ function YLload() {
   $("#value50_100").html("" + count50_100 + "");
   $("#value100_250").html("" + count100_250 + "");
   $("#value250").html("" + count250 + "");
+
+  $("#countFX").html("" + countFX + "");
+  $("#countGX").html("" + countGX + "");
+
   PointMark.addYLMark(
     viewer,
     resultPptnRain,
@@ -1002,7 +1078,7 @@ function parentMethodshowDynamicLayer(item) {
 .tuli {
   width: auto;
   height: 200px;
-  color: white;
+  color: var(--title2);
   font-size: 12px;
   font-size: 0.15rem;
   padding: 0px 5px;
@@ -1039,7 +1115,7 @@ function parentMethodshowDynamicLayer(item) {
   position: fixed;
   /* left: calc(calc(50% - 220px) + 320px);
   top: 150px; */
-  color: white;
+  color: var(--title2);
   /* display:none; */
   left: 28rem;
   bottom: 0.8rem;
@@ -1246,5 +1322,20 @@ function parentMethodshowDynamicLayer(item) {
 :deep(.el-radio__input.is-checked .el-radio__inner) {
   background-color: var(--swDivSelectcolor);
   border-color: var(--swDivSelectcolor);
+}
+
+.colorSpan{
+    display: inline-block;
+    width: 15px;
+    height:13px;
+    /* margin-right: 5px; */
+    margin-left:5px;
+}
+.colorL{
+  padding: 10px;
+}
+.colorL p {
+  line-height: 16px;
+  margin-bottom: -4px;
 }
 </style>

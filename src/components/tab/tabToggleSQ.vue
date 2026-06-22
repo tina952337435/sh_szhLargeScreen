@@ -109,7 +109,7 @@ function changeTab(m) {
     tabyq: "/shuzidatingYQ",
     tabgq: "/shuzidatingGQ",
     tabll: "/shuzidatingLL",
-    tabqx: "/qixiangMap",
+    tabqx: "/qixiang",
   };
 
   if (routeConfig[m]) {

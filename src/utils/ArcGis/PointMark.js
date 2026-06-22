@@ -34,7 +34,7 @@ function onaddSWMark(evt) {
     }
     evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
 }
-function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMark") {
+function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMark",myClass) {
     // var layerId = "addSWMark" ;
     var WaterLayerGraphicLayer = CreateLayer(layerId); //创建图层
     if (SetNull(WaterLayerGraphicLayer) != "") {
@@ -42,8 +42,6 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
         WaterLayerGraphicLayer.on("click", onaddSWMark);
         setLayerToolTip(WaterLayerGraphicLayer, "stnm", "upz,wrz,tmStr", "水位,警戒,时间");
     }
-
-
     setTimeout(function () {
         if (SetNull(strJson) == "")
             return;
@@ -70,17 +68,19 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                         continue;
                     }
                     item["divid"] = "SQ" + item["stcd"];
-                    var cls = " level_zc";
+                    // var cls = " level_zc";
+                    var cls = myClass==undefined?" level_all":" "+myClass;
+
                     breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 15, 30);
-                    if (item.wrz && Number(item.upz) >= Number(item.wrz)&&Number(item.wrz)>0) {
-                        breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
-                        cls = " level_wrz";
-                    }
-                    // 只有当 grz 存在，且 upz 大于等于 grz 时，才执行
-                    if (item.grz && Number(item.upz) >= Number(item.grz)&&Number(item.grz)>0) {
-                        breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
-                        cls = " level_grz";
-                    }
+                    // if (item.wrz && Number(item.upz) >= Number(item.wrz)&&Number(item.wrz)>0) {
+                    //     breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
+                    //     cls = " level_wrz";
+                    // }
+                    // // 只有当 grz 存在，且 upz 大于等于 grz 时，才执行
+                    // if (item.grz && Number(item.upz) >= Number(item.grz)&&Number(item.grz)>0) {
+                    //     breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
+                    //     cls = " level_grz";
+                    // }
                     var point = new Point({
                         "x": item.lgtd,
                         "y": item.lttd,
@@ -118,12 +118,10 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     }
                     var graphic = new Graphic(point, breakSymbol, item, null);
                     WaterLayerGraphicLayer.add(graphic);
-
-
-                    // console.error(item.mapsize,"add=======-------------", map.getLevel())
-                    setMapZoom(WaterLayerGraphicLayer, map.getLevel(), "SQ", "stcd", switchChecked);
-                    mapZoomEnd(WaterLayerGraphicLayer, null, "SQ", "stcd", switchChecked);
                 }
+                // console.error(item.mapsize,"add=======-------------", map.getLevel())
+                setMapZoom(WaterLayerGraphicLayer, map.getLevel(), "SQ", "stcd", switchChecked);
+                mapZoomEnd(WaterLayerGraphicLayer, null, "SQ", "stcd", switchChecked);
             }
         })
     }, 100)
@@ -171,16 +169,15 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
             return;
         require(["esri/map", "esri/geometry/Point",
             "esri/graphic",
-            "myJs/MapTextNew",
+            "myJs/MapTextPagehome",
             "esri/symbols/PictureMarkerSymbol",
             "esri/InfoTemplate",
             "esri/dijit/InfoWindow", "esri/symbols/SimpleMarkerSymbol", "esri/Color",
             "esri/layers/GraphicsLayer", "esri/SpatialReference", "esri/geometry/webMercatorUtils", "dojo/domReady!"
-        ], function (Map, Point, Graphic, MapTextNew, PictureMarkerSymbol, InfoTemplate, InfoWindow, SimpleMarkerSymbol, Color,
+        ], function (Map, Point, Graphic, MapTextPagehome, PictureMarkerSymbol, InfoTemplate, InfoWindow, SimpleMarkerSymbol, Color,
             GraphicsLayer, SpatialReference, webMercatorUtils) {
             $(".amap-ui-district-cluster-marker").remove();
             $(".rainText").remove();
-            
             // destroy();
             if (arr.length > 0) {
                 var breakSymbol;
@@ -190,34 +187,72 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                     var cls = "rainText";
                     var pUrl = "/images/rain/";
                     var imgUrl = "";
-                    if (f >= 250.0) {
-                        imgUrl = "d_black.png";
-                        // cls = "rainText200";
+                    if (f >= 200.0) {
+                        if(item.atcunit=="上海水文总站"){
+                          imgUrl = "d_black.png";
+                        }
+                        else{
+                            imgUrl = "200.png";
+                        }
                     }
                     else if (f >= 100.0) {
-                        imgUrl = "d_red.png";
-                        // cls = "rainText199";
+                        if(item.atcunit=="上海水文总站"){
+                            imgUrl = "d_red.png";
+                        }
+                        else{
+                            imgUrl = "100.png";
+                        }
                     }
                     else if (f >= 50.0) {
-                        imgUrl = "d_yellow.png";
-                        // cls = "rainText99";
+                        if(item.atcunit=="上海水文总站"){
+                            imgUrl = "d_yellow.png";
+                        }
+                        else{
+                            imgUrl = "50.png";
+                        }
                     }
                     else if (f >= 25.0) {
-                        imgUrl = "d_blue.png";
-                        // cls = "rainText49";
+                        if(item.atcunit=="上海水文总站"){
+                            imgUrl = "d_blue.png";
+                        }
+                        else{
+                            imgUrl = "25.png";
+                        }
                     }
                     else if (f >= 10.0) {
-                        imgUrl = "d_sky.png";
-                        // cls = " rainText24";
+                        if(item.atcunit=="上海水文总站"){
+                            imgUrl = "d_sky.png";
+                        }
+                        else{
+                            imgUrl = "10.png";
+                        }
                     }
                     else if (f > 0.0) {
-                        imgUrl = "d_grey.png";
-                        // cls = "rainText9";
+                        if(item.atcunit=="上海水文总站"){
+                            imgUrl = "d_grey.png";
+                        }
+                        else{
+                            imgUrl = "5.png";
+                        }
                     }
                     else {
-                        imgUrl = "d_white.png";
+                        if(item.atcunit=="上海水文总站"){
+                            imgUrl = "d_white.png";
+                        }
+                        else{
+                            imgUrl = "0.png";
+                        }
                     }
-                    breakSymbol = new PictureMarkerSymbol(pUrl + imgUrl, 14, 18);
+                    var _width=14,_height=18;
+                    if(item.atcunit=="上海水文总站"){
+                        _width=14;
+                        _height=18;
+                    }
+                    else{
+                         _width=15;
+                         _height=15;
+                    }
+                    breakSymbol = new PictureMarkerSymbol(pUrl + imgUrl, _width, _height);
 
                     if (breakSymbol == "") continue;
                     if (item.lgtd == undefined && item.lttd == undefined) {
@@ -231,9 +266,9 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                             _align = item["dir"];
                         }
                         
-                        var textStr = "@" +Number(arr[i].drp).toFixed(1);
+                        var textStr =arr[i].stnm+"@" +Number(arr[i].drp).toFixed(1);
                         if (switchChecked) {
-                            var label = new MapTextNew(map, point, arr[i], textStr, globallevel, _align, cls,
+                            var label = new MapTextPagehome(map, point, arr[i], textStr, globallevel, _align, cls,
                                 12);
                             labels.push(label);
                         }
@@ -241,6 +276,9 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                         RainLayerGraphicLayer.add(graphic);
                     }
                 }
+                // console.error(item.mapsize,"add=======-------------", map.getLevel())
+                setMapZoom(RainLayerGraphicLayer, map.getLevel(), "YQ", "stcd", switchChecked);
+                mapZoomEnd(RainLayerGraphicLayer, null, "YQ", "stcd", switchChecked);
             }
 
         });
@@ -628,7 +666,7 @@ function addLLMark(strJson, switchChecked) {
                     }
 
                     var cls = "gcText";
-                    var q = SetNull(item["q"]) != "" ? Number(item["q"]).toFixed(2) : "—";
+                    var q = SetNull(item["q"]) != "" ? Number(item["q"]).toFixed(3) : "—";
                     if (SetNull(item.rotate)!="") {
                         angle = parseInt(item.rotate);
                         if(q!="—"){

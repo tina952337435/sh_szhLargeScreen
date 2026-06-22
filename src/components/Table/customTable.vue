@@ -16,10 +16,10 @@
               <img v-for="(url, index) in row.imageUrls" :key="index" :src="url" alt="Image" :style="{height:url.indexOf('bz_')>-1 ? '16px' : '12px',width:url.indexOf('bz_')>-1 ? '20px' : '22px'}" />
             </span>
             <!-- 如果值为 NaN，则显示 - -->
-            <span v-else-if="row[cell.name] === 'NaN'" title="-">-</span>
+            <span v-else-if="row[cell.name] === 'NaN'" title="-" :id="cell['name']">-</span>
             <!-- 显示普通文本 -->
             <span v-else :style="'' + (SetNull(row.colorCss) == '' ? JSON.stringify(rowIndex) : row.colorCss) + ''"
-              :title="row[cell['name']]">{{ row[cell["name"]] }}</span>
+              :title="row[cell['name']]" :id="cell['name']">{{ row[cell["name"]] }}</span>
           </td>
         </tr>
       </template>

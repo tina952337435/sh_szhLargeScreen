@@ -92,11 +92,17 @@ const router = createRouter({
       name: 'pinggu',
       component: () => import('../components/menu/pinggu.vue')
     },
-    //气象板块
+    //气象板块：降水、增水
     {
       path: '/qixiangMap',
       name: 'qixiangMap',
       component: () => import('../components/menu/qixiangMap.vue')
+    },
+    //气象板块：雷达图
+    {
+      path: '/qixiang',
+      name: 'qixiang',
+      component: () => import('../components/menu/qixiang.vue')
     },
   ]
 })

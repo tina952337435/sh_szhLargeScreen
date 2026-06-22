@@ -186,6 +186,7 @@
 .rainText .amap-ui-district-cluster-marker-title {
     text-align: center;
     padding-top: 8px;
+    color: #ffffff;
 }
 
 .rainText .amap-ui-district-cluster-marker-body {
@@ -200,6 +201,10 @@
     font-size: 16px;
     /* font-weight: 700; */
     color: #ffffff;
+
+    /* 新加 */
+    width: fit-content;
+    margin: 0px auto;
 }
 
 .MapText {
@@ -566,4 +571,75 @@
     color: #fff;
     text-align: center;
     margin: 0 auto
+}
+
+
+.level_all {
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 4px 15px 12px 15px;
+
+}
+
+.level_all .amap-ui-district-cluster-marker-body {
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    background:#27e0d7;/* #27e0d7*/;
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+    
+    /* 新加 */
+    width: fit-content;
+    margin: 0px auto;
+
+}
+
+.level_all .amap-ui-district-cluster-marker-title {
+    color: #FFFFFF;
+    text-align: center;
+    padding-top: 8px;
+}
+
+
+
+.level_moren {
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: auto;
+    height: auto;
+    padding: 4px 15px 12px 15px;
+
+}
+
+.level_moren .amap-ui-district-cluster-marker-body {
+    text-align: left;
+    /*width: 50px;*/
+    border-radius: 5px;
+    padding: 0px 8px;
+    background:#27e0d7;/* #27e0d7*/;
+    text-align: center;
+    border-radius: 5px;
+    line-height: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    
+    /* 新加 */
+    width: fit-content;
+    margin: 0px auto;
+
+}
+
+.level_moren .amap-ui-district-cluster-marker-title {
+    color: #FFFFFF;
+    text-align: center;
+    padding-top: 8px;
 }

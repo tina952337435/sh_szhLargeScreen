@@ -354,7 +354,7 @@ function SWload() {
     strResult,
     stime.value,
     etime.value,
-    riverMarker.value,
+    riverMarker.value,"addSWMark","level_moren"
   );
 }
 function getTLObj(obj) {

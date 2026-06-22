@@ -85,7 +85,7 @@ function Weacontent() {
             var item = strJson[num];
             var _strParam = {};
             _strParam["stnm"] = SetNull(item["stnm"]).replaceAll(" ", "");
-            _strParam["drp"] = item.drp;
+            _strParam["drp"] =SetNull(item["drp"])==""?"-":item.drp.toFixed(1);
             _strParam["tm"] = item.tm;
             _strParam["stcd"] = item.stcd;
             _strParam["lgtd"] = Number(item.lgtd);
@@ -107,7 +107,19 @@ function handleSearch(evt) {
 }
 const emit = defineEmits(['parentMethodshowDynamicLayers']);
 function handleclick(evt) {
-    const name = evt.target.innerText;
+    const targetId = evt.target.id;
+    var name = evt.target.innerText;
+    if(targetId=="drp"){
+        const parentDom = evt.target.parentNode; 
+        const prevSibling = parentDom.previousElementSibling; 
+         // 查找 prevSibling 下的第一个 span 元素
+        const spanElement = prevSibling.querySelector('span');
+        if (spanElement) {
+            // 获取文本内容
+            name = spanElement.textContent;
+        }
+    }
+    
     const strJson = tableData.value.find(item => item.stnm === name);
     if(strJson==undefined){
         return;
@@ -122,18 +134,21 @@ function handleclick(evt) {
         emit("parentMethodshowDynamicLayers", evt);
         
     }
-    
-    const ChildVue = defineAsyncComponent(() =>
+    //雨量弹开过程
+    if(targetId=="drp"){
+        const ChildVue = defineAsyncComponent(() =>
         import("@/components/danzhan/sq/DanZHanSel.vue")
-    );
-    const strWhere = {};
-    strWhere["stcd"] = strJson["stcd"];
-    strWhere["stime"] = props.stime;
-    strWhere["etime"] = props.etime;
-    strWhere["mtype"] = strJson["mtype"];
-    strWhere["type"] = "降雨过程";
-    //ChildVue为弹窗中嵌入的slot
-    Dialog.open({ title: strJson["stnm"] , widh: 1500, heig: 700 }, h(ChildVue, strWhere)).then(() => { console.log('弹窗关闭了') })
+        );
+        const strWhere = {};
+        strWhere["stcd"] = strJson["stcd"];
+        strWhere["stime"] = props.stime;
+        strWhere["etime"] = props.etime;
+        strWhere["mtype"] = strJson["mtype"];
+        strWhere["type"] = "降雨过程";
+        //ChildVue为弹窗中嵌入的slot
+        Dialog.open({ title: strJson["stnm"] , widh: 1500, heig: 700 }, h(ChildVue, strWhere)).then(() => { console.log('弹窗关闭了') })
+    }
+    
 }
 function fangda() {
     var dialogClass = $(".dialog").css("display");

@@ -1,5 +1,11 @@
 <template>
   <div class="topClass">
+    <div style="position: absolute;left: 20px;height: 30px;border-radius: 5px;">
+     <span style="margin-left: 20px;">方案：</span> 
+     <el-select style="max-width: 500px;" v-model="value" filterable placeholder="请选择方案" @change="handleChange">
+            <el-option v-for="item in ListFangAn" :key="item.dd_ID" :label="item.dd_NAME" :value="item.dd_ID" />
+      </el-select>
+    </div>
     <span
       style="position: absolute;right: 20px;width: 70px;height: 30px;margin: 5px 0px;background: rgb(238 238 238 / 60%);border-radius: 5px;      ">
       <span class="switch" style="border-radius: 5px 0px 0px 5px" @click="OnBoot('fit1')"
@@ -34,6 +40,7 @@ import ComZujian from "@/components/ComZujian.vue";
 import { Postcard } from "@element-plus/icons-vue";
 import Table from "@/components/Table/Table.vue";
 import api from "@/api/zonglan/index.js";
+import apiMode from "@/api/mode/index.js";
 import TableJs from "@/api/Table/TableJs.js";
 import dayjs from "dayjs";
 import $ from "jquery";
@@ -41,10 +48,14 @@ import Echarts from "@/components/MyEcharts/echartsLine.vue";
 import ChartJs from "@/api/MyEcharts/ChartJs.js";
 import { SetNull, groupBy, GetSZStateBy, GetSZState } from "@/api/ComUnit.js";
 import { onMounted, ref, shallowRef, defineAsyncComponent, nextTick, provide, inject } from "vue";
+// ElConfigProvider：时间选择框汉化
+import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElSelect, ElOption, ElMessage } from "element-plus";
 import { convertToDate } from "@/api/dateUtil.js";
 const tabName = ref("fit1");
 const img1 = ref("/images/line-chart.png");
 const img2 = ref("/images/line-table4.png");
+const ListFangAn = ref([]);
+const value = ref([]);
 
 const tableHeaders = ref([
   // { name: "num", label: "序号" },
@@ -89,6 +100,8 @@ const props = defineProps({
   }
 });
 onMounted(() => {
+  value.value=props.dd_id;
+  loadFangAn();
   Weacontent();
 });
 function Weacontent() {
@@ -97,7 +110,7 @@ function Weacontent() {
     enddate: props.etime,
     stcd: props.stcd,
     type: "1",
-    plan_n: props.dd_id
+    plan_n: value.value
   };
   api.loadModeYBSHUIWEI(strParam).then(res => {
     //绘制图形
@@ -107,7 +120,18 @@ function Weacontent() {
     }
   }).catch(err => { });
 }
-
+function loadFangAn() {
+  var strParam = {};
+  strParam["PageSize"] = 10;
+  strParam["PageIndex"] = 0;
+  apiMode.loadFangList(strParam).then(res => {  
+    ListFangAn.value=res.data;
+  }).catch(err => { console.error("API 请求失败:", err); });
+}
+function handleChange(evalue) {
+    value.value = evalue;
+    Weacontent();
+}
 function JsonColumnChart(res) {
   const strJson = res;
   var result = [];
@@ -223,7 +247,7 @@ function OnBoot(e) {
   }
 }
 </script>
-<style setup>
+<style scoped>
 .topClass {
   height: 45px;
   line-height: 40px;
@@ -323,5 +347,228 @@ function OnBoot(e) {
   line-height: 40px;
   color: var(--mtablecolor);
   text-align: center;
+}
+</style>
+
+
+<style lang="scss">
+/* 站点选择 */
+.el-cascader-node {
+    padding: 0 0px 0 10px;
+    width: 118px;
+    color: var(--widgetcolor);
+}
+
+.el-cascader-menu {
+    min-width: 20px;
+}
+
+.el-cascader-menu:last-child .el-cascader-node {
+    padding-right: 0px;
+}
+
+
+.el-cascader-node__prefix {
+    left: 0px !important;
+}
+
+.el-cascader-node__label {
+    padding: 0 4px;
+}
+
+.el-input {
+    height: 29px;
+}
+
+.el-input__suffix {
+    color: var(--popContentHeadbg);
+}
+
+.el-cascader__dropdown.el-popper,
+.el-cascader-node:not(.is-disabled):focus,
+.el-cascader-node:not(.is-disabled):hover {
+    background: none;
+}
+
+.el-cascader__dropdown.el-popper {
+    box-shadow: var(--popContentHeadbg);
+}
+
+.el-popper.is-light,
+.el-popper.is-light .el-popper__arrow:before {
+    border: 1px solid var(--popContentHeadbg);
+    background: var(--boxtitlebg);
+}
+
+.el-cascader:not(.is-disabled):hover .el-input__wrapper,
+.el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+    cursor: pointer;
+}
+
+// 站点选择 - el-select 适配
+.el-select {
+    height: 29px;
+    width: 300px;
+
+    .el-select__wrapper {
+        min-height: 29px;
+        height: 29px;
+        background-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+
+        &:hover {
+            box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+        }
+    }
+
+    &.is-hovering {
+        .el-select__wrapper {
+            box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+        }
+    }
+
+    .el-select__selection {
+        line-height: 27px;
+    }
+
+    .el-select__placeholder {
+        color: var(--widgetcolor);
+    }
+
+    .el-select__input {
+        color: var(--widgetcolor);
+    }
+}
+
+.el-select-dropdown {
+    max-height: 300px;
+    overflow-y: auto;
+
+    .el-select-dropdown__item {
+        padding: 0 10px;
+        width: 100%;
+        color: var(--widgetcolor);
+
+        &.hover,
+        &:hover {
+            background: var(--popContentHeadbg);
+        }
+
+        &.is-selected {
+            color: var(--widgetcolor) !important;
+            background: var(--popContentHeadbg) !important;
+        }
+    }
+}
+
+.el-popper.is-light.el-select-dropdown {
+    border: 1px solid var(--popContentHeadbg);
+    background: var(--boxtitlebg);
+}
+
+// 时间选择框
+.el-date-picker,
+.el-picker-panel__footer {
+    // width: 174px;
+    background: none;
+    color: var(--widgetcolor);
+}
+
+.el-date-picker .el-picker-panel__content {
+    // width: 160px;
+}
+
+.el-date-picker__header,
+.el-picker-panel__content {
+    // margin: 6px;
+}
+
+.el-date-table td {
+    padding: 0;
+}
+
+.el-date-picker table {
+    width: none !important;
+}
+
+.el-date-picker__time-header {
+    background: var(--boxtitlebg);
+    // display: block;
+}
+
+.el-picker-panel__icon-btn {
+    // padding: 0;
+    color: var(--widgetcolor);
+}
+
+.el-input--small .el-input__inner,
+.el-date-table th,
+.el-date-picker__header-label,
+.el-button.is-text,
+.el-button.is-plain {
+    color: var(--widgetcolor);
+}
+
+.el-cascader .el-input.is-focus .el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
+}
+
+.el-cascader-node.in-active-path,
+.el-cascader-node.is-selectable.in-checked-path,
+.el-year-table td .cell:hover,
+.el-date-picker__header-label:hover {
+    color: var(--swDivSelectcolor);
+}
+
+.el-date-table th {
+    border-bottom: 1px solid var(--popContentHeadbg);
+}
+
+.el-picker-panel__footer {
+    border-top: 1px solid var(--popContentHeadbg);
+}
+
+.el-button.is-plain,
+.el-button.is-text:not(.is-disabled):hover,
+.el-scrollbar__thumb {
+    background-color: var(--popContentHeadbg);
+    border-color: var(--popContentHeadbg);
+    color: #fff;
+}
+
+.el-date-picker__editor-wrap:nth-child(1) .el-input--small .el-input__wrapper {
+    width: 90px;
+}
+
+.el-date-picker__editor-wrap {
+    width: 50%;
+}
+
+.el-year-table td {
+    padding: 0px;
+}
+
+.el-cascader-node.is-active .el-cascader-node__label,
+.el-cascader-node.is-active {
+    font-size: 1rem;
+    color: var(--swDivSelectcolor);
+}
+
+.el-date-table td.current:not(.disabled) .el-date-table-cell__text,
+.el-year-table td.current:not(.disabled) .cell {
+    background-color: var(--swDivSelectcolor);
+    border-color: var(--swDivSelectcolor);
+    color: #fff;
+}
+
+.el-date-table td.today .el-date-table-cell__text,
+.el-date-table td.available:hover {
+    color: var(--swDivSelectcolor);
+}
+
+.el-year-table td .cell,
+.el-month-table td .cell {
+    color: #fff;
 }
 </style>

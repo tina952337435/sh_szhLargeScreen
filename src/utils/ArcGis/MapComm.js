@@ -339,6 +339,20 @@ function setMapZoom(myLayer, mapLevel, stType, field, switchChecked) {
 
         }
     }
+
+    if(mapLevel>=13){
+        removeClassParamByClass("level_all .amap-ui-district-cluster-marker-title", "none");
+    }
+    else{
+        addClassParamByClass("level_all .amap-ui-district-cluster-marker-title", "none");
+    }
+    if(mapLevel>=13){
+        removeClassParamByClass("rainText .amap-ui-district-cluster-marker-title", "none");
+    }
+    else{
+        addClassParamByClass("rainText .amap-ui-district-cluster-marker-title", "none");
+    }
+    
 }
 
 function removeClassParam(objID, objClass) {
@@ -351,6 +365,14 @@ function addClassParam(objID, objClass) {
     // console.error('addClassParam',objID, objClass)
     $("#" + objID).addClass(objClass);
     $("#" + objID + "Arrow").addClass(objClass);
+}
+
+function addClassParamByClass(objID, objClass) {
+    $("." + objID).addClass(objClass);
+}
+
+function removeClassParamByClass(objID, objClass) {
+    $("." + objID).removeClass(objClass);
 }
 
 //地图放大缩小调用事件**************************************************************
