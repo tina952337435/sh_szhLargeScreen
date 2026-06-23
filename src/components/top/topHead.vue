@@ -89,6 +89,7 @@
               <span
                 >{{ WarningInfo
                 }}<span
+                  class="warningTitleSpan"
                   style="
                     color: rgb(185 182 182);
                     font-weight: bold;
@@ -618,23 +619,23 @@ function getWarningInfo() {
         var color1 = "#ED493F";
         var color2 = "#F79715";
         var color3 = "#F8E757";
-        var color4 = "#3475DF";
+        var color4 = "#16a4f3";
         if (strJson[0].SIGNAL_LEVEL == "Ⅰ") {
-          $(".warningTitle").css("color", color1);
+          $(".warningTitleSpan").css("color", color1);
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
         } else if (strJson[0].SIGNAL_LEVEL == "Ⅱ") {
-          $(".warningTitle").css("color", color2);
+          $(".warningTitleSpan").css("color", color2);
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
         } else if (strJson[0].SIGNAL_LEVEL == "Ⅲ") {
-          $(".warningTitle").css("color", color3);
+          $(".warningTitleSpan").css("color", color3);
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
         } else if (strJson[0].SIGNAL_LEVEL == "Ⅳ") {
-          $(".warningTitle").css("color", color4);   
+          $(".warningTitleSpan").css("color", color4);   
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
         } 
         else if (strJson[0].SIGNAL_LEVEL == "0") {
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
-          $(".warningTitle").css("color", color0);
+          $(".warningTitleSpan").css("color", color0);
         }
         console.error("当前应急响应情况======", WarningInfo.value);
       }

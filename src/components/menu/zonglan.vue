@@ -451,6 +451,15 @@ function YLload() {
       if (f > 0) {
         if (SetNull(item.lgtd) != "" && SetNull(item.lttd) != "") {
           RainfallStr.push({ lon: item.lgtd, lat: item.lttd, value: f });
+          if(item.stcd=="63422650"){//边角需要插值的点
+              RainfallStr.push({ lon:-58570.8187561 , lat:-14245.7293732, value: f });            
+          }
+          if(item.stcd=="63422480"){
+            RainfallStr.push({ lon:-45857.005352, lat:-45373.137903, value: f });         
+          }
+          if(item.stcd=="X1160101"){
+            RainfallStr.push({ lon:-18971.869913,lat:-60205.822566, value: f });         
+          }
         }
       }
     }

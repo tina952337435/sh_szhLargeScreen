@@ -647,10 +647,10 @@ function addLLMark(strJson, switchChecked) {
             return;
         require(["esri/geometry/Point",
             "esri/graphic",
-            "myJs/MapText",
+            "myJs/MapTextPagehome",
             "esri/symbols/PictureMarkerSymbol",
              "esri/SpatialReference","dojo/domReady!"
-        ], function (Point, Graphic, MapText, PictureMarkerSymbol,SpatialReference) {
+        ], function (Point, Graphic, MapTextPagehome, PictureMarkerSymbol,SpatialReference) {
             $(".gcText").remove();
             // destroy();
             if (arr.length > 0) {
@@ -665,7 +665,7 @@ function addLLMark(strJson, switchChecked) {
                         _align=item.dir;
                     }
 
-                    var cls = "gcText";
+                    var cls = "rainText";
                     var q = SetNull(item["q"]) != "" ? Number(item["q"]).toFixed(3) : "—";
                     if (SetNull(item.rotate)!="") {
                         angle = parseInt(item.rotate);
@@ -701,10 +701,10 @@ function addLLMark(strJson, switchChecked) {
                         var point = new Point(arr[i].lgtd, arr[i].lttd, new SpatialReference({
                             wkid: 4326
                         }));
-                        var textStr = item.stnm + "<br>";
-                        textStr += "流量:" + q;
+                        var textStr = item.stnm + "@";
+                        textStr += q;
                         if (switchChecked) {
-                            var label = new MapText(map, point, arr[i], textStr, globallevel, _align, cls,
+                            var label = new MapTextPagehome(map, point, arr[i], textStr, globallevel, _align, cls,
                                 12);
                             labels.push(label);
                         }
@@ -712,6 +712,9 @@ function addLLMark(strJson, switchChecked) {
                         LLLayerGraphicLayer.add(graphic);
                     }
                 }
+
+                setMapZoom(LLLayerGraphicLayer, map.getLevel(), "LL", "stcd", switchChecked);
+                mapZoomEnd(LLLayerGraphicLayer, null, "LL", "stcd", switchChecked);
             }
 
         });

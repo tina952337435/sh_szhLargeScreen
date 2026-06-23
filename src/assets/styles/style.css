@@ -983,8 +983,6 @@ p {
   pointer-events: auto;
   transform-style: preserve-3d;
   transform: scale(0.9);
-  /* transform: translateY(-90px); */
-  margin-top: -90px;
 }
 
 .LabelDRP {}

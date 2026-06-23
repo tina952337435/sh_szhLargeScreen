@@ -173,6 +173,12 @@ define(["dojo/_base/declare",
                 else {
                     this._hide();
                 }
+                // 延迟重新测量：MapComm.setMapZoom 在同一 zoom-end 事件中切换 title 显示/隐藏，
+                // 需要等 DOM 更新后再重新读取尺寸并重新定位，否则 top/bottom 偏移量会错位。
+                var self = this;
+                setTimeout(function () {
+                    self._applyPosition();
+                }, 50);
             },
             hide: function () {
                 this._isShow = false;
@@ -207,55 +213,44 @@ define(["dojo/_base/declare",
                 var ss = this._map.root; //this._layer.container;//dom.byId(this._gl.id);
                 ss.appendChild(this._node);
 
-                var xy = this.getScreentPoint();
+                // 延迟测量：PointMark 在 label 创建完成后立即调 setMapZoom 切换 title
+                // 的 none 类，需要等 DOM 更新后才是最终高度，否则 _height 会包含尚
+                // 未隐藏的标题高度。
+                var self = this;
+                setTimeout(function () {
+                    self._applyPosition();
+                    if (self._map.getLevel() < self._level) {
+                        self._hide();
+                    }
+                }, 0);
+            },
+            _applyPosition: function () {
                 this._width = this._node.offsetWidth;
                 this._height = this._node.offsetHeight;
                 this.setOffset();
-                try {
-                    domStyle.set(this._node, {
-                        left: xy.x + this._offsetX + "px",
-                        top: xy.y + this._offsetY + "px",
-                        position: "absolute",
-                        // zIndex: "1"
-                    });
-                } catch (ex) {
-
-                }
-
-                if (this._map.getLevel() < this._level) {
-                    this._hide();
-                }
+                var dd = this.getScreentPoint();
+                domStyle.set(this._node, {
+                    left: dd.x + this._offsetX + "px",
+                    top: dd.y + this._offsetY + "px",
+                    position: "absolute"
+                });
             },
             setOffset: function () {
                 if (this._place == "top") {
-                    this._offsetX = 0 - 35;
-                    this._offsetY = this._height / 6 - this._offset;
-                    // console.error('MapTextPagehome',this._offsetX, this._offsetY,'this._height',this._height);
+                    this._offsetX = 0 - this._width / 2;
+                    this._offsetY = 0 - this._height - this._offset - 12;
                 }
                 else if (this._place == "bottom") {
-                    this._offsetX = 0 - 35;
-                    this._offsetY = this._height + 30 - this._offset;
-                    if (this._class.indexOf("SZText") > -1) {
-                        this._offsetX = 0 - 30;
-                        this._offsetY = this._offset / 2 + 95;
-                    }
-                    // console.error('MapTextPagehome',this._offsetX, this._offsetY,'this._height',this._height);
+                    this._offsetX = 0 - this._width / 2;
+                    this._offsetY = this._offset + 10;
                 }
                 else if (this._place == "left") {
-                    // if (this._width == undefined) {
-                    //     this._width = 11;
-                    //     this._height = this._offset * 2;
-                    // }
-                    // this._offsetX = 0 - this._width - this._offset;
-                    // this._offsetY = 0 - this._height / 2;
-                    // this._offsetX = this._offset - 60;
-                    // console.error(this._width, this._offset, this._offset - 60)
-                    this._offsetX = -this._width - 5;
-                    this._offsetY = 0 - this._height / 2 + 70;
+                    this._offsetX = 0 - this._width - 5;
+                    this._offsetY = 0 - this._height / 2;
                 }
                 else if (this._place == "right") {
                     this._offsetX = 5;
-                    this._offsetY = 0 - this._height / 2 + 70;
+                    this._offsetY = 0 - this._height / 2;
                 }
                 else if (this._place == "top_left") {
                     this._offsetX = 0 - this._width - this._offset;

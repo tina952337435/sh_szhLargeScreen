@@ -93,7 +93,7 @@ const rain_6h=ref(0.0);
 function Weacontent() {
   var strParam = {};
   strParam["stime"] =stime.value;
-  strParam["etime"] =stime.value;
+  strParam["etime"] =etime.value;
   api
     .getRainDashboardr(strParam)
     .then((res) => {

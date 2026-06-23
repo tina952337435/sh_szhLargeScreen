@@ -33,9 +33,9 @@ import Dialog from "@/api/utils/Dialog.js";
 const datekey = ref(null);
 const tableHeaders = ref([
     { name: "sortnum", label: "序号",width:"10%" },
-    { name: "stnm", label: "站名",width:"35%" },
-    { name: "drp", label: "雨量(mm)" },
-    { name: "addvnm", label: "分区" },
+    { name: "stnm", label: "站名"},
+    { name: "drp", label: "雨量(mm)",width:"15%" },
+    { name: "addvnm", label: "分区",width:"25%" },
 ]);
 const tableData = ref([]);
 // 判断弹窗是否显示,默认隐藏
