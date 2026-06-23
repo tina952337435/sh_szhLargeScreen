@@ -1,9 +1,0 @@
-.el-date-picker {
-    --el-datepicker-active-color: var(--areaSelectColor);
-    --el-datepicker-hover-text-color: var(--areaSelectColor);
-}
-
-.el-date-table td.current:not(.disabled) .el-date-table-cell__text {
-    background-color: var(--areaSelectColor);
-    color: #ffffff;
-}
