@@ -1,6 +1,6 @@
 <template>
     <div id="mainTabs" class="tabs" activeIndex="0" style="width:100%;height:100%;">
-        <div style="width: 98%; margin: 5px auto;">
+        <div style="width: 98%; margin:0px auto;">
             <ul style="margin: 0px;padding: 0px;">
                 <li v-for="(item, index) in List" :key="index" class="tab" style="cursor: pointer"
                     :class='index === isActive ? "tab-active" : "tab"' @click="getTab(index, item.title, item.url)">

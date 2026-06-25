@@ -56,13 +56,13 @@
     </div> -->
 
     <div style="color: var(--popupContentTitleColor);padding: 0px 10px">-------站点类型-------</div>
-      <div style="height: 25px; line-height: 25px;padding: 0px 10px">
+      <div style="height: 25px; line-height: 25px;padding: 0px 8px">
         <img
           alt=""
           src="/images/water/水位(正常).png"
           style="
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             margin-top: 2px;
             display: inline-block;margin-left: 2px;
           "
@@ -75,13 +75,13 @@
           >)
         </span>
       </div>
-      <div style="height: 25px; line-height: 25px;padding: 0px 10px">
+      <div style="height: 25px; line-height: 25px;padding: 0px 8px">
         <img
           alt=""
           src="/images/water/共享水位(正常).png"
           style="
-            width: 25px;
-            height: 25px;
+            width: 22px;
+            height: 22px;
             display: inline-block;
           "
         />
@@ -98,45 +98,37 @@
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterZC')" v-model="cb_waterZC" type="checkbox"
         checked="checked" />
-      <!-- <img alt="" src="/images/icon_51.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
         <span class="colorSpan" style="background-color:#1afa29"></span>
       <span style="padding-left: 2px; color: white; vertical-align: 15px; margin-left: 2px">
-        正常(<span id="waterZC" style="color: rgb(6 255 255); font-size: 14px"></span>)
+        正常(<span class="clickable-count" style="color: rgb(6 255 255); font-size: 14px" @click.stop="openStationList('zc')">{{ waterZCCount }}</span>)
       </span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterCJ')" v-model="cb_waterCJ" type="checkbox"
         checked="checked" />
-      <!-- <img alt="" src="/images/cheng2.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
 
         <span class="colorSpan" style="background-color:#FFC000"></span>
 
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
-        超警(<span id="waterCJ" style="color: rgb(6 255 255); font-size: 14px"></span>)
+        超警(<span class="clickable-count" style="color: rgb(6 255 255); font-size: 14px" @click.stop="openStationList('cj')">{{ waterCJCount }}</span>)
       </span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterCB')" v-model="cb_waterCB" type="checkbox"
         checked="checked" />
-      <!-- <img alt="" src="/images/hong.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
 
         <span class="colorSpan" style="background-color:#FF0000"></span>
 
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
-        超保(<span id="waterCB" style="color: rgb(6 255 255); font-size: 14px"></span>)
+        超保(<span class="clickable-count" style="color: rgb(6 255 255); font-size: 14px" @click.stop="openStationList('cb')">{{ waterCBCount }}</span>)
       </span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterQC')" v-model="cb_waterQC" type="checkbox"
         checked="checked" />
-      <!-- <img alt="" src="/images/water_qc.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
         <span class="colorSpan" style="background-color:#C1C1C1"></span>
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
-        缺测(<span id="waterQC" style="color: rgb(6 255 255); font-size: 14px"></span>)
+        缺测(<span class="clickable-count" style="color: rgb(6 255 255); font-size: 14px" @click.stop="openStationList('qc')">{{ waterQCCount }}</span>)
       </span>
     </div>
   </div>
@@ -224,6 +216,7 @@ import {
   provide,
   reactive,
   onUnmounted,
+  h,
 } from "vue";
 // ElConfigProvider：时间选择框汉化
 import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElRadioGroup } from "element-plus";
@@ -233,6 +226,7 @@ import dayjs from "dayjs";
 import * as PointMark from "@/utils/ArcGis/PointMark.js"; 
 import $ from "jquery";
 import { useRoute } from "vue-router";
+import Dialog from "@/api/utils/Dialog.js";
 
 const route = useRoute();
 
@@ -261,6 +255,16 @@ const cb_waterZC = ref(true),
   cb_waterCJ = ref(true),
   cb_waterCB = ref(true),
   cb_waterQC = ref(false);
+// 分类站点列表（用于弹窗查看详情）
+const zcStationList = ref([]);  // 正常
+const cjStationList = ref([]);  // 超警
+const cbStationList = ref([]);  // 超保
+const qcStationList = ref([]);  // 缺测
+// 响应式数量变量
+const waterZCCount = ref(0);
+const waterCJCount = ref(0);
+const waterCBCount = ref(0);
+const waterQCCount = ref(0);
 const datekeyAll = ref(null);
 const datekeyAllJC=ref(null);
 const typenameRadio = ref()
@@ -518,64 +522,49 @@ function SWload() {
   var countFX=0,countGX=0;//防汛站，共享站（气象站）
   const strJson = strJsonData.value;
 
-  // if (resultList.length > 0) {
-  //   for (var num = 0; num < resultList.length; num++) {
-  //     var item = resultList[num];
-  //     strJson.push(item[0]);
-  //   }
-  // }
+  // 清空分类数组
+  zcStationList.value = [];
+  cjStationList.value = [];
+  cbStationList.value = [];
+  qcStationList.value = [];
+
   var strResult = [];
   if (strJson.length > 0) {
-    
+
     var WartfallStr="";
     for (var i = 0; i < strJson.length; i++) {
       var item = strJson[i];
-      //  if (WartfallStr == "") {
-      //        WartfallStr += item.lgtd84 + "," + item.lttd84 + "," + item.upz;
-      //     } else {
-      //        WartfallStr += "|" + item.lgtd84 + "," + item.lttd84 + "," + item.upz;
-      //     }
-      // item.lgtd=item.lgtd84;
-      // item.lttd=item.lttd84;
       var z = "";
       if (SetNull(item.upz) != "") {
         z = Number(item.upz).toFixed(2);
       }
       var wrz = Number(item.wrz) == 0.0 || item.wrz == "—" ? 99 : Number(item.wrz).toFixed(2);
       var grz =Number(item.grz) == 0.0 || item.grz == "—" ? 99 : Number(item.grz).toFixed(2);
-      // var time = dayjs(dayjs(nowTM).format("YYYY-MM-DD HH:mm:ss"))
-      //   .add(-3, "hour")
-      //   .format("YYYY-MM-DD HH:mm:ss");
 
-      item.upz = z; 
+      item.upz = z;
 
-      // var tempTM = false;
-      // if (item.tm == undefined) {
-      //   tempTM = true;
-      // } else {
-      //   if (new Date(item.tm) > new Date(time)) {
-      //     tempTM = false;
-      //   } else {
-      //     tempTM = true;
-      //   }
-      // }
       if (z == null || z == "") {
         qcCount++;
+        qcStationList.value.push(item);
         if (cb_waterQC.value == true) {
           strResult.push(item);
         }
       }else if (z >= grz) {
         cbCount++;
+        cjStationList.value.push(item);
+        cbStationList.value.push(item);
         if (cb_waterCB.value == true) {
           strResult.push(item);
         }
       }  else if (z >= wrz) {
         cjCount++;
+        cjStationList.value.push(item);
         if (cb_waterCJ.value == true) {
           strResult.push(item);
         }
       } else {
         zcCount++;
+        zcStationList.value.push(item);
         if (cb_waterZC.value == true) {
           strResult.push(item);
         }
@@ -588,12 +577,11 @@ function SWload() {
         countGX++;
       }
     }
-    // console.error('WartfallStr',WartfallStr);
   }
-  $("#waterZC").html("" + zcCount + "");
-  $("#waterCJ").html("" + cjCount + "");
-  $("#waterCB").html("" + cbCount + "");
-  $("#waterQC").html("" + qcCount + "");
+  waterZCCount.value = zcCount;
+  waterCJCount.value = cjCount;
+  waterCBCount.value = cbCount;
+  waterQCCount.value = qcCount;
   $("#countFX").html("" + countFX + "");
   $("#countGX").html("" + countGX + "");
   SWDATA.value = strResult;
@@ -609,6 +597,25 @@ function getTLObj(obj) {
   setTimeout(function () {
     SWload();
   }, 100)
+}
+// 点击图例数量，弹窗查看站点清单
+function openStationList(type) {
+  const mapCfg = {
+    zc: { list: zcStationList, title: "正常" },
+    cj: { list: cjStationList, title: "超警" },
+    cb: { list: cbStationList, title: "超保" },
+    qc: { list: qcStationList, title: "缺测" },
+  };
+  const cfg = mapCfg[type];
+  if (!cfg || !cfg.list.value || cfg.list.value.length === 0) return;
+
+  const StationListDialog = defineAsyncComponent(() =>
+    import("@/components/menu/sq/StationListDialog.vue")
+  );
+  Dialog.open(
+    { title: `${cfg.title}站点清单（${cfg.list.value.length}个）`, widh: 1200, heig: 700 },
+    h(StationListDialog, { stationList: cfg.list.value, type: type })
+  );
 }
 function opencz() {
   $(".top-left-icon-menu").show();
@@ -1066,5 +1073,14 @@ function parentMethodshowDynamicLayer(item) {
 .colorL p {
   line-height: 16px;
   margin-bottom: -4px;
+}
+
+.clickable-count {
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+.clickable-count:hover {
+  color: #ffd700 !important;
 }
 </style>

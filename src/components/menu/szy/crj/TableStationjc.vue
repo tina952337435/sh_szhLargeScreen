@@ -26,7 +26,7 @@ import $ from "jquery";
 import { useStore } from 'vuex'
 import Dialog from "@/api/utils/Dialog.js";
 import { ref, onMounted, reactive, defineAsyncComponent, h,defineProps,watch } from "vue";
-import { SetNull } from "@/api/ComUnit";
+import { SetNull,formatFlow} from "@/api/ComUnit";
 import { ElMessage } from "element-plus";
 
 const store = useStore();
@@ -66,6 +66,7 @@ function Weacontent() {
       if (item.tm != undefined) {
         tm = dayjs(item.tm).format("MM-DD HH:mm");
       }
+      var q = formatFlow(item["q"]);
       var _strParam = {};
       _strParam["num"] = num+1;
       _strParam["stnm"] = SetNull(item["stnm"]).replaceAll(" ", "");
@@ -79,7 +80,7 @@ function Weacontent() {
       _strParam["lttd"] = item.lttd;
       _strParam["colorCss"] = colorCss;
       _strParam["mtype"] = item.mtype;
-      _strParam["q"] = item.q;
+      _strParam["q"] = q;
       _strParam["dwz"] = item.dwz;
       _strParam["BZtm"] = item.tm;
       _strParam["sl"] = item.sl;       

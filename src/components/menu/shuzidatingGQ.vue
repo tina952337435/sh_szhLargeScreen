@@ -8,10 +8,10 @@
   <!-- 右侧 -->
   <div class="g-rside">
     <div style="width: 100%">
-      <TableRiver :GCtableDataAll="GCtableDataAllTJ" :key="datekeyGCTJ"  ref="child" @passValue="getRiverType" />
+      <TableRiver :GCtableDataAll="GCtableDataAllTJ" :key="datekeyGCTJ"  ref="child" @passValue="getRiverType" @passValueTJ="getRiverTypeTJ"/>
     </div>
     <div style="width: 100%">
-      <TableGQJC :GCtableDataAll="GCtableDataAll" :key="datekeyGC"
+      <TableGQJC :GCtableDataAll="GCtableDataAllFiltered" :key="datekeyGC"
         @parentMethodshowDynamicLayers="parentMethodshowDynamicLayer" />
     </div>
   </div>
@@ -184,88 +184,30 @@ const ybdrplist = ref([]);
 const WQtableDataAll = ref([]);
 const GCtableDataAll = ref([]);
 const GCtableDataAllTJ = ref([]);
+const GCtableDataAllFiltered = ref([]);  // 过滤后的工情数据，传给 TableGQJC
 const datekeyGC = ref(null);
 const datekeyGCTJ=ref(null);
 const pid=ref("2023060214563122171-1");
 function loadGC() {
   apizonglan.stPptnGQTable({ "key": "1", "pid": pid.value}).then(res => { 
     GCtableDataAll.value = res.data;
+    GCtableDataAllFiltered.value = res.data;
     datekeyGC.value = new Date();
     $.data(myData, "GCData", res.data);
     $.data(myData, "GCList", res.data);
     addGCMarker();
   }).catch(err => { });
 }
-function loadGCTJ() {
-  apizonglan.stPptnGQSLPTJ({ "key": "1", "pid": "2023060214563122171-2" }).then(res => { 
-    GCtableDataAllTJ.value = res.data;
-    datekeyGCTJ.value = new Date();
-  }).catch(err => { });
-}
 function getRiverType(lx, id, zhen, rvnm) {
-  var WQData = $.data(myData, "WQtableDataAll");
-  var GCData = $.data(myData, "GCData");
-  var RiverData = $.data(myData, "RiverData");
-  if (SetNull(zhen) != "") {
-    if (lx == "river") {
-      if (SetNull(id) != "") {
-        var riverWaterList = RiverData.filter(function (rv) {
-          return rv.type == "1";
-        });
-        const arrWater = riverWaterList.map(item => item.stcd);
-        const WaterSet = new Set(arrWater);
-        $.data(myData, "WaterSet", WaterSet);
-      }
-      $.data(myData, "cityId", "2025071619110378487");
-      $.data(myData, "rvnmName", rvnm);
-      var riverGateList = RiverData.filter(function (rv) {
-        return rv.riverid == id && rv.type == "3";
-      });
-      const arrGate = riverGateList.map(item => item.stcd);
-      const stcdSet = new Set(arrGate);
-      const GCList = GCData.filter(gc => stcdSet.has(gc.stcd));   //河道关联工程站点
-      $.data(myData, "GCList", GCList);
-
-      var riverPoldList = RiverData.filter(function (rv) {
-        return rv.riverid == id && rv.type == "6";
-      });
-      const arrPold = riverPoldList.map(item => item.stcd);
-      const plodSet = new Set(arrPold);
-      if (Array.isArray(WQData)) {
-        const filteredData = WQData.filter(s => SetNull(s.wqid) !== "" && plodSet.has(s.wqid));
-        WQtableDataAll.value = filteredData;
-        datekeyAll.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss")).add(6, "hour").format("YYYY-MM-DD HH:mm:ss");
-      }
-    } else if (lx == "district") {
-      $.data(myData, "cityId", id);
-      $.data(myData, "WaterSet", "");
-      if (Array.isArray(GCData)) {
-        //行政关联工程
-        const GCList = GCData.filter(s => SetNull(s.admauth) !== "" && s.admauth == zhen);
-        $.data(myData, "GCList", GCList);
-        // const wqnmSet = new Set(GCList.map(gc => gc.wqnm));
-        if (Array.isArray(WQData)) {
-          // 行政关联圩区				
-          const filteredData = WQData.filter(s => SetNull(s.wq_zhen) !== "" && (s.wq_zhen).indexOf(zhen) > -1);
-          WQtableDataAll.value = filteredData;
-          datekeyAll.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss")).add(6, "hour").format("YYYY-MM-DD HH:mm:ss");
-        }
-      }
-    }
-  } else {
-    $.data(myData, "cityId", "2025071619110378487");
-    $.data(myData, "WaterSet", "");
-    $.data(myData, "rvnmName", "");
-    var GCList = GCData;
-    $.data(myData, "GCList", GCList);
-    WQtableDataAll.value = WQData;
-    datekeyAll.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss")).add(6, "hour").format("YYYY-MM-DD HH:mm:ss");
+  if(id==""){
+    id="2023060214563122171-1";
   }
-  // addGCMarker();
+  pid.value=id;
+  loadGC();
 }
-
 function addGCMarker() {
   var GCJson = $.data(myData, "GCList");
+  if (!GCJson) return;
   gateTotal.value = GCJson.length;
   var resList = [];
   var totalQ_New = 0, totalOpen = 0, totalGuan = 0, totalQc = 0, totalOpenzm = 0;
@@ -449,16 +391,11 @@ onMounted(async () => {
   $.data(myData, "cityId", "2025071619110378487");
   $.data(myData, "WaterSet", "")
   loadGC();
-  loadGCTJ();
 });
 function parentMethodshowDynamicLayer(item) {
   setZOOM(13);
   dyCenter(item[0], item[1]);
 }
-//传参
-provide("WQtableDataAll", WQtableDataAll);
-
-
 function OnBoot(type) {
   var ChildVue = defineAsyncComponent(() =>
     import("@/components/danzhan/gq/EchartGCSK.vue")

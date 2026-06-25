@@ -15,14 +15,11 @@
     style="width: 70%; height: 700px">
     <EchartSQGJ :strJsonData="props.strJsonData" />
   </ComZujian>
-  <MyDialog :showDialog="showDialogSW" @close="showDialogSW = false" :title="titleNameSW" :typeValueSW="typeValueSW"
-    style="width: 70%; height: 700px">
-    <EchartSQGJ :strJsonData="props.strJsonData"/>
-  </MyDialog>
+
 </template>
 <script setup>
 import ComZujian from "@/components/ComZujian.vue";
-import MyDialog from "@/components/ComDialog.vue";
+
 import EchartsList from "@/components/MyEcharts/echartsLine.vue";
 import api from "@/api/zonglan/index.js";
 import ChartJs from "@/api/MyEcharts/ChartJs.js";
@@ -32,7 +29,8 @@ import $ from "jquery";
 import { ElMessage, ElTimePicker } from "element-plus";
 import * as echarts from "echarts";
 
-import { ref, onMounted, reactive, inject, provide,defineProps } from "vue";
+import { ref, onMounted, reactive, inject, provide, defineProps, h, defineAsyncComponent } from "vue";
+import Dialog from "@/api/utils/Dialog.js";
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 const datekey = ref(null);
@@ -41,10 +39,8 @@ const trendsTooltip = ref();
 
 // 判断弹窗是否显示,默认隐藏
 const showDialog = ref(false);
-const showDialogSW = ref(false);
 const dateid = ref("PieCJ");
 const titleName = ref();
-const titleNameSW = ref();
 // 传递水位的类别：1:正常;2:超警;3:超保;4:缺测;
 const typeValueSW = ref();
 const pidSW = ref("2026031114184492913-2");
@@ -54,6 +50,11 @@ const zcNCount = ref(0);
 const wrzNCount = ref(0);
 const grzNCount = ref(0);
 const nullNCount = ref(0);
+// 分类站点列表（用于弹窗查看详情）
+const zcStationList = ref([]);  // 正常
+const wrzStationList = ref([]); // 超警
+const grzStationList = ref([]); // 超保
+const qcStationList = ref([]);  // 缺测
 const props = defineProps({
   strJsonData: {
     type: Object,
@@ -87,6 +88,12 @@ function Weacontent() {
         zccount = 0,
         grzCount = 0;
 
+      // 清空分类数组
+      zcStationList.value = [];
+      wrzStationList.value = [];
+      grzStationList.value = [];
+      qcStationList.value = [];
+
       for (var num = 0; num < data.length; num++) {
         var item = data[num][0];
         if (SetNull(item["tm"]) != "") {
@@ -106,21 +113,26 @@ function Weacontent() {
             }
             if (colorCss == "#FF9E43") {
               wrzcount++;
+              wrzStationList.value.push(item);
             }
             else if (colorCss == "#F70019") {
               grzCount++;
+              grzStationList.value.push(item);
             }
             else {
               zccount++;
+              zcStationList.value.push(item);
             }
 
           }
           else {
             zccount++;
+            zcStationList.value.push(item);
           }
         }
         else {
           nullcount++;
+          qcStationList.value.push(item);
         }
       }
       totalcount = data.length;
@@ -238,47 +250,34 @@ function Weacontent() {
   // });
 }
 function eSLChage(param) {
-  SQtable(param.name)
+  const nameMap = {
+    "正常": "zc",
+    "超警": "cj",
+    "超保": "cb",
+    "缺测": "qc",
+  };
+  openStationList(nameMap[param.name] || "");
 }
-function SQtable(e) {
-  $(".g-rside ").css({ "z-index": 99 });
-  $(".g-lside ").css({ "z-index": 90 });
-  if (e == "正常") {
-    if (zcNCount.value > 0) {
-      showDialogSW.value = true;
-      titleNameSW.value = "水位正常站点";
-      typeValueSW.value = 1;
-    } else {
-      ElMessage.error("无数据");
-    }
+// 点击饼图扇区，弹窗查看站点清单
+function openStationList(type) {
+  const mapCfg = {
+    zc: { list: zcStationList, title: "正常" },
+    cj: { list: wrzStationList, title: "超警" },
+    cb: { list: grzStationList, title: "超保" },
+    qc: { list: qcStationList, title: "缺测" },
+  };
+  const cfg = mapCfg[type];
+  if (!cfg || cfg.list.value.length === 0) {
+    ElMessage.error("无数据");
+    return;
   }
-  if (e == "超警") {
-    if (wrzNCount.value > 0) {
-      showDialogSW.value = true;
-      titleNameSW.value = "水位超警戒站点";
-      typeValueSW.value = 2;
-    } else {
-      ElMessage.error("无数据");
-    }
-  }
-  if (e == "超保") {
-    if (grzNCount.value > 0) {
-      showDialogSW.value = true;
-      titleNameSW.value = "水位超保证站点";
-      typeValueSW.value = 3;
-    } else {
-      ElMessage.error("无数据");
-    }
-  }
-  if (e == "缺测") {
-    if (nullNCount.value > 0) {
-      titleNameSW.value = "水位缺测站点";
-      typeValueSW.value = 4;
-      showDialogSW.value = true;
-    } else {
-      ElMessage.error("无数据");
-    }
-  }
+  const StationListDialog = defineAsyncComponent(() =>
+    import("@/components/menu/sq/StationListDialog.vue")
+  );
+  Dialog.open(
+    { title: `${cfg.title}站点清单（${cfg.list.value.length}个）`, widh: 1200, heig: 700 },
+    h(StationListDialog, { stationList: cfg.list.value, type: type })
+  );
 }
 function fangda() {
   var dialogClass = $(".dialog").css("display");

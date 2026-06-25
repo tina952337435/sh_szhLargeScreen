@@ -72,12 +72,15 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .popContent .content {
   min-width: 0px;
-  height: 90%;
-  /* overflow-y: auto; */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* 自定义滚动条样式 */

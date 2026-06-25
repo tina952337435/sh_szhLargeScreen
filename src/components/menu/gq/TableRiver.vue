@@ -39,70 +39,13 @@ import { SetNull, groupBy } from "@/api/ComUnit";
 import { convertToDate } from "@/api/dateUtil.js";
 const Typeswiper = ref('district')
 const datekey = ref(null);
-const emit = defineEmits(['passValue']);
+const emit = defineEmits(['passValue',"passValueTJ"]);
 const tableHeaders = ref([]);
 const tableData = ref([]);
 // 判断弹窗是否显示,默认隐藏
 const showDialog = ref(false);
-const props = defineProps({
-    GCtableDataAll: {
-        type: Array,
-        default: () => []
-    },
-});
-watch(props.GCtableDataAll, () => {
-    GetType("district");
-});
-function WeacontentRiver() {
-    var strParam = {};
-    strParam["state"] = "1";
-    var res = {};
-    var strJson = props.GCtableDataAll;
-    let _index = 0;
-    var result = strJson.filter(res => {
-        _index = _index + 1;
-        res.num = _index;
-        res.id = res.hd_base_id;
-        return res;
-    });
-    tableData.value = result;
-}
-function WeacontentDistrict() {
-    var strJson =props.GCtableDataAll;
-    var result=[];
-    if (props.GCtableDataAll.length > 0) {
-        var data = props.GCtableDataAll;  
-        data.filter(function(e,_index){
-            e.num=_index+1;
-            e.title=e.stnm;
-            e.paiBili=Number(e.ROTATE).toFixed(1);
-            e.total=e.NUM;
-        }); 
-        result=data;  
-        // console.error('result',result);  
-    }
-    tableData.value = result;
-}
-function GetType(obj) {
-    Typeswiper.value = obj;
-    if (obj == "river") {
-        tableHeaders.value = [
-            {
-                name: "num",
-                label: "序号"
-            },
-            {
-                name: "hd_name",
-                label: "河道名称"
-            },
-            {
-                name: "hd_index",
-                label: "类别"
-            },
-        ];
-        WeacontentRiver();
-    } else if (obj == "district") {
-        tableHeaders.value = [
+const GCtableDataAll = ref([]);
+tableHeaders.value = [
             {
                 name: "num",
                 label: "序号"
@@ -119,48 +62,76 @@ function GetType(obj) {
                 name: "paiBili",
                 label: "运行情况"
             },
-        ];
-        WeacontentDistrict();
+];
+
+
+const pidTJ=ref("2023060214563122171-2");
+
+function loadGCTJ() {
+  api.stPptnGQSLPTJ({ "key": "1", "pid": pidTJ.value }).then(res => { 
+    GCtableDataAll.value = res.data;
+    WeacontentDistrict();
+  }).catch(err => { });
+}
+
+function WeacontentDistrict() {
+    var strJson =GCtableDataAll.value;
+    var result=[];
+    if (strJson.length > 0) {
+        var data =strJson;  
+        data.filter(function(e,_index){
+            e.num=_index+1;
+            e.title=e.stnm;
+            e.paiBili=Number(e.ROTATE).toFixed(1);
+            e.total=e.NUM;
+        }); 
+        result=data;  
+        // console.error('result',result);  
     }
-    emit('passValue', Typeswiper.value, "", "");
+    tableData.value = result;
+}
+function GetType(obj) {
+    Typeswiper.value = obj;
+    if(Typeswiper.value == "district") {
+        pidTJ.value="2023060214563122171-2";
+    }
+    else if(Typeswiper.value == "river") {
+        pidTJ.value="2023060214563122171-4";
+    }    
+    loadGCTJ();
 }
 const lastClickedRow = ref(null); // 新增：用于记录当前选中的河道行
 function handleclick(evt) {
     // 找到点击的 tr 元素
-    // let targetTr = evt.target.closest('tr');
-    // console.log("targetTr", targetTr)
-    // if (!targetTr) return;
+    let targetTr = evt.target.closest('tr');
+    if (!targetTr) return;
 
-    // // 移除所有 tr 元素的 active 类名
-    // const allTrs = document.querySelectorAll('.river-table tr');
-    // allTrs.forEach(tr => {
-    //     tr.classList.remove('liSelected');
-    // });
+    // 移除所有 tr 元素的 active 类名
+    const allTrs = document.querySelectorAll('.river-table tr');
+    allTrs.forEach(tr => {
+        tr.classList.remove('liSelected');
+    });
 
-    // // 获取行索引
-    // var _rowindex = Array.from(allTrs).indexOf(targetTr) - 1;
-    // const currentRow = tableData.value[_rowindex];
-    // if (lastClickedRow.value && lastClickedRow.value.id === currentRow.id) {
-    //     // 再次点击同一行，取消点击事件
-    //     lastClickedRow.value = null;
-    //     emit('passValue', Typeswiper.value, "", "", "");
-    // } else {
-    //     if (targetTr) {
-    //         // 给当前点击的 tr 元素添加 active 类名
-    //         targetTr.classList.add('liSelected');
+    // 获取行索引
+    var _rowindex = Array.from(allTrs).indexOf(targetTr) - 1;
+    const currentRow = tableData.value[_rowindex];
+    if (!currentRow) return;
 
-    //         // console.error("sasdasasdasdasdas", currentRow, Typeswiper.value)
-    //         if (Typeswiper.value == "river") {
-    //             emit('passValue', Typeswiper.value, currentRow.hd_base_id, currentRow.hd_zhen, currentRow.hd_name);
-    //         } else if (Typeswiper.value == "district") {
-    //             if (currentRow.title == "花桥经济开发区") {
-    //                 currentRow.title = "花桥镇"
-    //             }
-    //             emit('passValue', Typeswiper.value, currentRow.id, currentRow.title);
-    //         }
-    //     }
-    // }
-    // lastClickedRow.value = currentRow;
+        console.error('currentRow1',currentRow);
+    if (lastClickedRow.value && lastClickedRow.value.stcd === currentRow.stcd) {
+        // 再次点击同一行，取消选中
+        lastClickedRow.value = null;
+        emit('passValue', Typeswiper.value, "", "");
+    } else {
+        // 给当前点击的 tr 元素添加 active 类名
+        targetTr.classList.add('liSelected');
+        if (Typeswiper.value == "river") {
+            emit('passValue', Typeswiper.value, currentRow.stcd, currentRow.stnm, currentRow.stnm);
+        } else if (Typeswiper.value == "district") {
+            emit('passValue', Typeswiper.value, currentRow.stcd, currentRow.stnm);
+        }
+    }
+    lastClickedRow.value = currentRow;       
 }
 function fangda() {
     var dialogClass = $(".dialog").css("display");
@@ -176,8 +147,7 @@ function fangda() {
     showDialog.value = true;
 }
 onMounted(() => {
-    // WeacontentDistrict();
-    GetType("district");
+    loadGCTJ();
 });
 </script>
 <style src="@/assets/styles/Table.css"></style>

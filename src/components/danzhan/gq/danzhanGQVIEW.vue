@@ -81,6 +81,7 @@ function Weacontent() {
   strParam["stime"] = stime.value;
   strParam["etime"] = etime.value;  
   strJsonAll =itemData;
+  console.error('strJsonAll',strJsonAll);
   setTimeout(() => {
     GQload(strJsonAll);
   }, 1000);

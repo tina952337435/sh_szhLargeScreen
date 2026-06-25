@@ -96,6 +96,7 @@ const tableHeaders = ref([
   { name: "num", label: "序号" },
   { name: "tm", label: "时间" },
   { name: "q", label: "流量(m³/s)" },
+  { name: "v", label: "流速(m/s)" },
 ]);
 const tableData = ref();
 const props = defineProps({
@@ -160,7 +161,7 @@ function Weacontent() {
   strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   api
-    .stFlowLine(strParam)
+    .stFlowVelLine(strParam)
     .then((res) => {
       const strJson = res.data;
       var jsondata = strJson.sort(function (a, b) {
@@ -185,6 +186,7 @@ function LLload() {
   const strNote = [];
   strNote.push({ name: "时间", codename: "tm", tableV: "0", isShow: true });
   strNote.push({ name: "流量", codename: "q", tableV: "0", isShow: true });
+  strNote.push({ name: "流速", codename: "v", tableV: "0", isShow: true });
   var LineColor = [
     "#3E8BFF",
     "#1CB8B2",
@@ -194,7 +196,7 @@ function LLload() {
     "#FE7923",
     "#8E30FF",
   ];
-  const _Option = ChartJs.chartLL(
+  const _Option = ChartJs.chartLLLS(
     "",
     strJson,
     strNote,

@@ -1,5 +1,5 @@
 import { CreateLayer, destroy, globallevel, globalalign, map, labels, setLayerToolTip,RemoveLayer, setMapZoom, mapZoomEnd} from "@/utils/ArcGis/MapComm.js";
-import { groupBy, SetNull,validateAndClean } from "@/api/ComUnit.js";
+import { groupBy, SetNull,validateAndClean,formatFlow } from "@/api/ComUnit.js";
 import { ref, reactive, createVNode, defineAsyncComponent, h } from 'vue'
 import Dialog from "@/api/utils/Dialog.js";
 import dayjs from "dayjs";
@@ -17,7 +17,6 @@ var myData = [];
 
 function onaddSWMark(evt) {
     var item = evt.graphic.attributes;
-    // console.error("onaddSWMark", evt, item)
     if (SetNull(item) != "") {
         const ChildVue = defineAsyncComponent(() =>
             import("@/components/danzhan/sq/DanZHanSel.vue")
@@ -35,7 +34,6 @@ function onaddSWMark(evt) {
     evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
 }
 function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMark",myClass,dan=false) {//dan=true时，说明需要按照站分类使用图标
-    // var layerId = "addSWMark" ;
     var WaterLayerGraphicLayer = CreateLayer(layerId); //创建图层
     if (SetNull(WaterLayerGraphicLayer) != "") {
         WaterLayerGraphicLayer.clear(); //删除图层
@@ -73,19 +71,19 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 15, 30);
                     if(dan){
                         if(item.atcunit=="上海水文总站"){
-                            breakSymbol = new PictureMarkerSymbol("/images/water/水位(正常).png", 16, 16);
+                            breakSymbol = new PictureMarkerSymbol("/images/water/水位(正常).png", 14, 14);
                         }
                         else{
-                            breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(正常).png", 22, 22);
+                            breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(正常).png", 20, 20);
                         }
                     }
                     if (item.wrz && Number(item.upz) >= Number(item.wrz)&&Number(item.wrz)>0) {
                         if(dan){   
                             if(item.atcunit=="上海水文总站"){
-                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超警).png", 16, 16);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超警).png", 14, 14);
                             }
                             else{
-                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超警).png", 22, 22);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超警).png", 20, 20);
                             }
                          }else{  
                             breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
@@ -96,10 +94,10 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     if (item.grz && Number(item.upz) >= Number(item.grz)&&Number(item.grz)>0) {
                          if(dan){   
                             if(item.atcunit=="上海水文总站"){
-                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超保).png", 16, 16);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超保).png", 14, 14);
                             }
                             else{
-                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超保).png", 22, 22);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超保).png", 20, 20);
                             }
                          }else{                            
                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
@@ -204,7 +202,7 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
 
         }
         RainLayerGraphicLayer.on("click", onaddYLMark);
-        setLayerToolTip(RainLayerGraphicLayer, "stnm", "drp", "雨量");
+        setLayerToolTip(RainLayerGraphicLayer, "stnm", "drp,addvnm", "雨量,分区");
     }
     setTimeout(function () {
         if (SetNull(strJson) == "")
@@ -381,6 +379,7 @@ function addGQMark(strJson, switchChecked) {
             if (strJson.length > 0) {
                 for (var num = 0; num < strJson.length; num++) {
                     var item = strJson[num];
+                    item["divid"] = "GQ" + item["stcd"];
                     if (SetNull(item.lgtd) == "" && SetNull(item.lttd) == "") {
                         continue;
                     }
@@ -417,6 +416,9 @@ function addGQMark(strJson, switchChecked) {
                     var graphic = new Graphic(point, breakSymbol, strJson[num], null);
                     pondLayerGraphicLayer.add(graphic);
                 }
+
+                setMapZoom(pondLayerGraphicLayer, map.getLevel(), "GQ", "stcd", switchChecked);
+                mapZoomEnd(pondLayerGraphicLayer, null, "GQ", "stcd", switchChecked);
             }
         })
     }, 100)
@@ -709,7 +711,7 @@ function addLLMark(strJson, switchChecked) {
                     }
 
                     var cls = "rainText";
-                    var q = SetNull(item["q"]) != "" ? Number(item["q"]).toFixed(3) : "—";
+                    var q = formatFlow(item["q"]);
                     if (SetNull(item.rotate)!="") {
                         angle = parseInt(item.rotate);
                         if(q!="—"){
@@ -1561,10 +1563,8 @@ function addXunjianPointMark(strJson, switchChecked) {
 }
 function onaddWQMark(evt) {
     var item = evt.graphic.attributes;
-    // console.error("onaddSWMark", evt, item)
     if (SetNull(item) != "") {
         let ChildVue = defineAsyncComponent(() =>
-            // import("@/components/danzhan/wq/WQAreaCapacityNewMode.vue")
             import("@/components/danzhan/wq/DanZhanWQSel.vue")
           );
           var wqid = item.wqid;

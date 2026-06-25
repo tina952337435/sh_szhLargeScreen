@@ -458,5 +458,9 @@ export default {
   getEventRain32: (params) => {
     return request.post(`${serveName}SWZZ_RTSQ_ST_PPTN_R/getEventRain32`, params)
   },   
+  //流量流速过程
+  stFlowVelLine: (params) => {
+    return request.post(`${serveName}SWZZ_RTSQ_ST_FLOW_R/selectHisQV`, params)
+  },
 }
 

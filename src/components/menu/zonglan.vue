@@ -140,7 +140,7 @@
           />
           超警：
         </span>
-        <span class="numCJ">{{ waterCJCount }}</span>
+        <span class="numCJ clickable-count" @click.stop="openStationList('cj')">{{ waterCJCount }}</span>
         <span class="warning-danwei">个</span>
       </span>
       <span style="margin-right: 14px">
@@ -152,7 +152,7 @@
           />
           超保：
         </span>
-        <span class="numCB">{{ waterCBCount }}</span>
+        <span class="numCB clickable-count" @click.stop="openStationList('cb')">{{ waterCBCount }}</span>
         <span class="warning-danwei">个</span>
       </span>
     </div>
@@ -167,7 +167,7 @@ import zonglanyubao from "@/components/menu/yb/zonglanyubao.vue";
 import TaihuSW from "@/components/menu/sq/TaihuSW.vue";
 import Mapbiaozhu from "@/components/untils/Mapbiaozhu.vue";
 import TableWind from "@/components/menu/zonglan/TableWind.vue";
-import { onMounted, ref, nextTick, onUnmounted, provide, reactive } from "vue";
+import { onMounted, ref, nextTick, onUnmounted, provide, reactive, h, defineAsyncComponent } from "vue";
 import api from "@/api/zonglan/index.js";
 import apidzxm from "@/api/zonglan/dzxmIndex.js";
 import dayjs from "dayjs";
@@ -190,6 +190,7 @@ import * as PointMark from "@/utils/ArcGis/PointMark.js";
 import szhStationData from "@/assets/json/szhStation.json";
 
 import tabToggleSQ from "@/components/tab/tabToggleSQ.vue";
+import Dialog from "@/api/utils/Dialog.js";
 
 const route = useRoute();
 const store = useStore();
@@ -216,6 +217,8 @@ const waterZCCount = ref(0),
   waterCJCount = ref(0),
   waterCBCount = ref(0),
   waterQCCount = ref(0);
+const cjStationList = ref([]); // 超警站点列表
+const cbStationList = ref([]); // 超保站点列表
 
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
@@ -302,9 +305,12 @@ function SWload() {
   var zcCount = 0,
     cjCount = 0,
     cbCount = 0,
-    qcCount = 0;
-  const strJson = [];
-  var strResult = strJsonData.value;
+    qcCount = 0;  
+  var strResult =[];
+  // 清空分类数组
+  cjStationList.value = [];
+  cbStationList.value = [];  
+  const strJson= strJsonData.value;
   if (strJson.length > 0) {
     for (var i = 0; i < strJson.length; i++) {
       var item = strJson[i];
@@ -321,23 +327,28 @@ function SWload() {
           ? 99
           : Number(item.grz).toFixed(2);
       item.upz = z;
-
       if (z == null || z == "") {
         qcCount++;
         if (cb_waterQC.value == true) {
           strResult.push(item);
         }
-      } else if (z >= grz) {
+      } 
+      else if (z >= grz) {
         cbCount++;
+        cjStationList.value.push(item);
+        cbStationList.value.push(item);
         if (cb_waterCB.value == true) {
           strResult.push(item);
         }
-      } else if (z >= wrz) {
+      } 
+      else if (z >= wrz) {
         cjCount++;
+        cjStationList.value.push(item);
         if (cb_waterCJ.value == true) {
           strResult.push(item);
         }
-      } else {
+      } 
+      else {
         zcCount++;
         if (cb_waterZC.value == true) {
           strResult.push(item);
@@ -468,7 +479,7 @@ function YLload() {
   }
 }
 var colors = ["#A6F28E", "#007B00", "#3DBCF9", "#0000F9", "#FB3DFA", "#7B0000"];
-var levels = [0.1,10,25,50,100,200];
+var levels = [0.01,10,25,50,100,200];
 function MapRainfall() {
   var strParam = {
     interpolation_method: "trigonometric",
@@ -532,6 +543,21 @@ onUnmounted(() => {
 function parentMethodshowDynamicLayer(item) {
   setZOOM(13);
   dyCenter(item[0], item[1]);
+}
+// 点击超警/超保数量，弹窗查看站点清单
+function openStationList(type) {
+  const list = type === "cj" ? cjStationList.value : cbStationList.value;
+  const title = type === "cj" ? "超警" : "超保";
+  if (!list || list.length === 0) {
+    return;
+  }
+  const StationListDialog = defineAsyncComponent(() =>
+    import("@/components/menu/sq/StationListDialog.vue")
+  );
+  Dialog.open(
+    { title: `${title}站点清单（${list.length}个）`, widh: 1200, heig: 700 },
+    h(StationListDialog, { stationList: list, type: type })
+  );
 }
 //传参
 provide("strJsonDataNew", strJsonData);
@@ -729,6 +755,14 @@ provide("strJsonDataNew", strJsonData);
   display: flex;
 }
 
+.clickable-count {
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+.clickable-count:hover {
+  color: #ffd700 !important;
+}
 .monitorSwitch_container .text-num {
   background-color: #c52821;
   width: 20px;

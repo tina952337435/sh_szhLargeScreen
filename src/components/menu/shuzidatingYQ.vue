@@ -876,7 +876,7 @@ function YLload() {
   SpanItem("RainDZMMarker");
 }
 var colors = ["#A6F28E", "#007B00", "#3DBCF9", "#0000F9", "#FB3DFA", "#7B0000"];
-var levels = [0.1,10,25,50,100,200];
+var levels = [0.01,10,25,50,100,200];
 function MapRainfall() {
   var strParam = {
     interpolation_method: "trigonometric",

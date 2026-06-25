@@ -8,7 +8,7 @@
             <el-input v-model="searchKey" placeholder="请输入搜索站点" clearable @input="handleSearch"></el-input>
         </div>
         <div class="txt" style="overflow-y: auto">
-            <customTable :headers="tableHeaders" :rows="tableData" :key="datekey" class="m-table FirstTable" :border="0"
+            <customTable :headers="tableHeaders" :rows="tableData" :key="datekey" class="m-table" :border="0"
                 :cellspacing="0" :cellpadding="0" @click="handleclick" />
         </div>
         <div class="bot leftBottom-radius"></div>
@@ -35,7 +35,8 @@ const tableHeaders = ref([
     { name: "sortnum", label: "序号",width:"10%" },
     { name: "stnm", label: "站名"},
     { name: "drp", label: "雨量(mm)",width:"15%" },
-    { name: "addvnm", label: "分区",width:"25%" },
+    // { name: "addvnm", label: "分区",width:"15%" },
+    { name: "tm", label: "时间",width:"25%" },
 ]);
 const tableData = ref([]);
 // 判断弹窗是否显示,默认隐藏
@@ -84,9 +85,10 @@ function Weacontent() {
         for (var num = 0; num < strJson.length; num++) {
             var item = strJson[num];
             var _strParam = {};
+            var tmStr=SetNull(item.tm)!=""?dayjs(item.tm).format("MM-DD HH:mm"):"-";
             _strParam["stnm"] = SetNull(item["stnm"]).replaceAll(" ", "");
-            _strParam["drp"] =SetNull(item["drp"])==""?"-":item.drp.toFixed(1);
-            _strParam["tm"] = item.tm;
+            _strParam["drp"] =item["drp"]==null||item["drp"]==undefined?"-":item.drp.toFixed(1);
+            _strParam["tm"] =tmStr;
             _strParam["stcd"] = item.stcd;
             _strParam["lgtd"] = Number(item.lgtd);
             _strParam["lttd"] = Number(item.lttd);
@@ -166,11 +168,15 @@ onMounted(() => {
 <style src="@/assets/styles/Table.css"></style>
 <style scoped>
 :deep(tr td:nth-child(1)) {
-    width: 20vh !important;
+    /* width: 20vh !important; */
 }
 
-tr td:nth-child(2) {
-    width: 15vh;
+:deep(tr td:nth-child(2)) {
+    /* width: 15vh; */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 tr td:nth-child(3) {
@@ -211,7 +217,7 @@ tr td:nth-child(5) {
   --el-input-border-color: var(--popContentHeadbg) !important;
   width: 160px;
   border-radius: 6px;
-  margin-left: 10px;
+  margin-left: 50px;
   height: 1.8rem;
   vertical-align: 0.8rem;
 }

@@ -1329,6 +1329,27 @@ function getWindDirectionName(code) {
     // 3. 返回结果，如果找不到则返回 '未知'
     return directionMap[key] || '未知';
 }
+/**
+ * 格式化流量数值
+ * 规则：保留3位有效数字，且禁止使用科学计数法（针对大数值）
+ */
+function formatFlow(value) {
+    // 1. 边界检查
+    if (value === null || value === undefined || isNaN(value)) return '-';
+
+    // 2. 核心逻辑：先取3位有效数字
+    let result = Number(value).toPrecision(3);
+
+    // 3. 关键步骤：处理科学计数法 (例如 "4.44e+4")
+    // 如果结果中包含 'e'，说明变成了科学计数法，我们需要把它转回普通数字
+    if (result.includes('e')) {
+        // parseFloat 会自动把 "4.44e+4" 变成 44400
+        // toFixed(0) 确保不显示小数点（因为大数值通常不需要小数）
+        result = parseFloat(result).toFixed(0);
+    }
+
+    return result;
+}
 export {
     groupBy,
     sortObjectArray,
@@ -1355,5 +1376,6 @@ export {
     getParametricEquation,
     getPie3D,
     validateAndClean,
-    getWindDirectionName
+    getWindDirectionName,
+    formatFlow
 }
