@@ -4,25 +4,25 @@
         <tabToggleZT />
     </aside>
     <div class="g-lside">
-        <div style="wistrresulth: 100%">
+        <div style="width: 100%">
             <EchartZXSL :strJsonData="tableData" :key="datekeyAllZXSL" @parentMethodshowDynamicLayers="parentMethodshowDynamicLayer"/>
         </div>    
         
-        <div style="wistrresulth: 100%">
+        <div style="width: 100%">
             <EchartCXLGC :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAll"/>
         </div> 
 
-        <div style="wistrresulth: 100%">
+        <div style="width: 100%">
             <TableSPXSL :strJsonData="tableData" :key="datekeyAll" />
         </div>
     </div>
 
     <!-- 右侧 -->
     <div class="g-rside">    
-        <div style="wistrresulth: 100%">            
+        <div style="width: 100%">            
             <TableCXL :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAll"/>
         </div>
-        <div style="wistrresulth: 100%">
+        <div style="width: 100%">
             <EchartCXLGX :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAll"/>
         </div> 
     </div>

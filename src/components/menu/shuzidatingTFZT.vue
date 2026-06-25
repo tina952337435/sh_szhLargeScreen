@@ -5,13 +5,13 @@
   </aside>
   <!-- 左侧 -->
   <div class="g-lside">
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <TableTFTJ :strJsonData="strJsonData" :key="datekeyAll" />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <EchartYQFP :strJsonData="strJsonData" :key="datekeyAll" />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <TaihuZS :strJsonData="strJsonData" :key="datekeyAll" />
     </div>
   </div>
@@ -20,10 +20,10 @@
     <div style="width: 100%">
       <TableZSTJ :strJsonData="strJsonData" :key="datekeyAll" />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <gongchengdd :strJsonData="strJsonData" :key="datekeyAll" />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <fxmeiguitu :strJsonData="strJsonData" :key="datekeyAll" />
     </div>
   </div>

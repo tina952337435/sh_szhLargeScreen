@@ -6,9 +6,13 @@
         <li :class="mtype == 'BX' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="getType('BX')">报汛</li>
         <li :class="mtype == 'QX' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="getType('QX')">气象</li>
       </ul> -->
-      <span style="margin-left: 20px">站点选择：</span>
+      <span style="margin-left: 20px">水位站：</span>
       <el-select style="max-width: 120px;" v-model="value" filterable placeholder="请选择站点" @change="handleChange">
         <el-option v-for="item in Liststnm" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
+      <span style="margin-left: 20px">雨量站：</span>
+      <el-select style="max-width: 120px;" v-model="valueYL" filterable placeholder="请选择站点" @change="handleChangeYL">
+        <el-option v-for="item in ListstnmYL" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
       <span style="margin-left: 20px">开始时间：</span>
       <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
@@ -85,7 +89,9 @@ const tabName = ref("fit1");
 const img1 = ref("/images/line-chart.png");
 const img2 = ref("/images/line-table4.png");
 const Liststnm = ref([]);
-const value = ref([])
+const ListstnmYL = ref([]);
+const value = ref([]);
+const valueYL=ref([]);
 
 const tableHeaders = ref([
   { name: "num", label: "序号" },
@@ -114,8 +120,9 @@ const props = defineProps({
 });
 function loadZhan() {
   value.value = stcd.value;
-  api.QuSel({ "pid": "2026031114184492913-6" }).then((res) => {
-    console.error("res", res.data)
+  valueYL.value=stcd.value;
+  api.QuSelDuo({ "pid": "2026031114184492913-2,2026031114184492913-7,2026031114184492913-8" }).then((res) => {//所有水位站
+    // console.error("res", res.data)
     var strJson = [];
     if (res.data.length > 0) {
       for (var i = 0; i < res.data.length; i++) {
@@ -129,17 +136,33 @@ function loadZhan() {
     }
     Liststnm.value = strJson;
   });
+
+  api.QuSelDuo({ "pid": "201901101419326076-1-1,201901101419326076-5" }).then((res) => {//所有雨量站
+    // console.error("res", res.data)
+    var strJson = [];
+    if (res.data.length > 0) {
+      for (var i = 0; i < res.data.length; i++) {
+        var strTemp = {
+          value: res.data[i].stcd,
+          label: res.data[i].stnm,
+          children: []
+        }
+        strJson.push(strTemp)
+      }
+    }
+    ListstnmYL.value = strJson;
+  });
 }
 function Weacontent() {
   window.loadingShow();
   var strParam = {};
-  strParam["stcd"] = stcd.value;
+  strParam["stcd"] = stcd.value+","+valueYL.value;
   strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   strParam["pathname"] = pathname.value;
   strParam["datasource"] ="BX";
   api
-    .querySWDRPDANZHANList(strParam)
+    .querySWDRPDANZHANListSYL(strParam)
     .then((res) => {    
       const strJson = sortObjectArray(res.data, ["tm"], "asc");
       var jsondata = strJson.sort(function (a, b) {
@@ -243,6 +266,10 @@ function getType(obj) {
 function handleChange(value) {
   // console.error(value)
   stcd.value = value;
+  Weacontent();
+}
+function handleChangeYL(value) {
+  valueYL.value = value;
   Weacontent();
 }
 function TypeeChange(e) {

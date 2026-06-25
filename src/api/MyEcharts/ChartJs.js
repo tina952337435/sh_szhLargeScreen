@@ -1850,7 +1850,7 @@ export default {
 
     },
     // 河道过程线
-    chartHD: (chartName, data, strNote, theme) => {
+    chartHD: (chartName, data, strNote, theme,hengX=false) => {
         var axisLabelColor, axisLineColor, splitLineColor, legendColor, itemColor;
         if (theme == "BlueTheme" || theme == "VioletTheme") {
             axisLabelColor = "#000";
@@ -1912,6 +1912,20 @@ export default {
                     fontSize: 14,
                     //rotate: 30,//-30度角倾斜显示
                     position: [10, 10],
+                    formatter: function (value) {
+                        if(hengX){
+                            var name = value.split("").join("\n");
+                            return name;
+                            // if (Number(name.length) > 7) {
+                            //     return name.slice(0, 5) + "\n...";
+                            // } else {
+                            //     return name;
+                            // }
+                        }else{
+                            return value;
+                        }
+                            
+                    },
                 },
                 axisLine: {
                     lineStyle: {

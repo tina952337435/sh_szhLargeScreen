@@ -232,25 +232,25 @@ function chartSW(data, strNote, LineColor, max_min_Name) {
                             //if (minValue < 0) {
                             //    minValue = 0;
                             //}
-                            return 2.5;
+                            return minValue;
                         },
                         max: function (value) {
-                            // var jiange = (value.max - value.min).toFixed(2) * 100;
-                            // var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+                            var jiange = (value.max - value.min).toFixed(2) * 100;
+                            var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
 
-                            // jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
-                            // if ((jiangenew - jiange - 1) == 0) {
-                            //     jiangenew = jiangenew * 2;
-                            // }
-                            // if (jiangenew < 5) jiangenew = 5;
+                            jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                            if ((jiangenew - jiange - 1) == 0) {
+                                jiangenew = jiangenew * 2;
+                            }
+                            if (jiangenew < 5) jiangenew = 5;
 
-                            // if ((jiangenew - jiange) % 2 == 0) {
-                            //     return value.max + (jiangenew - jiange) / 30;
-                            // }
-                            // else {
-                            //     return value.max + (jiangenew - jiange + 1) / 30;
-                            // }
-                            return 3.10;
+                            if ((jiangenew - jiange) % 2 == 0) {
+                                return value.max + (jiangenew - jiange) / 30;
+                            }
+                            else {
+                                return value.max + (jiangenew - jiange + 1) / 30;
+                            }
+                            // return 3.10;
 
                         },
                         axisLabel: {

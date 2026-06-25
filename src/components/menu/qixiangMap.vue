@@ -7,26 +7,26 @@
 
   <!-- 左侧 -->
   <div class="g-lside">      
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <zonglanAreaChart :resultDataSL="resultDataSL" :key="datekeyAll" />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <zonglanAreaChartZY :strJsonData="strJsonData" :fbtime="fbtime" :key="datekeyAllYL"/>
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <wendai/>
     </div>   
 
   </div>
   <!-- 右侧 -->
   <div class="g-rside">        
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <taifeng/>
     </div> 
-    <div style="wistrresulth: 100%">   
+    <div style="width: 100%">   
       <haichao />
     </div>
-    <div style="wistrresulth: 100%">   
+    <div style="width: 100%">   
       <windyweater />
     </div>
   </div>

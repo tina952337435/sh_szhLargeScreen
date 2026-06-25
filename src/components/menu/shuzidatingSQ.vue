@@ -54,11 +54,53 @@
         共享站
       </span>
     </div> -->
+
+    <div style="color: var(--popupContentTitleColor);padding: 0px 10px">-------站点类型-------</div>
+      <div style="height: 25px; line-height: 25px;padding: 0px 10px">
+        <img
+          alt=""
+          src="/images/water/水位(正常).png"
+          style="
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            display: inline-block;margin-left: 2px;
+          "
+        />
+        <span style="padding-left: 2px; color: var(--title2);vertical-align: 4px; ">
+          防汛站(<span
+            id="countFX"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
+          ></span
+          >)
+        </span>
+      </div>
+      <div style="height: 25px; line-height: 25px;padding: 0px 10px">
+        <img
+          alt=""
+          src="/images/water/共享水位(正常).png"
+          style="
+            width: 25px;
+            height: 25px;
+            display: inline-block;
+          "
+        />
+        <span style="color: var(--title2); vertical-align:8px">
+          共享站(<span
+            id="countGX"
+            style="color: var(--popupContentTitleColor); font-size: 14px"
+          ></span
+          >)
+        </span>
+      </div>
+      <div style="padding:5px 0px;color: var(--popupContentTitleColor);padding: 5px 10px 0px 10px;">-------站点图例-------</div>
+      
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterZC')" v-model="cb_waterZC" type="checkbox"
         checked="checked" />
-      <img alt="" src="/images/icon_51.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+      <!-- <img alt="" src="/images/icon_51.png"
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
+        <span class="colorSpan" style="background-color:#1afa29"></span>
       <span style="padding-left: 2px; color: white; vertical-align: 15px; margin-left: 2px">
         正常(<span id="waterZC" style="color: rgb(6 255 255); font-size: 14px"></span>)
       </span>
@@ -66,8 +108,11 @@
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterCJ')" v-model="cb_waterCJ" type="checkbox"
         checked="checked" />
-      <img alt="" src="/images/cheng2.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+      <!-- <img alt="" src="/images/cheng2.png"
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
+
+        <span class="colorSpan" style="background-color:#FFC000"></span>
+
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
         超警(<span id="waterCJ" style="color: rgb(6 255 255); font-size: 14px"></span>)
       </span>
@@ -75,8 +120,11 @@
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterCB')" v-model="cb_waterCB" type="checkbox"
         checked="checked" />
-      <img alt="" src="/images/hong.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+      <!-- <img alt="" src="/images/hong.png"
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
+
+        <span class="colorSpan" style="background-color:#FF0000"></span>
+
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
         超保(<span id="waterCB" style="color: rgb(6 255 255); font-size: 14px"></span>)
       </span>
@@ -84,8 +132,9 @@
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterQC')" v-model="cb_waterQC" type="checkbox"
         checked="checked" />
-      <img alt="" src="/images/water_qc.png"
-        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+      <!-- <img alt="" src="/images/water_qc.png"
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" /> -->
+        <span class="colorSpan" style="background-color:#C1C1C1"></span>
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
         缺测(<span id="waterQC" style="color: rgb(6 255 255); font-size: 14px"></span>)
       </span>
@@ -466,6 +515,7 @@ function SWload() {
     cjCount = 0,
     cbCount = 0,
     qcCount = 0;
+  var countFX=0,countGX=0;//防汛站，共享站（气象站）
   const strJson = strJsonData.value;
 
   // if (resultList.length > 0) {
@@ -530,6 +580,13 @@ function SWload() {
           strResult.push(item);
         }
       }
+
+      if(item.atcunit=="上海水文总站"){
+        countFX++;
+      }
+      else{
+        countGX++;
+      }
     }
     // console.error('WartfallStr',WartfallStr);
   }
@@ -537,12 +594,15 @@ function SWload() {
   $("#waterCJ").html("" + cjCount + "");
   $("#waterCB").html("" + cbCount + "");
   $("#waterQC").html("" + qcCount + "");
+  $("#countFX").html("" + countFX + "");
+  $("#countGX").html("" + countGX + "");
   SWDATA.value = strResult;
-  PointMark.addSWMark(viewer, strResult, stime.value, etime.value, riverMarker.value);
+  PointMark.addSWMark(viewer, strResult, stime.value, etime.value, riverMarker.value,undefined,undefined,true);
   SpanItem("WaterSsxMarker");
 }
 function getTLObj(obj) {
   $(".light").remove();
+  $(".level_all").remove();
   try {
     // PointMark.removePrimitiveByName(viewer, "水位")
   } catch (ex) { }
@@ -991,4 +1051,20 @@ function parentMethodshowDynamicLayer(item) {
 }
 
 /* 搜索结束 */
+
+.colorSpan{
+    display: inline-block;
+    width: 15px;
+    height:13px;
+    /* margin-right: 5px; */
+    margin-left:5px;
+    vertical-align: 15px;
+}
+.colorL{
+  padding: 10px;
+}
+.colorL p {
+  line-height: 16px;
+  margin-bottom: -4px;
+}
 </style>

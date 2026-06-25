@@ -29,15 +29,15 @@
       <span style="vertical-align: -10px; margin-left: 50px">标注</span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
-      <img alt src="/images/icon_51.png" style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block">
+      <img alt src="/images/icon_51.png" style="width: 15px; height: 30px; margin-top: 2px; display: inline-block">
       <span style="padding-left: 2px; color: white; vertical-align: 15px; margin-left: 2px">正常</span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
-      <img alt src="/images/cheng2.png" style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block">
+      <img alt src="/images/cheng2.png" style="width: 15px; height: 30px; margin-top: 2px; display: inline-block">
       <span style="padding-left: 2px; color: white; vertical-align: 15px">超警</span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
-      <img alt src="/images/hong.png" style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block">
+      <img alt src="/images/hong.png" style="width: 15px; height: 30px; margin-top: 2px; display: inline-block">
       <span style="padding-left: 2px; color: white; vertical-align: 15px">超保</span>
     </div>
     <div class="colorL" id="colorLSW" style="margin-top:15px;padding: 0px 10px;">

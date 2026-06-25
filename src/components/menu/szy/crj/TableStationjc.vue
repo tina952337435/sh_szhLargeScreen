@@ -93,7 +93,19 @@ function Weacontent() {
 }
 const emit = defineEmits(['parentMethodshowDynamicLayers']);
 function handleclick(evt) {
-  const name = evt.target.innerText;
+  const targetId = evt.target.id;
+  var name = evt.target.innerText;
+  if(targetId=="q"){
+        const parentDom = evt.target.parentNode; 
+        const prevSibling = parentDom.previousElementSibling; 
+         // 查找 prevSibling 下的第一个 span 元素
+        const spanElement = prevSibling.querySelector('span');
+        if (spanElement) {
+            // 获取文本内容
+            name = spanElement.textContent;
+        }
+    }
+
   const strJson = tableData.value.find(item => item.stnm === name);
   if(strJson==undefined){
     return;
@@ -107,16 +119,20 @@ function handleclick(evt) {
     var evt=[_lgtd,_lttd];
     emit("parentMethodshowDynamicLayers", evt);
   }
-  const ChildVue = defineAsyncComponent(() =>
-    import("@/components/danzhan/ll/LLLine.vue")
-  );
-  const props = {};
-  props["stcd"] = strJson["stcd"];
-  props["stime"] = "";
-  props["etime"] = "";
-  props["mtype"] = strJson["mtype"];
-  //ChildVue为弹窗中嵌入的slot
-  Dialog.open({ title: strJson["stnm"] + "流量过程", widh: 1500, heig: 700 }, h(ChildVue, props)).then(() => { console.log('弹窗关闭了') })
+  if(targetId=="q"){
+    var nowTM = new Date();
+    const ChildVue = defineAsyncComponent(() =>
+      import("@/components/danzhan/sq/DanZHanSel.vue")
+    );
+    const props = {};
+    props["stcd"] = strJson["stcd"];
+    props["stime"] = "";
+    props["etime"] = dayjs(nowTM).add(1, "HOUR").format("YYYY-MM-DD HH:00:00");
+    props["mtype"] = strJson["mtype"];
+    props["type"] = "流量过程";
+    //ChildVue为弹窗中嵌入的slot
+    Dialog.open({ title: strJson["stnm"], widh: 1500, heig: 700 }, h(ChildVue, props)).then(() => { console.log('弹窗关闭了') })
+  }
 }
 const searchKey = ref('')
 function handleSearch(evt) {

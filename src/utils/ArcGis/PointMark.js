@@ -34,7 +34,7 @@ function onaddSWMark(evt) {
     }
     evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
 }
-function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMark",myClass) {
+function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMark",myClass,dan=false) {//dan=true时，说明需要按照站分类使用图标
     // var layerId = "addSWMark" ;
     var WaterLayerGraphicLayer = CreateLayer(layerId); //创建图层
     if (SetNull(WaterLayerGraphicLayer) != "") {
@@ -69,18 +69,43 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     }
                     item["divid"] = "SQ" + item["stcd"];
                     // var cls = " level_zc";
-                    var cls = myClass==undefined?" level_all":" "+myClass;
-
+                    var cls = myClass==undefined||myClass==""?" level_all":" "+myClass;
                     breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 15, 30);
-                    // if (item.wrz && Number(item.upz) >= Number(item.wrz)&&Number(item.wrz)>0) {
-                    //     breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
-                    //     cls = " level_wrz";
-                    // }
-                    // // 只有当 grz 存在，且 upz 大于等于 grz 时，才执行
-                    // if (item.grz && Number(item.upz) >= Number(item.grz)&&Number(item.grz)>0) {
-                    //     breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
-                    //     cls = " level_grz";
-                    // }
+                    if(dan){
+                        if(item.atcunit=="上海水文总站"){
+                            breakSymbol = new PictureMarkerSymbol("/images/water/水位(正常).png", 16, 16);
+                        }
+                        else{
+                            breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(正常).png", 22, 22);
+                        }
+                    }
+                    if (item.wrz && Number(item.upz) >= Number(item.wrz)&&Number(item.wrz)>0) {
+                        if(dan){   
+                            if(item.atcunit=="上海水文总站"){
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超警).png", 16, 16);
+                            }
+                            else{
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超警).png", 22, 22);
+                            }
+                         }else{  
+                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
+                         }
+                        // cls = " level_wrz";
+                    }
+                    // 只有当 grz 存在，且 upz 大于等于 grz 时，才执行
+                    if (item.grz && Number(item.upz) >= Number(item.grz)&&Number(item.grz)>0) {
+                         if(dan){   
+                            if(item.atcunit=="上海水文总站"){
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超保).png", 16, 16);
+                            }
+                            else{
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超保).png", 22, 22);
+                            }
+                         }else{                            
+                           breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
+                         }
+                        // cls = " level_grz";
+                    }
                     var point = new Point({
                         "x": item.lgtd,
                         "y": item.lttd,
@@ -97,7 +122,7 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     item.dwz = validateAndClean(item.dwz);
                     item.grz = validateAndClean(item.grz);
                     item.wrz = validateAndClean(item.wrz);
-                    item.tmStr=dayjs(item.tm).format("MM-DD HH:mm");
+                    item.tmStr=item.tm!=undefined?dayjs(item.tm).format("MM-DD HH:mm"):"-";
 
                     if (item.upz != "" && item.dwz != "") {
                         textStr += item.upz + "/" + item.dwz;
@@ -107,6 +132,23 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     }
                     else if (item.dwz != "") {
                         textStr += item.dwz;
+                    }
+                    if(item.stnm=="虹桥"){
+                        
+                    console.error(item.upz,item.dwz);
+                    }
+                    if(item.upz == "" && item.dwz == "")
+                    {//缺测
+                        if(dan){   
+                            if(item.atcunit=="上海水文总站"){
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(缺测).png", 16, 16);
+                            }
+                            else{
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(缺测).png", 22, 22);
+                            }
+                         }else{ 
+                            breakSymbol = new PictureMarkerSymbol("/images/water_qc.png", 15, 30);
+                         }
                     }
                     var oneAlign = "top";
                     if (SetNull(item["dir"]) != "") {
@@ -640,7 +682,7 @@ function addLLMark(strJson, switchChecked) {
 
         }
         LLLayerGraphicLayer.on("click", onaddLLMark);
-        setLayerToolTip(LLLayerGraphicLayer, "stnm", "q", "流量");
+        setLayerToolTip(LLLayerGraphicLayer, "stnm", "q,rvnm,tm", "流量,河道,时间");
     }
     setTimeout(function () {
         if (SetNull(strJson) == "")
@@ -659,6 +701,7 @@ function addLLMark(strJson, switchChecked) {
                     var item = arr[i];
                     item.lgtd = item.lgtd;
                     item.lttd = item.lttd;
+                    item["divid"] = "LL" + item["stcd"];
                     var angle = 0;
                     var _align = "bottom";
                     if(SetNull(item.dir)!=""){
@@ -677,20 +720,26 @@ function addLLMark(strJson, switchChecked) {
                         angle=angle+180;//图片箭头是向下的
                     }
                     var _width=10,_height=60;
-                    let imgUrl = "/images/fl_y.gif";
-                    if (SetNull(item.q) == "") {//没流量
-                        angle=0;
-                        imgUrl = "/images/tgtqtingzhi.svg";
-                        _width=18;
+                    var imgUrl = "/images/fl_y.gif";
+                    if(item.atcunit!="上海水文总站"){
+                         imgUrl = "/images/LL.png";
+                         _width=18;
                         _height=18;
                     }
-                    if (SetNull(item.tm) == "") {//缺测
-                        angle=0;
-                        imgUrl = "/images/tgtqarrowtz.svg";
-                        _width=18;
-                        _height=18;
+                    else{                    
+                        if (SetNull(item.q) == "") {//没流量
+                            angle=0;
+                            imgUrl = "/images/tgtqtingzhi.svg";
+                            _width=18;
+                            _height=18;
+                        }
+                        if (SetNull(item.tm) == "") {//缺测
+                            angle=0;
+                            imgUrl = "/images/tgtqarrowtz.svg";
+                            _width=18;
+                            _height=18;
+                        }
                     }
-                    
                     breakSymbol = new PictureMarkerSymbol(imgUrl, _width, _height);
                     breakSymbol.angle = angle;
 

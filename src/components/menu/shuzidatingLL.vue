@@ -19,16 +19,16 @@
       <el-switch class="switch-xs iconMarker" @click="SpanItem('riverMarker')" v-model="riverMarker" />
       <span style="vertical-align: -10px; margin-left: 50px"> 标注 </span>
     </div>
-    <!-- <div style="height: 30px; line-height: 30px; padding: 8px 10px">
-      <img alt="" src="/images/outInfo.png"
-        style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block" />
-      <span style="padding-left: 2px; color: white; vertical-align: 15px; margin-left: 2px">入境水量 </span>
+    <div style="height: 30px; line-height: 30px; padding: 8px 10px">
+      <img alt="" src="/images/fl_y.png"
+        style="width:40px; height: 10px; margin-top: 2px; display: inline-block;" />
+      <span style="padding-left: 2px; color: white; margin-left: 2px">自有站</span>
     </div>
     <div style="height: 30px; line-height: 30px; padding: 8px 10px">
-      <img alt="" src="/images/inInfo.png"
-        style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block" />
-      <span style="padding-left: 2px; color: white; vertical-align: 15px">出境水量 </span>
-    </div> -->
+      <img alt="" src="/images/LL.png"
+        style="width: 20px; height: 20px;display: inline-block;margin-left: 5px;" />
+      <span style="padding-left: 20px; color: white; vertical-align: 6px">共享站</span>
+    </div>
   </div>
   <!-- <div class="xiala"
     style="right: 5px;position: absolute;top: calc(5rem + 20px);width:100px;line-height: 30px;cursor: pointer;">
@@ -117,7 +117,7 @@ function SpanItem(obj) {
 function Weacontent() {
   window.loadingShow();
   var strParam = {};
-  strParam["pid"] = "2026031114184492913-4";
+  strParam["pid"] = "2026031114184492913-4,2019011015353464106";
   strParam["stime"] = stime.value;
   strParam["etime"] = etime.value;
   apizonglan.stFlowJC(strParam).then((res) => {  

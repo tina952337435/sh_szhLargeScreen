@@ -7,10 +7,10 @@
 
   <!-- 左侧 -->
   <div class="g-lside">
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <EchartShanghai />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <hourSQTJ
         :strJsonData="strJsonDataYL"
         :stime="ylStime"
@@ -18,7 +18,7 @@
         :key="datekeyAllYL"
       />
     </div>
-    <div style="wistrresulth: 100%">
+    <div style="width: 100%">
       <TableSWJC
         :strJsonData="strJsonData"
         :key="datekeyAll"
@@ -85,7 +85,7 @@
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterZC')" v-model="cb_waterZC" type="checkbox"
         checked="checked" />
       <img alt="" src="/images/icon_51.png"
-        style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
       <span style="padding-left: 2px; color: white; vertical-align: 15px; margin-left: 2px">
         正常
         (<span id="waterZC" style="color: rgb(6 255 255); font-size: 14px">{{ waterZCCount }}</span>)
@@ -95,7 +95,7 @@
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterCJ')" v-model="cb_waterCJ" type="checkbox"
         checked="checked" />
       <img alt="" src="/images/cheng2.png"
-        style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
         超警
         (<span id="waterCJ" style="color: rgb(6 255 255); font-size: 14px">{{ waterCJCount }}</span>)
@@ -105,7 +105,7 @@
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterCB')" v-model="cb_waterCB" type="checkbox"
         checked="checked" />
       <img alt="" src="/images/hong.png"
-        style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
         超保
         (<span id="waterCB" style="color: rgb(6 255 255); font-size: 14px">{{ waterCBCount }}</span>)
@@ -115,7 +115,7 @@
       <input style="vertical-align: 15px" @click="getTLObj('cb_waterQC')" v-model="cb_waterQC" type="checkbox"
         checked="checked" />
       <img alt="" src="/images/water_qc.png"
-        style="wistrresulth: 15px; height: 30px; margin-top: 2px; display: inline-block" />
+        style="width: 15px; height: 30px; margin-top: 2px; display: inline-block" />
       <span style="padding-left: 2px; color: white; vertical-align: 15px">
         缺测
         (<span id="waterQC" style="color: rgb(6 255 255); font-size: 14px">{{ waterQCCount }}</span>)
@@ -136,7 +136,7 @@
           <img
             alt=""
             src="/images/cheng2.png"
-            style="wistrresulth: 15px; height: 30px; vertical-align: -13px"
+            style="width: 15px; height: 30px; vertical-align: -13px"
           />
           超警：
         </span>
@@ -148,7 +148,7 @@
           <img
             alt=""
             src="/images/hong.png"
-            style="wistrresulth: 15px; height: 30px; vertical-align: -13px"
+            style="width: 15px; height: 30px; vertical-align: -13px"
           />
           超保：
         </span>

@@ -85,11 +85,15 @@ function Weacontent() {
         for (var i = 0; i < parseInt(Number(strJson[num].distance) / 1000); i++) {
           strNote.push({ "name": "", "codename": (i + 1), "tableV": "1", "isShow": true, "width": "20%" });
         }
-        strNote.push({ "name": strJson[num].stnm, "codename": strJson[num].stcd, "tableV": "1", "isShow": true, "width": "20%" });
+
+        var stnmNew=strJson[num].stnm.indexOf("（")>-1?strJson[num].stnm.substring(0,strJson[num].stnm.indexOf("（")):strJson[num].stnm;
+
+        strNote.push({ "name": stnmNew, "codename": strJson[num].stcd, "tableV": "1", "isShow": true, "width": "20%" });
       }
       strNote.push({ "name": "", "codename": "13", "tableV": "1", "isShow": true, "width": "20%" });
     }
-    const _Option = ChartJs.chartHD("", strJson, strNote, _theme);
+    // console.error('strNote',strNote);
+    const _Option = ChartJs.chartHD("", strJson, strNote, _theme,true);
     if (pid.value == "2024103110210061872") {
       _Option.grid.bottom = 30;
     } else if (pid.value == "2023061517201546817") {
@@ -126,14 +130,6 @@ function fangda() {
 onMounted(() => {
   Weacontent();
 });
-function ExportData() {
-  const ChildVue = defineAsyncComponent(() =>
-    import("@/components/danzhan/sq/RiverDF.vue")
-  );
-  Dialog.open({ title: "太浦河提防水位关系图", widh: 1600, heig: 600 }, h(ChildVue, {})).then(() => {
-
-  })
-}
 </script> 
 <style scoped>
 :deep(.el-button span) {

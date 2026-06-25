@@ -431,6 +431,9 @@ export default {
   querySWDRPDANZHANList: (params) => {
     return request.post(`${serveName}SWZZ_RTSQ_ST_PPTN_R/querySWDRPDANZHANList`, params)
   },
+  querySWDRPDANZHANListSYL: (params) => {
+    return request.post(`${serveName}SWZZ_RTSQ_ST_PPTN_R/querySWDRPDANZHANListSYL`, params)
+  },
   // 工情：水利片统计
   stPptnGQSLPTJ: (params) => {
     return request.post(`${serveName}/SWZZ_RTSQ_ST_GATE_RNEW/queryTreeList`, params)
