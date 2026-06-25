@@ -217,9 +217,12 @@ function LLload() {
   var averageP = 0, averagePN = 0;
   for (var num = 0; num < strJson.length; num++) {
     var item = strJson[num];
-    var q = "—";
+    var q = "—",v="—";
     if(SetNull(item.q)!=""){
       q = Number(item.q).toFixed(2);
+    }
+    if(SetNull(item.v)!=""){
+      v = Number(item.v).toFixed(2);
     }
     var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
 
@@ -236,7 +239,7 @@ function LLload() {
         maxTM = tm;
       }
     }
-    result.push({ num: num + 1, tm: tm, q: q });
+    result.push({ num: num + 1, tm: tm, q: q,v:v });
   }
   if (averageP > 0) {
     averageP = Number(averageP / averagePN).toFixed(2)
