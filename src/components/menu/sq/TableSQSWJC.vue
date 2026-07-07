@@ -93,9 +93,12 @@ function Weacontent() {
             var wrzCha = "—";
             var colorCss = "";
             if (wrz != "—" && upz != "—") {
-                wrzCha = Number(Number(upz) - Number(wrz)).toFixed(2);
+                wrzCha = Number(Number(upz) - Number(wrz)).toFixed(2);               
                 if (Number(wrzCha) > 0) {
                     colorCss = "#F9C33D";
+                }
+                else{//负数的不展示
+                    wrzCha = "—";
                 }
             }
 

@@ -109,7 +109,9 @@ onMounted(() => {
 });
 
 function Weacontent() {  
-  JsonColumnChart(props.swstrJson);
+  if (props.swstrJson != undefined) {    
+    JsonColumnChart(props.swstrJson);
+  }
 }
 const yujingfabuStr=ref("");
 function JsonColumnChart(res) {
@@ -141,7 +143,6 @@ function JsonColumnChart(res) {
       }
     }
   }
-
   if (yujingfabuStr.value != "") {
     yujingfabuStr.value = yujingfabuStr.value.substring(0, yujingfabuStr.value.length - 1) + "。";
     var stimeStr = dayjs(props.DD_ARR.STIME).format("M月D日H时");

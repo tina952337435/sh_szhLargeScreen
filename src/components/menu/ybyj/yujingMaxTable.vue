@@ -110,20 +110,23 @@ function JsonColumnChart(res) {
 		if (SetNull(item.maxz) != "") {
 			item.maxz = Number(item.maxz).toFixed(2);
 		}
-		var WRZ = item.wrz != undefined ? Number(item.wrz).toFixed(2) : "—";
-		var GRZ = item.grz != undefined ? Number(item.grz).toFixed(2) : "—";
-		var UPZ = item.maxz != undefined ? Number(item.maxz).toFixed(2) : "—";
-		var MINZ = item.minz != undefined ? Number(item.minz).toFixed(2) : "—";
+		var WRZ = item.wrz != undefined ? Number(item.wrz).toFixed(2) : "-";
+		var GRZ = item.grz != undefined ? Number(item.grz).toFixed(2) : "-";
+		var UPZ = item.maxz != undefined ? Number(item.maxz).toFixed(2) : "-";
+		var MINZ = item.minz != undefined ? Number(item.minz).toFixed(2) : "-";
 		var STARTZ =
-			item.startz != undefined ? Number(item.startz).toFixed(2) : "—"; //起始水位，用来计算涨幅
+			item.startz != undefined ? Number(item.startz).toFixed(2) : "-"; //起始水位，用来计算涨幅
 		var groupCls = "color-zc";
 		var itemCls = "";
 
-		if (UPZ != "—") {
-			var wrzCha = WRZ != "—" ? Number(UPZ) - Number(WRZ) : "—";
+		if (UPZ != "-") {
+			var wrzCha = WRZ != "-" ? Number(UPZ) - Number(WRZ) : "-";
+			if(wrzCha!="-"&&wrzCha<0){
+                wrzCha= "-";
+            }
             var wrzChaA=0;
 			var cls = "";
-			if (WRZ != "—" && WRZ > 0 && Number(UPZ) >= Number(WRZ)) {
+			if (WRZ != "-" && WRZ > 0 && Number(UPZ) >= Number(WRZ)) {
 				cls = "tableWRZ";
 				groupCls = "color-wrz";
 				itemCls = "color-wrz";
@@ -136,7 +139,7 @@ function JsonColumnChart(res) {
 			}
 
 			var clsM = "";
-			if (WRZ != "—" && WRZ > 0 && Number(MINZ) >= Number(WRZ)) {
+			if (WRZ != "-" && WRZ > 0 && Number(MINZ) >= Number(WRZ)) {
 				clsM = "tableWRZ";
 			}
 			if (GRZ != "-" && GRZ > 0 && Number(MINZ) >= Number(GRZ)) {
@@ -154,7 +157,7 @@ function JsonColumnChart(res) {
 			TM = dayjs(new Date(item.maxtm)).format("M-D HH:mm");
 			MTM = dayjs(new Date(item.mintm)).format("M-D HH:mm");
 			item.TMStr = TM;
-			item.wrzCha = wrzCha != "—" ? wrzCha.toFixed(2) : wrzCha;
+			item.wrzCha = wrzCha != "-" ? wrzCha.toFixed(2) : wrzCha;
             item.wrzChaA =wrzChaA;
 			item.groupCls = "ysts-num font-agency " + groupCls;
 			item.data = item.maxz;

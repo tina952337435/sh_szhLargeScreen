@@ -8,29 +8,23 @@
   <div class="g-lside">
     <!-- 面雨量时段统计 -->
     <div style="width: 100%">
-      <EchartYQAreaTJ :typenameRadio="typenameRadio" :key="datekeyAll" />
+      <EchartYQAreaTJ :typenameRadio="typenameRadio"/>
     </div>
     <!-- 片区最大降雨量 -->
     <div style="width: 100%">
-      <EchartQZDrpTable :typenameRadio="typenameRadio" :key="datekeyAll" />
+      <EchartQZDrpTable :typenameRadio="typenameRadio"/>
     </div>    
     <!-- 面雨量小时过程 -->
     <div style="width: 100%">
-      <EchartQZDrpAreaGC :typenameRadio="typenameRadio" :key="datekeyAll" />
+      <EchartQZDrpAreaGC :typenameRadio="typenameRadio"/>
     </div>    
   </div>
   <!-- 右侧 -->
   <div class="g-rside">   
     <!-- 分区雨量 -->
     <div style="width: 100%">
-      <EchartQZDrpArea :typenameRadio="typenameRadio" :key="datekeyAll" />
+      <EchartQZDrpArea :typenameRadio="typenameRadio"/>
     </div>
-    <!-- <div style="width: 100%">
-      <EchartQZDrpAreaMonth :typenameRadio="typenameRadio" :key="datekeyAll" />
-    </div>
-    <div style="width: 100%">
-      <DrpTablePX :typenameRadio="typenameRadio" :key="datekeyAll" />
-    </div> -->
     <!-- 雨情分析 -->
     <div style="width: 100%">
       <TableYQJC :typenameRadio="typenameRadio" :key="datekeyAll" :strJsonData="strJsonData" :stime="stime" :etime="etime" @parentMethodshowDynamicLayers="parentMethodshowDynamicLayer"/>
@@ -321,6 +315,7 @@
         showTime="true"
         showOkButton="true"
         showClearButton="false"
+        onvaluechanged="onSTimeChanged"
       />&nbsp;&nbsp; -&nbsp;
       <input
         id="ETIME"
@@ -331,6 +326,7 @@
         showTime="true"
         showOkButton="true"
         showClearButton="false"
+        onvaluechanged="onETimeChanged"
       />&nbsp;&nbsp;
       <img
         :src="popupCloseImg"
@@ -528,7 +524,7 @@ const stime = ref({});
 const etime = ref({});
 const pid = ref("201901101419326076-1-1,201901101419326076-5");
 // 默认选择当日
-let pathName = ref("mapday0");
+const pathName = ref("mapday0");
 // 默认选择全市
 const AreaName = ref("");
 const strJsonData = ref({});
@@ -539,7 +535,7 @@ const tmCenter = ref(null);
 const store = useStore();
 const { viewer } = store.state;
 const riverLX = ref(true);
-const riverMarker = ref(true);
+const riverMarker = ref(false);
 const RainDZMMarker = ref(false);
 const rainfall0 = ref(false),
   rainfall0_10 = ref(true),
@@ -723,27 +719,35 @@ onUnmounted(() => {
   }
 });
 function Weacontent() {
-  var strParam = {};
-  strParam["pid"] = pid.value;
-  strParam["stime"] = stime.value;
-  strParam["etime"] = etime.value;
-  strParam["pathname"] = "SUM";
-  var TYPEname = "(全部)";
-  //   strParam["datasource"] = "BX";
+  window.loadingShow();
+  stime.value = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  etime.value = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  
+  setTimeout(() => {
+    console.error("stime",stime.value,"etime",etime.value);
+    var strParam = {};
+    strParam["pid"] = pid.value;
+    strParam["stime"] = stime.value;
+    strParam["etime"] = etime.value;
+    strParam["pathname"] = "SUM";
+    var TYPEname = "(全部)";
+    //   strParam["datasource"] = "BX";
 
-  tmCenter.value =
-    dayjs("2025-07-30 08:00:00").format("M月D日 H时") +
-    "至" +
-    dayjs("2025-07-31 08:00:00").format("M月D日 H时");
-  apizonglan.stPptnRain(strParam).then((res) => {
-    strJsonData.value = res.data;
-    // if (datekeyAllname.value == true) {
-      datekeyAll.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss"))
-        .add(6, "hour")
-        .format("YYYY-MM-DD HH:mm:ss");
-    // }
-    YLload();
-  });
+    tmCenter.value =
+      dayjs("2025-07-30 08:00:00").format("M月D日 H时") +
+      "至" +
+      dayjs("2025-07-31 08:00:00").format("M月D日 H时");
+    apizonglan.stPptnRain(strParam).then((res) => {
+      strJsonData.value = res.data;
+      // if (datekeyAllname.value == true) {
+        datekeyAll.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss"))
+          .add(6, "hour")
+          .format("YYYY-MM-DD HH:mm:ss");
+      // }
+      YLload();
+      window.loadingHide();
+    });
+  }, 100);   
 }
 var PicUrl = "/xishanyuntu/weather/";
 function SpanItem(obj) {
@@ -838,7 +842,7 @@ function YLload() {
         countGX++;
       }
 
-      if (f > 0) {
+      // if (f > 0) {
         if (SetNull(item.lgtd) != "" && SetNull(item.lttd) != "") {
           RainfallStr.push({ lon: item.lgtd, lat: item.lttd, value: f });
           if(item.stcd=="63422650"){//边角需要插值的点
@@ -851,7 +855,7 @@ function YLload() {
             RainfallStr.push({ lon:-18971.869913,lat:-60205.822566, value: f });         
           }
         }
-      }
+      // }
     }
   }
   YLDATA.value = resultPptnRain;
@@ -941,7 +945,9 @@ function closecz() {
   $(".top-left-icon-menu").hide();
 }
 
+var _isChangeDay = false; // 标记是否由 changeDay 触发的 setValue
 function changeDay(e) {
+  _isChangeDay = true;
   pathName.value = e;
   var day = e.replace("mapday", "");
   var now = new Date();
@@ -953,10 +959,13 @@ function changeDay(e) {
     .format("YYYY-MM-DD HH:00:00");
 
   datekeyAllname.value = false;
-
-  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
-  Weacontent();
+  
+  setTimeout(() => {
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+    _isChangeDay = false;
+    Weacontent();
+  }, 100);  
 }
 // 行政分区
 function bjLayers(obj) {
@@ -1050,6 +1059,7 @@ onMounted(() => {
     popupCloseImg.value = "/images/missBlack.png";
   }
   mini.parse();
+  _isChangeDay = true; // 防止 mini.setValue 触发回调导致 Vue 重渲染破坏控件
   var now = new Date();
   var endTime = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
   var startTime = dayjs(now).format("YYYY-MM-DD 08:00:00");
@@ -1060,6 +1070,7 @@ onMounted(() => {
   }
   mini.get("STIME").setValue(dayjs(startTime).format("YYYY-MM-DD HH:00"));
   mini.get("ETIME").setValue(dayjs(endTime).format("YYYY-MM-DD HH:00"));
+  _isChangeDay = false;
   stime.value =
     dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   etime.value =
@@ -1076,10 +1087,19 @@ onMounted(() => {
     });
   }, 500);
 });
-function parentMethodshowDynamicLayer(item) { 
+function parentMethodshowDynamicLayer(item) {
   setZOOM(13);
   dyCenter (item[0],item[1]);
 }
+window.onSTimeChanged = function (e) {
+  // 程序触发时直接返回，避免触发 Vue 重渲染破坏 MiniUI 控件
+  if (_isChangeDay) return;
+  $(".swDivSelect").removeClass("swDivSelect");
+};
+window.onETimeChanged = function (e) {
+  if (_isChangeDay) return;
+  $(".swDivSelect").removeClass("swDivSelect");
+};
 </script>
 <style src="@/assets/styles/style.css"></style>
 

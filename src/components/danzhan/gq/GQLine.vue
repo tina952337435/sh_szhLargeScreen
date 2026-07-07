@@ -58,7 +58,8 @@ import dayjs from "dayjs";
 import { groupBy } from "@/api/ComUnit.js";
 import $ from "jquery";
 
-import { ref, onMounted, reactive, inject } from "vue";
+import { ref, onMounted, reactive, inject, nextTick } from "vue";
+import * as echarts from 'echarts';
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 const datekey = ref(null);
@@ -87,6 +88,12 @@ const tableHeaders = ref([
 ]);
 const exkeyData = reactive([]);
 const tableData = ref();
+// dataZoom 相关
+let queryStime = "";
+let queryEtime = "";
+let isLoadingMore = false;
+let pendingZoomStart = null;  // loadMorePrev 后恢复 dataZoom 位置
+let currentStrNote = [];
 const strJsonAll = ref();
 const resultEchart = ref();
 // 获取雨型的类型：1:(小~中雨);2:(中雨);3:(暴雨);4:(大暴雨);5:(特大暴雨);
@@ -118,6 +125,8 @@ function Weacontent() {
   strParam["stcd"] = stcd.value;
   strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  queryStime = strParam["stime"];
+  queryEtime = strParam["etime"];
   api
     .stPptnGQDanZhan(strParam)
     .then((res) => {
@@ -195,7 +204,8 @@ function GQload() {
     "#EC30FD",
     "#EC3032",
   ];
-  const _Option = ChartJs.chartGQ(
+  currentStrNote = strNote;
+  const _Option = ChartJs.chartGQZoom(
     "",
     resultJsonEchart.reverse(),
     strNote,
@@ -209,6 +219,19 @@ function GQload() {
 
   lineOption.value = _Option;
   datekey.value = Date.now();
+
+  // 绑定 dataZoom 事件 + 恢复加载后的缩放位置
+  nextTick(() => {
+    if (pendingZoomStart !== null && resultJsonEchart.length > 0) {
+      var chartDom = document.getElementById('GQLine');
+      var myChart = echarts.getInstanceByDom(chartDom);
+      if (myChart) {
+        myChart.dispatchAction({ type: 'dataZoom', start: pendingZoomStart, end: 100 });
+      }
+      pendingZoomStart = null;
+    }
+    bindDataZoomEvent();
+  });
 }
 function getType() {
   var checkedValuesList = checkedValues.value;
@@ -249,6 +272,52 @@ function OnBoot(e) {
     img2.value = "/images/line-table3.png";
   }
 }
+// ========== dataZoom 动态加载 ==========
+function bindDataZoomEvent() {
+  var chartDom = document.getElementById('GQLine');
+  if (!chartDom) return;
+  var myChart = echarts.getInstanceByDom(chartDom);
+  if (!myChart) return;
+  myChart.off('dataZoom');
+  myChart.on('dataZoom', handleDataZoom);
+}
+function handleDataZoom(params) {
+  if (isLoadingMore) return;
+  var batch = params.batch || [params];
+  if (!batch.length) return;
+  var start = batch[0].start;
+  if (start < 10) { isLoadingMore = true; loadMorePrev(); }
+}
+function loadMorePrev() {
+  var currentStime = dayjs(queryStime);
+  var newStime = currentStime.add(-1, 'day').format('YYYY-MM-DD HH:mm') + ':00';
+  var newEtime = currentStime.format('YYYY-MM-DD HH:mm') + ':00';
+  window.loadingShow();
+  var strParam = {};
+  strParam["stcd"] = stcd.value;
+  strParam["stime"] = newStime;
+  strParam["etime"] = newEtime;
+  api.stPptnGQDanZhan(strParam).then(function (res) {
+    queryStime = newStime;
+    var newData = res.data || [];
+    var existingTms = {};
+    (strJsonAll.value || []).forEach(function (d) { existingTms[d.tm + '_' + d.exkey] = true; });
+    var uniqueNew = [];
+    newData.forEach(function (d) {
+      if (!existingTms[d.tm + '_' + d.exkey]) { uniqueNew.push(d); }
+    });
+    strJsonAll.value = uniqueNew.concat(strJsonAll.value || []);
+    mini.get("STIME").setValue(newStime.substring(0, 16));
+    // 计算 dataZoom 新位置：新追加数据占比即为旧数据起始位置
+    var newCount = (strJsonAll.value || []).length;
+    pendingZoomStart = newCount > 0 ? Math.max(0, (uniqueNew.length / newCount) * 100) : 0;
+    getType();
+    window.loadingHide();
+    isLoadingMore = false;
+  }).catch(function () { window.loadingHide(); isLoadingMore = false; });
+}
+// =========================================
+
 onMounted(() => {
   mini.parse();
   stime.value = "2024-08-06 08:00:00";

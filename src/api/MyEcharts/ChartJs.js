@@ -505,6 +505,493 @@ export default {
         return option;
 
     },
+    chartSWZoom: (ChartName, data, strNote, LineColor, max_min_Name, TimeType, theme, symbolSize, markSize) => {
+        var axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor, titleColor;
+        if (theme == "BlueTheme" || theme == "VioletTheme") {
+            axisLabelColor = "#000";
+            axisLineColor = "#000";
+            splitLineColor = "#eee";
+            legendColor = "#000";
+            titleColor = 'rgba(0,0,0,0.70)';
+        } else if (theme == "default") {
+            axisLabelColor = "#00FFFF";
+            axisLineColor = "#00FFFF";
+            splitLineColor = "#074159";
+            legendColor = "#fff";
+            titleColor = 'rgba(255,255,255,0.60)';
+        }
+        var showed = data.length > 0 ? false : true;
+        showed = false;
+        if (max_min_Name == "") {
+            max_min_Name = "水位(m)";
+        }
+
+        //echarts.init(document.getElementById('quxian'), 'macarons');
+        var chartName = []; //控件元素名称
+        var chartTM = []; //时间序列
+        var chartValue = []; //时间序列
+        var liststr = ""; //拼装表格
+        var m = new Array();
+        var LineSelect = {};
+        strNote.forEach(item => {
+            chartName.push(item.name);
+            LineSelect[item.name] = item.isShow;
+        });
+
+        data.forEach(value => {
+            var charthan = []; 	//时间序列
+            strNote.forEach(item => {
+                charthan.push(value[item.codename]); //加入集合
+                if (item.name == "时间") {
+                    if (TimeType == "Mouth") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH:mm"))); //加入时间集合
+                    } else if (TimeType == "Day") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD"))); //加入时间集合
+                    } else {
+                        chartTM.push(value[item.codename]); //加入时间集合
+                    }
+                    //chartTM.push(IsSubDate(value[value1.codename], "MM-dd hh:mm", "4")); //加入时间集合
+                } else if (item.name == "名称") {
+                    chartTM.push(value[item.codename]);
+                }
+                else {
+                    chartValue.push(value[item.codename]);
+                }
+            });
+            m.push(charthan); //加入集合
+        });
+        if (data.length == 0) {
+            chartTM = ['']
+        }
+        if (data.length == 0) {
+            var titleShow = true
+        } else {
+            var titleShow = false
+        }
+        var option = {
+            title: {
+                show: titleShow, // 是否显示title
+                text: '暂无数据',
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    color: 'rgba(255,255,255,0.50)',
+                    fontSize: 18,
+                    fontWeight: 400
+                }
+            },
+            //backgroundColor: '#100E19',
+            tooltip: {
+                trigger: 'axis'
+            },
+            color: LineColor,
+            legend: {
+                data: chartName,
+                itemWidth: 8,
+                itemHeight: 8,
+                textStyle: {
+                    color: legendColor,
+                    fontSize: 14
+                },
+                selected: LineSelect,
+                icon: 'circle',
+            },
+            grid: {
+                left: 20,
+                right: 20,
+                bottom: 60,
+                top: 40,
+                containLabel: true
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    mark: {
+                        show: false
+                    },
+                    dataView: {
+                        show: false,
+                        readOnly: false
+                    },
+                    magicType: {
+                        show: false,
+                        type: ['line', 'bar']
+                    },
+                    restore: {
+                        show: false
+                    },
+                    saveAsImage: {
+                        show: false
+                    }
+                }
+            },
+            calculable: true,
+            // ========== dataZoom ==========
+            dataZoom: [
+                { type: 'slider', start: 0, end: 100, height: 25, bottom: 10,
+                    borderColor: axisLineColor, fillerColor: 'rgba(0, 255, 255, 0.1)',
+                    handleStyle: { color: '#00FFFF' }, textStyle: { color: axisLabelColor },
+                    dataBackground: { lineStyle: { color: axisLineColor }, areaStyle: { color: 'rgba(0, 255, 255, 0.05)' } } },
+                { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false }
+            ],
+            xAxis: [{
+                type: 'category',
+                boundaryGap: false,
+                data: chartTM,
+                axisLine: {
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1 //这里是为了突出显示加上的
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: 14,
+                    }
+                },
+                axisLabel: {
+                    fontSize: 14,
+                },
+            }],
+            yAxis: [{
+                name: max_min_Name,
+                nameTextStyle: {
+                    padding: [0, 0, 0, -20]
+                },
+                type: 'value',
+                boundaryGap: false,
+                // splitNumeber:5,
+                scale: true, //是否自动计算最大最小值。
+                //min:max_min.min, //动态设置最大值最小值。
+                //max:max_min.max,
+                min: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5);
+
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        // return value.min - (jiangenew - jiange) / 20;
+                        if ((jiangenew - jiange) < 5) {
+                            return value.min - (jiangenew - jiange) / 20 - 0.5;
+                        } else {
+                            return value.min - (jiangenew - jiange) / 20;
+                        }
+
+                    } else {
+                        if ((jiangenew - jiange) < 5) {
+                            return value.min - (jiangenew - jiange) / 20 - 0.5;
+                        } else {
+                            return value.min - (jiangenew - jiange) / 20;
+                        }
+                    }
+                },
+                max: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+                    if (jiangenew < 5) jiangenew = 5;
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        if ((jiangenew - jiange) < 5) {
+                            return value.max + (jiangenew - jiange) / 30 + 0.5;
+                        } else {
+                            return value.max + (jiangenew - jiange) / 30;
+                        }
+                    } else {
+                        if ((jiangenew - jiange) < 5) {
+                            return value.max + (jiangenew - jiange + 1) / 30 + 0.5;
+                        } else {
+                            return value.max + (jiangenew - jiange + 1) / 30;
+                        }
+                    }
+                },
+                axisLabel: {
+                    formatter: function (v) {
+                        return v.toFixed(2);
+                    },
+                    textStyle: {
+                        color: axisLabelColor
+                    },
+                    fontSize: 14,
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: splitLineColor
+                    }
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1, //这里是为了突出显示加上的
+                        shadowBlur: 0,
+                        shadowOffsetX: 0
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: '16'
+                    }
+                }
+            }],
+            series: function () {
+                var serie = [];
+                for (var j = 0; j < chartName.length; j++) {
+                    if (chartName[j] == "时间" || chartName[j] == "名称") //调过时间字段
+                    {
+                        continue;
+                    }
+                    var chartValue = []; //声明过线value集合
+                    for (var i = 0; i < m.length; i++) {
+                        if (isNaN(m[i][j]) == false) {
+                            chartValue.push(m[i][j]); //循环价值
+                        }
+                        else {
+                            chartValue.push(null);
+                        }
+                    }
+                    if (chartName[j] == "实时" || chartName[j] == "上游水位") {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            // 光滑的折线
+                            smooth: true,
+                            connectNulls: true,
+                            symbol: 'none',
+                            data: chartValue,
+                            itemStyle: {
+                                color: "rgba(25,163,223,1)",
+                                //borderColor: "#646ace",
+                                //borderWidth: 1
+
+                            },
+                            markPoint: {
+                                data: [{ type: 'max', name: '最大值' }, { type: 'min', name: '最小值' }],
+                                symbolSize: symbolSize,
+                                label: {
+                                    offset: [0, 0],
+                                    textStyle: {
+                                        color: "#ffffff",
+                                        fontSize: markSize,
+                                    },
+                                    formatter: function (e) {
+                                        var value = Number(e.value).toFixed(2);
+                                        return value;
+                                    }
+                                },
+                            },
+                            areaStyle: { //区域填充样式
+                                normal: {
+                                    //线性渐变，前4个参数分别是x0,y0,x2,y2(范围0~1);相当于图形包围盒中的百分比。如果最后一个参数是‘true’，则该四个值是绝对像素位置。
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: "rgba(25,163,223,.6)"
+                                    },
+                                    {
+                                        offset: 1,
+                                        color: "rgba(25,163,223, 0.1)"
+                                    }
+                                    ], false),
+                                    shadowColor: 'rgba(25,163,223, 0.5)', //阴影颜色
+                                    shadowBlur: 20 //shadowBlur设图形阴影的模糊大小。配合shadowColor,shadowOffsetX/Y, 设置图形的阴影效果。
+                                }
+                            },
+                        };
+                        serie.push(item);
+                    }
+                    else if (chartName[j] == "预报") {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            // 光滑的折线
+                            smooth: true,
+                            connectNulls: true,
+                            symbol: 'none',
+                            data: chartValue,
+                            itemStyle: {
+                                // color: "rgba(22,255,141,1)",
+                                normal: {
+                                    lineStyle: {
+                                        width: 2,
+                                        type: 'dashed'  //'dotted'点型虚线 'solid'实线 'dashed'线性虚线
+                                    }
+                                },
+                                textStyle: {
+                                    color: "#000000",
+                                },
+                            },
+                            markPoint: {
+                                data: [{ type: 'max', name: '最大值' }],
+                                symbolSize: symbolSize,
+                                label: {
+                                    offset: [0, 0],
+                                    textStyle: {
+                                        color: "#000000",
+                                        fontSize: markSize,
+                                    },
+                                    formatter: function (e) {
+                                        var value = Number(e.value).toFixed(2);
+                                        return value;
+                                    }
+                                },
+                            },
+                            markLine: {
+                                symbol: ["none", "none"], //箭头 
+                                silent: true,
+                                data: [{ xAxis: '03-11 00:00' }],
+                                itemStyle: {
+                                    normal: {
+                                        shadowColor: '#16FF8D',
+                                        color: '#16FF8D',
+                                        shadowBlur: 10,
+                                    }
+                                },
+                                label: {
+                                    normal: {
+                                        formatter: 2.48,
+                                        textStyle: {
+                                            color: "#16FF8D", //color of value
+                                            fontSize: 14
+                                        }
+                                    }
+                                }
+                            },
+                        };
+                        serie.push(item);
+                    }
+                    else if (chartName[j] == "警戒") {
+                        var item = {
+                            name: '警戒',
+                            type: 'line',
+                            data: chartValue,
+                            connectNulls: true,
+                            smooth: true,
+                            showSymbol: false,//去掉数据点
+                            endLabel: {
+                                show: true,//只显示折线图最后一个数据
+                                offset: [-30, -20],
+                                fontSize: 14,
+                                color: 'inherit',
+                                formatter: function (params) {
+                                    // params 是一个包含数据信息的对象
+                                    return Number(params.value).toFixed(2); // 将数值保留两位小数
+                                },
+                            },
+                            itemStyle: {
+                                // borderWidth: 1,
+                                normal: {
+                                    show: true,
+                                    color: '#FF9E43',
+                                    lineStyle: {
+                                        // 设置线的宽度
+                                        width: 2,
+                                        //'dotted'虚线 'solid'实线
+                                        type: 'solid',
+                                        // opacity: 0.8      // 设置透明度为 0.5 (即50%透明)
+                                    }
+                                },
+                            },
+                        };
+                        serie.push(item);
+                    }
+                    else if (chartName[j] == "保证") {
+                        var item = {
+                            name: '保证',
+                            type: 'line',
+                            data: chartValue,
+                            connectNulls: true,
+                            smooth: true,
+                            showSymbol: false,//去掉数据点
+                            endLabel: {
+                                show: true,//只显示折线图最后一个数据
+                                offset: [-30, -20],
+                                fontSize: 14,
+                                color: 'inherit',
+                                formatter: function (params) {
+                                    // params 是一个包含数据信息的对象
+                                    return Number(params.value).toFixed(2); // 将数值保留两位小数
+                                },
+                            },
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: '#EE585B',
+                                    lineStyle: {
+                                        // 设置线的宽度
+                                        width: 2,
+                                        //'dotted'虚线 'solid'实线
+                                        type: 'solid'
+                                    }
+                                },
+                            },
+                        }
+                        serie.push(item);
+                    }
+                    else if (chartName[j] == "历史最高") {
+                        var item = {
+                            name: '历史最高',
+                            type: 'line',
+                            data: chartValue,
+                            connectNulls: true,
+                            smooth: true,
+                            showSymbol: false,//去掉数据点
+                            endLabel: {
+                                show: true,//只显示折线图最后一个数据
+                                offset: [-30, -20],
+                                fontSize: 14,
+                                color: 'inherit',
+                                formatter: function (params) {
+                                    // params 是一个包含数据信息的对象
+                                    return Number(params.value).toFixed(2); // 将数值保留两位小数
+                                },
+                            },
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: '#E117D2',
+                                    lineStyle: {
+                                        // 设置线的宽度
+                                        width: 2,
+                                        //'dotted'虚线 'solid'实线
+                                        type: 'solid'
+                                    }
+                                },
+                            },
+                        }
+                        serie.push(item);
+                    }
+                    else {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            // 光滑的折线
+                            smooth: true,
+                            connectNulls: true,
+                            symbol: 'none',
+                            data: chartValue,
+                        };
+                        serie.push(item);
+                    }
+                };
+                return serie;
+            }()
+        };
+        // myChart.resize();
+        // myChart.setOption(option);
+        // window.addEventListener("resize", function () {
+        //     myChart.resize();
+        // }); 
+        return option;
+
+    },
     // 累计降雨量
     chartYL: (ChartName, data, strNote, LineColor, max_min_Name, NameType, theme, TimeName, TimeType, DecimalP = 1,labelShow=true,legendShow=false) => {
         var barWidthVal;
@@ -634,7 +1121,8 @@ export default {
                 formatter: function (params) {
                     let res = params[0].axisValue + '<br/>';
                     params.forEach(function (item) {
-                        res += item.marker + item.seriesName + ': ' + Number(item.value).toFixed(DecimalP) + '<br/>';
+                        var valueText=SetNull(item.value)!=""?Number(item.value).toFixed(DecimalP):"-";
+                        res += item.marker + item.seriesName + ': ' + valueText + '<br/>';
                     });
                     return res;
                 }
@@ -689,6 +1177,410 @@ export default {
                 containLabel: true
             },
             calculable: true,
+            xAxis: [
+                {
+                    type: 'category',
+                    data: chartTM,
+                    boundaryGap: true,
+                    axisTick: {
+                        alignWithLabel: true,
+                        show: false
+                    },
+                    axisLabel: {
+                        show: true,
+                        rotate: rotate,
+                        fontSize: 14,
+                        textStyle: {
+                            color: axisLabelColor
+                        },
+                        formatter: function (value) {
+                            if (NameType == "true" && TimeName != "时间") {
+                                var name = value.split("").join("\n")
+                                if (Number(name.length) > 20) {
+                                    return name.slice(0, 5) + "\n...";
+                                } else {
+                                    return name;
+                                }
+                            } else {
+                                return value
+                            }
+                        },
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: axisLineColor
+                        }
+                    },
+                    boundaryGap: ['5%', '5%'],
+                }
+            ],
+            yAxis: [
+                {
+                    name: max_min_Name,
+                    nameTextStyle: {
+                        padding: [0, 0, 0, 0]
+                    },
+                    type: 'value',
+                    min: function (value) {
+                        var jiange = (value.max - value.min).toFixed(2) * 100;
+                        var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                        jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5);
+
+                        if ((jiangenew - jiange - 1) == 0) {
+                            jiangenew = jiangenew * 2;
+                        }
+                        var minVal = 0;
+                        if ((jiangenew - jiange) % 2 == 0) {
+                            minVal = value.min - (jiangenew - jiange) / 20;
+                        } else {
+                            minVal = value.min - (jiangenew - jiange - 1) / 20;
+                        }
+                        if (minVal <= 0) {
+                            minVal = 0;
+                        }
+                        return Number(minVal).toFixed(DecimalP);
+                    },
+                    max: function (value) {
+                        var jiange = (value.max - value.min).toFixed(2) * 100;
+                        var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                        jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                        if ((jiangenew - jiange - 1) == 0) {
+                            jiangenew = jiangenew * 2;
+                        }
+                        if (jiangenew < 5) jiangenew = 5;
+                        var maxVal = 0;
+                        if ((jiangenew - jiange) % 2 == 0) {
+                            maxVal = value.max + (jiangenew - jiange) / 30;
+                        } else {
+                            maxVal = value.max + (jiangenew - jiange + 1) / 30;
+                        }
+                        if (maxVal < 1) {
+                            maxVal = 5;
+                        }
+                        return Number(maxVal).toFixed(DecimalP);
+                    },
+                    boundaryGap: false,
+                    splitNumeber: 5,
+                    axisTick: {
+                        alignWithLabel: true,
+                        show: false,
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: axisLineColor
+                        }
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: splitLineColor
+                        }
+                    },
+                    splitArea: {     // 网格区域
+                        show: false   // 是否显示，默认为false
+                    },
+                    //scale: true, //是否自动计算最大最小值。
+                    min: 0,
+                    axisLabel: {
+                        formatter: function (v) {
+                            return v.toFixed(DecimalP);
+                        },
+                        fontSize: 14,
+                    },
+                }
+            ],
+            series: function () {
+                var serie = [];
+                for (var j = 0; j < chartName.length; j++) {
+                    if (chartName[j] == "时间" || chartName[j] == "名称") //调过时间字段
+                    {
+                        continue;
+                    }
+                    var chartValue = []; 	//声明过线value集合
+                    for (var i = 0; i < m.length; i++) {
+                        if (Number(m[i][j]) >= 0) {
+                            chartValue.push(Number(m[i][j]).toFixed(DecimalP)); //循环价值
+                        } else {
+                            chartValue.push(null);
+                        }
+                    }
+                    if (max_min_Name != "") {
+                        var jycolor=new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: '#0099FF'
+                        }, {
+                            offset: 1,
+                            color: '#00FFFF'
+                        }]);
+                        if(chartName[j] == "多年平均"){
+                            jycolor= new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#FF0000'
+                            }, {
+                                offset: 1,
+                                color: '#FF6D6D'
+                            }]);
+                            labelColor='#FF6D6D';
+                        }
+                        else if(chartName[j] == "预报"){
+                            jycolor= new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#38DB00'
+                            }, {
+                                offset: 1,
+                                color: '#A9FF8D'
+                            }]);
+                            labelColor='#A9FF8D';
+                        }
+                        var item = {
+                            name: chartName[j],
+                            type: 'bar',
+                            data: chartValue,
+                            barWidth: barWidthVal,
+                            symbol: 'none',
+                            label: {
+                                normal: {
+                                    show: labelShow,
+                                    position: 'top',
+                                    formatter: function (params) {
+                                        if (params.value == 0) {
+                                            return "";
+                                        }
+                                        else{
+                                            return params.value;
+                                        }
+
+                                    },
+                                    textStyle: {
+                                        color: labelColor, //color of value
+                                        fontSize: 14
+                                    }
+                                }
+                            },
+                            // 相邻柱状之间的空隙
+                            // barGap: '0%',
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: jycolor,
+                                    borderWidth: 0,
+                                    barBorderRadius: [15, 15, 0, 0],
+                                },
+                                emphasis: {
+                                    shadowBlur: 10,
+                                    shadowColor: 'rgba(105,123, 214, 0.7)'
+                                }
+                            },
+                            smooth: true
+                        }
+                        serie.push(item);
+                    }
+                    else {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            data: chartValue,
+                            smooth: true
+                        }
+                        serie.push(item);
+                    }
+                };
+                return serie;
+            }()
+        };
+        // myChart.setOption(option);
+        var tt = chartValue.filter(function (ex) {
+            return ex != undefined && ex > 0;
+        })
+        return option;
+    },
+    chartYLZoom: (ChartName, data, strNote, LineColor, max_min_Name, NameType, theme, TimeName, TimeType, DecimalP = 1,labelShow=true,legendShow=false) => {
+        var barWidthVal;
+        if (data.length == 5) {
+            barWidthVal = '18%';
+        } else if (data.length == 4) {
+            barWidthVal = '13%';
+        } else if (data.length == 3) {
+            barWidthVal = '8%';
+        } else if (data.length == 2) {
+            barWidthVal = '4%';
+        } else if (data.length == 1) {
+            barWidthVal = '1%';
+        } else {
+            barWidthVal = '26%';
+        }
+        var toolboxColor, axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor, titleColor;
+        if (theme == "BlueTheme" || theme == "VioletTheme") {
+            toolboxColor = "#ccc";
+            axisLabelColor = "#000";
+            axisLineColor = "#000";
+            splitLineColor = "#eee";
+            legendColor = "#000";
+            labelColor = "#0099FF";
+            titleColor = 'rgba(0,0,0,0.70)';
+        } else if (theme == "default") {
+            toolboxColor = "#074159";
+            axisLabelColor = "#00FFFF";
+            axisLineColor = "#00FFFF";
+            splitLineColor = "#074159";
+            legendColor = "#fff";
+            labelColor = "#57CDF9";
+            titleColor = 'rgba(255,255,255,0.60)';
+        }
+        // var myChart = echarts.init(document.getElementById(ChartName));  //获得控件对象
+        // //清空绘画内容，清空后实例可用，因为并非释放示例的资源，释放资源我们需要dispose()
+        // myChart.clear();
+        if (max_min_Name == "雨量") {
+            max_min_Name = "雨量（mm）";
+        }
+        var chartName = []; 	//控件元素名称
+        var chartTM = []; 	//时间序列
+        var chartValue = []; //时间序列
+        var liststr = ""; 	//拼装表格
+        var m = new Array();
+        var Drptotal = 0;
+        var LineSelect = {};
+        strNote.forEach(item => {
+            chartName.push(item.name);
+            LineSelect[item.name] = item.isShow;
+        });
+
+        data.forEach(value => {
+            var charthan = []; 	//时间序列
+            strNote.forEach(item => {
+                charthan.push(value[item.codename]); //加入集合
+                if (item.name == "时间") {
+                    if (TimeType == "Hour") {
+                        chartTM.push((dayjs(value[item.codename]).format("HH"))); //加入时间集合
+                    } else if (TimeType == "Day") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD"))); //加入时间集合
+                    } else if (TimeType == "Mouth") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH:mm"))); //加入时间集合
+                    }else if (TimeType == "Hours") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH"))); //加入时间集合
+                    }
+                     else {
+                        chartTM.push(value[item.codename]); //加入时间集合
+                    }
+                    // chartTM.push(value[item.codename]); //加入时间集合
+                    //chartTM.push(IsSubDate(value[value1.codename], "MM-dd hh:mm", "4")); //加入时间集合
+                } else if (item.name == "名称") {
+                    chartTM.push(value[item.codename]);
+                }
+                else {
+                    chartValue.push(value[item.codename]);
+                    Drptotal += value[item.codename]
+                }
+            });
+            m.push(charthan); //加入集合
+        });
+        if (data.length == 0) {
+            chartTM = ['']
+        }
+        // var max_min = GetSort(chartValue);
+
+        if (NameType == "true") {
+            var rotate = 0
+        } else {
+            var rotate = 45
+        }
+
+        if (Drptotal > 0) { var titleShow = false; } else { var titleShow = data.length === 0; }
+        var Yoffset = '30%';
+        var option = {
+            title: {
+                // 是否显示title
+                show: titleShow,
+                text: '无数据',
+                x: 'center',
+                y: Yoffset,
+                textStyle: {
+                    color: titleColor,
+                    fontSize: 18,
+                    fontWeight: 400
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false,
+                    //type: 'cross',
+                    lineStyle: {
+                        color: '#376df4',
+                        width: 1,
+                        opacity: 1
+                    }
+                },
+                formatter: function (params) {
+                    let res = params[0].axisValue + '<br/>';
+                    params.forEach(function (item) {
+                        res += item.marker + item.seriesName + ': ' + Number(item.value).toFixed(DecimalP) + '<br/>';
+                    });
+                    return res;
+                }
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    saveAsImage: {
+                        show: true, // 显示导出图片按钮
+                        type: 'png', // 导出图片格式为 PNG
+                        name: 'echart_image', // 导出图片文件名
+                        pixelRatio: 2, // 图片清晰度，数值越大越清晰
+                        // 设置图标颜色
+                        iconStyle: {
+                            normal: {
+                                borderColor: toolboxColor, // 正常状态下边框颜色
+                            },
+                            emphasis: {
+                                borderColor: axisLineColor, // 鼠标悬停时边框颜色
+                            }
+                        },
+                        // 设置提示文字样式和位置
+                        title: '导出图片',
+                        textStyle: {
+                            color: axisLabelColor, // 文字颜色
+                            fontSize: 12 // 文字大小
+                        },
+                        // 调整提示文字位置
+                        orient: 'vertical', // 垂直布局
+                        itemGap: 10 // 图标与文字间距
+
+                    }
+                }
+            },
+            color: LineColor,
+            legend: {
+                data: chartName,
+                itemWidth: 8,
+                itemHeight: 8,
+                textStyle: {
+                    color: legendColor,
+                    fontSize: 14
+                },
+                selected: LineSelect,
+                show: legendShow
+            },
+            grid: {
+                left: 20,
+                right: 20,
+                bottom: 60,
+                top: 40,
+                containLabel: true
+            },
+            calculable: true,
+            // ========== dataZoom ==========
+            dataZoom: [
+                { type: 'slider', start: 0, end: 100, height: 25, bottom: 10,
+                    borderColor: axisLineColor, fillerColor: 'rgba(0, 255, 255, 0.1)',
+                    handleStyle: { color: '#00FFFF' }, textStyle: { color: axisLabelColor },
+                    dataBackground: { lineStyle: { color: axisLineColor }, areaStyle: { color: 'rgba(0, 255, 255, 0.05)' } } },
+                { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false }
+            ],
             xAxis: [
                 {
                     type: 'category',
@@ -1700,6 +2592,275 @@ export default {
                 }
             },
             calculable: true,
+            xAxis: [{
+                type: 'category',
+                boundaryGap: false,
+                data: chartTM,
+                axisLine: {
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1 //这里是为了突出显示加上的
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: '16'
+                    }
+                },
+                axisLabel: {
+                    fontSize: 14,
+                }
+            }],
+            yAxis: [{
+                name: max_min_Name,
+                nameTextStyle: {
+                    padding: [0, 0, 0, -20]
+                },
+                type: 'value',
+                boundaryGap: false,
+                // splitNumeber:5,
+                scale: true, //是否自动计算最大最小值。
+                //min:max_min.min, //动态设置最大值最小值。
+                //max:max_min.max,
+                min: function (e) {
+                    if (e < 0) {
+                        return e;
+                    } else {
+                        return 0;
+                    }
+                },
+                max: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+                    if (jiangenew < 5) jiangenew = 5;
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        return value.max + (jiangenew - jiange) / 30;
+                    } else {
+                        return value.max + (jiangenew - jiange + 1) / 30;
+                    }
+
+                },
+                axisLabel: {
+                    formatter: function (v) {
+                        return v.toFixed(1);
+                    },
+                    textStyle: {
+                        color: axisLabelColor
+                    },
+                    fontSize: 14,
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: splitLineColor
+                    }
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1, //这里是为了突出显示加上的
+                        shadowBlur: 0,
+                        shadowOffsetX: 0
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: '16'
+                    }
+                }
+            }],
+            series: function () {
+                var serie = [];
+                for (var j = 0; j < chartName.length; j++) {
+                    if (chartName[j] == "时间") //调过时间字段
+                    {
+                        continue;
+                    }
+                    var chartValue = []; 	//声明过线value集合
+                    for (var i = 0; i < m.length; i++) {
+                        // if (m[i][j] != "" && m[i][j] != null) {
+                        chartValue.push(m[i][j]); //循环价值
+                        // }
+                    }
+
+                    if (max_min_Name != "") {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            data: chartValue,
+                            connectNulls: true,
+                            itemStyle: {
+                                normal: {
+                                    color: '#000',
+                                    label: {
+                                        show: true,
+                                        color: '#ffffff',//气泡中字体颜色
+                                    }
+                                }
+                            },
+
+                            symbol: "none",
+                            smooth: true,
+                            itemStyle: {
+                                normal: {
+                                    lineStyle: {
+                                        width: 2,
+                                        type: 'solid'  //'dotted'虚线 'solid'实线
+                                    }
+                                }
+                            },
+                        }
+                        serie.push(item);
+                    }
+                    else {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            data: chartValue,
+                            smooth: true,
+                            itemStyle: {
+                                normal: {
+                                    lineStyle: {
+                                        width: 1,
+                                        type: 'solid'  //'dotted'虚线 'solid'实线
+                                    }
+                                }
+                            }
+                        }
+                        serie.push(item);
+                    }
+                };
+                return serie;
+            }()
+        };
+        return option;
+
+    },
+    chartGQZoom: (ChartName, data, strNote, LineColor, max_min_Name, TimeType, theme, symbolSize, markSize) => {
+        var axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor;
+        if (theme == "BlueTheme" || theme == "VioletTheme") {
+            axisLabelColor = "#000";
+            axisLineColor = "#000";
+            splitLineColor = "#eee";
+            legendColor = "#000";
+        } else if (theme == "default") {
+            axisLabelColor = "#00FFFF";
+            axisLineColor = "#00FFFF";
+            splitLineColor = "#074159";
+            legendColor = "#fff";
+        }
+        var showed = data.length > 0 ? false : true;
+        showed = false;
+        if (max_min_Name == "") {
+            max_min_Name = "流量(m³/s)";
+        }
+        // var myChart = echarts.init(document.getElementById(ChartName)); //获得控件对象
+        // myChart.clear();
+
+        //echarts.init(document.getElementById('quxian'), 'macarons');
+        var chartName = []; //控件元素名称
+        var chartTM = []; //时间序列
+        var chartValue = []; //时间序列
+        var liststr = ""; //拼装表格
+        var m = new Array();
+        var LineSelect = {};
+        strNote.forEach(item => {
+            chartName.push(item.name);
+            LineSelect[item.name] = item.isShow;
+        });
+
+        data.forEach(value => {
+            var charthan = []; 	//时间序列
+            strNote.forEach(item => {
+                charthan.push(value[item.codename]); //加入集合
+                if (item.name == "时间") {
+                    if (TimeType == "Mouth") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH:mm"))); //加入时间集合
+                    } else {
+                        chartTM.push(value[item.codename]); //加入时间集合
+                    }
+                } else if (item.name == "名称") {
+                    chartTM.push(value[item.codename]);
+                }
+                // else {
+                //     chartValue.push(Number(Number(value[item.codename]).toFixed(2)));
+                // }
+            });
+            m.push(charthan); //加入集合
+        });
+        if (data.length == 0) {
+            chartTM = ['']
+        }
+        // 预报水位过程线
+        var option = {
+            title: {
+                show: showed, // 是否显示title
+                text: '暂无数据',
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    color: 'rgba(255,255,255,0.50)',
+                    fontSize: 18,
+                    fontWeight: 400
+                }
+            },
+            color: LineColor,
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: chartName,
+                itemWidth: 8,
+                itemHeight: 8,
+                textStyle: {
+                    color: legendColor,
+                    fontSize: 14
+                },
+                selected: LineSelect,
+            },
+            grid: {
+                left: 20,
+                right: 20,
+                bottom: 60,
+                top: 40,
+                containLabel: true
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    mark: {
+                        show: false
+                    },
+                    dataView: {
+                        show: false,
+                        readOnly: false
+                    },
+                    magicType: {
+                        show: false,
+                        type: ['line', 'bar']
+                    },
+                    restore: {
+                        show: false
+                    },
+                    saveAsImage: {
+                        show: false
+                    }
+                }
+            },
+            calculable: true,
+            // ========== dataZoom ==========
+            dataZoom: [
+                { type: 'slider', start: 0, end: 100, height: 25, bottom: 10,
+                    borderColor: axisLineColor, fillerColor: 'rgba(0, 255, 255, 0.1)',
+                    handleStyle: { color: '#00FFFF' }, textStyle: { color: axisLabelColor },
+                    dataBackground: { lineStyle: { color: axisLineColor }, areaStyle: { color: 'rgba(0, 255, 255, 0.05)' } } },
+                { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false }
+            ],
             xAxis: [{
                 type: 'category',
                 boundaryGap: false,
@@ -11434,6 +12595,214 @@ export default {
             };
             return option;
     },
+    chartFXZoom:(flfxdata, xData, LineColor, max_min_Name, TimeType, theme, showTpye, NameType, TimeName) =>  {
+            var axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor, titleColor;
+            if (theme == "BlueTheme" || theme == "VioletTheme") {
+                axisLabelColor = "#000";
+                axisLineColor = "#000";
+                splitLineColor = "#eee";
+                legendColor = "#000";
+                titleColor = 'rgba(0,0,0,0.70)';
+            } else if (theme == "default") {
+                axisLabelColor = "#00FFFF";
+                axisLineColor = "#00FFFF";
+                splitLineColor = "#074159";
+                legendColor = "#fff";
+                titleColor = 'rgba(255,255,255,0.60)';
+            }
+            var data = flfxdata;
+            var seriesData = [], seriesDataFS = [], seriesDataFX = [];
+            data.filter(item => {
+                seriesData.push({
+                    value: item.WindSpeed,
+                    symbol: 'path://M31 16l-15-15v9h-26v12h26v9z',
+                    symbolSize: [22, 10],
+                    symbolRotate: -90 - item.WindDir,
+                    msg: item.WindDir
+                });
+                seriesDataFS.push(item.WindSpeed);
+                seriesDataFX.push(item.WindDir);
+            });
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function (params) {
+                        var str = params[0].axisValue + '<br/>';
+                        for (var num = 0; num < params.length - 1; num++) {
+                            var value = params[num].value;
+                            if (params[num].seriesName == "风向") {
+                                value += "(" + getDirName(value) + ")";
+                            }
+                            str += params[num].seriesName + '：' + value + '<br/>';
+                        }
+                        return str;
+                    }
+                },
+                legend: {
+                    data: ["风速"],
+                    show: true,
+                    itemWidth: 18,
+                    itemHeight: 18,
+                    textStyle: {
+                        color: legendColor,
+                        fontSize: 14,
+                        padding:[30,0]
+                    },
+                    left: "center"
+                },
+                grid: {
+                    left: 40,
+                    right: 20,
+                    bottom: 65,
+                    top: 45,
+                    containLabel: true
+                },
+                // ========== dataZoom ==========
+                dataZoom: [
+                    { type: 'slider', start: 0, end: 100, height: 25, bottom: 8,
+                        borderColor: axisLineColor, fillerColor: 'rgba(0, 255, 255, 0.1)',
+                        handleStyle: { color: '#00FFFF' }, textStyle: { color: axisLabelColor },
+                        dataBackground: { lineStyle: { color: axisLineColor }, areaStyle: { color: 'rgba(0, 255, 255, 0.05)' } } },
+                    { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false }
+                ],
+                xAxis: {
+                    type: 'category',
+                    //boundaryGap: false,
+                    splitLine: {
+                        show: false
+                    },
+                    data: xData,
+                    axisLabel: {
+                        //formatter: function (date) {
+                        //    console.error(date);
+                        //    return echarts.format.formatTime("yyyy月MM月dd日 hh时", date)
+                        //}
+                        textStyle:{
+                            color:axisLabelColor
+                        },                        
+                        show: true
+                    },
+                    axisLine: {
+                    show: true,
+                    lineStyle: {
+                            color: axisLineColor,
+                            width: 1, //这里是为了突出显示加上的
+                            shadowBlur: 0,
+                            shadowOffsetX: 0
+                        },
+                        textStyle: {
+                            color: axisLineColor,
+                            fontSize: '16'
+                        }
+                    }
+                    //offset: 0,
+                },
+                yAxis: [{
+                    name:"风速(m/s)",
+                    type: 'value',
+                    min: 0,
+                    //max: 30,
+                    axisLine: { show: true },
+                    axisTick: { show: true },
+                    axisLabel: {
+                        show: true,
+                        formatter: function (v) {
+                            return v.toFixed(1);
+                        },
+                        textStyle:{
+                            color:axisLabelColor
+                        },
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color:splitLineColor,
+                            // width: 1,
+                            // type: 'dashed',
+                        }
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: axisLineColor,
+                            width: 1, //这里是为了突出显示加上的
+                            shadowBlur: 0,
+                            shadowOffsetX: 0
+                        },
+                        textStyle: {
+                            color: axisLineColor,
+                            fontSize: '16'
+                        }
+                    }
+                }
+                ],
+                visualMap: {
+                    name: "级别",
+                    type: "piecewise",
+                    orient: "horizontal",//horizontal水平 
+                    left: "center",
+                    //top: "bottom",
+                    bottom: 35,
+                    textStyle: {
+                        color: legendColor,
+                    },
+                    pieces: [{
+                        gte: 24.5,
+                        color: "red",
+                        label: "≥24.5"
+                    },
+                    {
+                        lt: 24.5,
+                        gte: 17.2,
+                        color: "#FFAA00",
+                        label: "17.2~24.5"
+                    },
+                    {
+                        lt: 17.2,
+                        gte: 13.9,
+                        color: "#FFFF6B",
+                        label: "13.9~17.2"
+                    },
+                    {
+                        lt: 13.9,
+                        color: "#0000FF",
+                        label: "＜13.9"
+                    }
+                    ],
+                    seriesIndex: 1,
+                    // dimension: 1
+                },
+                color:LineColor,
+                series: [
+                    {
+                        name: "风速",
+                        data: seriesDataFS,
+                        type: 'line',
+                        symbol: 'none',
+                        // color: "#FF0000",
+                        lineStyle: {
+                            normal: {
+                                // width: 2
+                            }
+                        },
+                    },
+                    {
+                        data: seriesData,
+                        type: 'line',
+                        //yAxisIndex: 1,
+                        encode: {
+                            x: 0,
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 0
+                            }
+                        },
+                    }
+                ]
+            };
+            return option;
+    },
     chartFXMGTU:(title, seriesData, maxValue = 100,legendName,dataFXNM)=>{
         var option = {
             // title:{
@@ -12026,6 +13395,506 @@ export default {
         })
         return option;
     },
+    chartSWYLZoom: (ChartName, data, strNote, LineColor, max_min_Name, NameType, theme, TimeName, TimeType, DecimalP = 1,labelShow=true,legendShow=false) => {
+        var barWidthVal;
+        if (data.length == 5) {
+            barWidthVal = '18%';
+        } else if (data.length == 4) {
+            barWidthVal = '13%';
+        } else if (data.length == 3) {
+            barWidthVal = '8%';
+        } else if (data.length == 2) {
+            barWidthVal = '4%';
+        } else if (data.length == 1) {
+            barWidthVal = '1%';
+        } else {
+            barWidthVal = '26%';
+        }
+        var toolboxColor, axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor, titleColor;
+        if (theme == "BlueTheme" || theme == "VioletTheme") {
+            toolboxColor = "#ccc";
+            axisLabelColor = "#000";
+            axisLineColor = "#000";
+            splitLineColor = "#eee";
+            legendColor = "#000";
+            labelColor = "#0099FF";
+            titleColor = 'rgba(0,0,0,0.70)';
+        } else if (theme == "default") {
+            toolboxColor = "#074159";
+            axisLabelColor = "#00FFFF";
+            axisLineColor = "#00FFFF";
+            splitLineColor = "#074159";
+            legendColor = "#fff";
+            labelColor = "#57CDF9";
+            titleColor = 'rgba(255,255,255,0.60)';
+        }
+        // var myChart = echarts.init(document.getElementById(ChartName));  //获得控件对象
+        // //清空绘画内容，清空后实例可用，因为并非释放示例的资源，释放资源我们需要dispose()
+        // myChart.clear();
+        if (max_min_Name == "雨量") {
+            max_min_Name = "雨量（mm）";
+        }
+        var chartName = []; 	//控件元素名称
+        var chartTM = []; 	//时间序列
+        var chartValue = []; //时间序列
+        var liststr = ""; 	//拼装表格
+        var m = new Array();
+        var Drptotal = 0;
+        var LineSelect = {};
+        strNote.forEach(item => {
+            chartName.push(item.name);
+            LineSelect[item.name] = item.isShow;
+        });
+
+        data.forEach(value => {
+            var charthan = []; 	//时间序列
+            strNote.forEach(item => {
+                charthan.push(value[item.codename]); //加入集合
+                if (item.name == "时间") {
+                    if (TimeType == "Hour") {
+                        chartTM.push((dayjs(value[item.codename]).format("HH"))); //加入时间集合
+                    } else if (TimeType == "Day") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD"))); //加入时间集合
+                    } else if (TimeType == "Mouth") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH:mm"))); //加入时间集合
+                    }else if (TimeType == "Hours") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH"))); //加入时间集合
+                    }
+                     else {
+                        chartTM.push(value[item.codename]); //加入时间集合
+                    }
+                    // chartTM.push(value[item.codename]); //加入时间集合
+                    //chartTM.push(IsSubDate(value[value1.codename], "MM-dd hh:mm", "4")); //加入时间集合
+                } else if (item.name == "名称") {
+                    chartTM.push(value[item.codename]);
+                }
+                else {
+                    chartValue.push(value[item.codename]);
+                    Drptotal += value[item.codename]
+                }
+            });
+            m.push(charthan); //加入集合
+        });
+        if (data.length == 0) {
+            chartTM = ['']
+        }
+        // var max_min = GetSort(chartValue);
+
+        if (NameType == "true") {
+            var rotate = 0
+        } else {
+            var rotate = 45
+        }
+
+        if (Drptotal > 0) { var titleShow = false; } else { var titleShow = data.length === 0; }
+        var Yoffset = '30%';
+        var option = {
+            title: {
+                // 是否显示title
+                show: titleShow,
+                text: '无数据',
+                x: 'center',
+                y: Yoffset,
+                textStyle: {
+                    color: titleColor,
+                    fontSize: 18,
+                    fontWeight: 400
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false,
+                    //type: 'cross',
+                    lineStyle: {
+                        color: '#376df4',
+                        width: 1,
+                        opacity: 1
+                    }
+                },
+                formatter: function (params) {
+                    let res = params[0].axisValue + '<br/>';
+                    params.forEach(function (item) {
+                        res += item.marker + item.seriesName + ': ' + Number(item.value).toFixed(DecimalP) + '<br/>';
+                    });
+                    return res;
+                }
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    saveAsImage: {
+                        show: true, // 显示导出图片按钮
+                        type: 'png', // 导出图片格式为 PNG
+                        name: 'echart_image', // 导出图片文件名
+                        pixelRatio: 2, // 图片清晰度，数值越大越清晰
+                        // 设置图标颜色
+                        iconStyle: {
+                            normal: {
+                                borderColor: toolboxColor, // 正常状态下边框颜色
+                            },
+                            emphasis: {
+                                borderColor: axisLineColor, // 鼠标悬停时边框颜色
+                            }
+                        },
+                        // 设置提示文字样式和位置
+                        title: '导出图片',
+                        textStyle: {
+                            color: axisLabelColor, // 文字颜色
+                            fontSize: 12 // 文字大小
+                        },
+                        // 调整提示文字位置
+                        orient: 'vertical', // 垂直布局
+                        itemGap: 10 // 图标与文字间距
+
+                    }
+                }
+            },
+            color: LineColor,
+            legend: {
+                data: chartName,
+                itemWidth: 8,
+                itemHeight: 8,
+                textStyle: {
+                    color: legendColor,
+                    fontSize: 14
+                },
+                selected: LineSelect,
+                show: legendShow
+            },
+            grid: {
+                left: 20,
+                right: 20,
+                bottom: 70,
+                top: 40,
+                containLabel: true
+            },
+            calculable: true,
+            // ========== dataZoom ==========
+            dataZoom: [
+                { type: 'slider', start: 0, end: 100, height: 25, bottom: 10,
+                    borderColor: axisLineColor, fillerColor: 'rgba(0, 255, 255, 0.1)',
+                    handleStyle: { color: '#00FFFF' }, textStyle: { color: axisLabelColor },
+                    dataBackground: { lineStyle: { color: axisLineColor }, areaStyle: { color: 'rgba(0, 255, 255, 0.05)' } } },
+                { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false }
+            ],
+            xAxis: [
+                {
+                    type: 'category',
+                    data: chartTM,
+                    boundaryGap: false,
+                    axisTick: {
+                        alignWithLabel: true,
+                        show: false
+                    },
+                    axisLabel: {
+                        show: true,
+                        rotate: rotate,
+                        fontSize: 14,
+                        textStyle: {
+                            color: axisLabelColor
+                        },
+                        formatter: function (value) {
+                            if (NameType == "true" && TimeName != "时间") {
+                                var name = value.split("").join("\n")
+                                if (Number(name.length) > 7) {
+                                    return name.slice(0, 5) + "\n...";
+                                } else {
+                                    return name;
+                                }
+                            } else {
+                                return value
+                            }
+                        },
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: axisLineColor
+                        }
+                    },
+                    boundaryGap: ['5%', '5%'],
+                }
+            ],
+            yAxis: [
+                {
+                    name: "水位",
+                    nameTextStyle: {
+                        padding: [0, 0, 0, -20]
+                    },
+                    type: 'value',
+                    boundaryGap: false,
+                    // splitNumeber:5,
+                    scale: true, //是否自动计算最大最小值。
+                    //min:max_min.min, //动态设置最大值最小值。
+                    //max:max_min.max,
+                    min: function (value) {
+                        var jiange = (value.max - value.min).toFixed(2) * 100;
+                        var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                        jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5);
+
+                        if ((jiangenew - jiange - 1) == 0) {
+                            jiangenew = jiangenew * 2;
+                        }
+
+                        if ((jiangenew - jiange) % 2 == 0) {
+                            // return value.min - (jiangenew - jiange) / 20;
+                            if ((jiangenew - jiange) < 5) {
+                                return value.min - (jiangenew - jiange) / 20 - 0.5;
+                            } else {
+                                return value.min - (jiangenew - jiange) / 20;
+                            }
+
+                        } else {
+                            if ((jiangenew - jiange) < 5) {
+                                return value.min - (jiangenew - jiange) / 20 - 0.5;
+                            } else {
+                                return value.min - (jiangenew - jiange) / 20;
+                            }
+                        }
+                    },
+                    max: function (value) {
+                        var jiange = (value.max - value.min).toFixed(2) * 100;
+                        var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                        jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                        if ((jiangenew - jiange - 1) == 0) {
+                            jiangenew = jiangenew * 2;
+                        }
+                        if (jiangenew < 5) jiangenew = 5;
+
+                        if ((jiangenew - jiange) % 2 == 0) {
+                            if ((jiangenew - jiange) < 5) {
+                                return value.max + (jiangenew - jiange) / 30 + 0.5;
+                            } else {
+                                return value.max + (jiangenew - jiange) / 30;
+                            }
+                        } else {
+                            if ((jiangenew - jiange) < 5) {
+                                return value.max + (jiangenew - jiange + 1) / 30 + 0.5;
+                            } else {
+                                return value.max + (jiangenew - jiange + 1) / 30;
+                            }
+                        }
+                    },
+                    axisLabel: {
+                        formatter: function (v) {
+                            return v.toFixed(2);
+                        },
+                        textStyle: {
+                            color: axisLabelColor
+                        },
+                        fontSize: 14,
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: splitLineColor
+                        }
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: axisLineColor,
+                            width: 1, //这里是为了突出显示加上的
+                            shadowBlur: 0,
+                            shadowOffsetX: 0
+                        },
+                        textStyle: {
+                            color: axisLineColor,
+                            fontSize: '16'
+                        }
+                    }
+                }                ,
+                {
+                    name: max_min_Name,
+                    nameLocation: 'start',   
+                    nameTextStyle: {
+                        padding: [0, 0, 0, 0]
+                    },
+                    type: 'value',
+                    max: function (value) {
+                        // var jiange = (value.max - value.min).toFixed(2) * 100;
+                        // var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                        // jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                        // if ((jiangenew - jiange - 1) == 0) {
+                        //     jiangenew = jiangenew * 2;
+                        // }
+                        // if (jiangenew < 5) jiangenew = 5;
+                        var maxVal = value.max+8;
+                        // if ((jiangenew - jiange) % 2 == 0) {
+                        //     maxVal = value.max + (jiangenew - jiange) / 30;
+                        // } else {
+                        //     maxVal = value.max + (jiangenew - jiange + 1) / 30;
+                        // }
+                        // if (maxVal < 1) {
+                        //     maxVal = 5;
+                        // }
+                        // else if (maxVal < 3) {
+                        //     maxVal=10;
+                        // }
+                        return Number(maxVal).toFixed(DecimalP);
+                    },
+                    boundaryGap: false,
+                    splitNumeber: 5,
+                    axisTick: {
+                        alignWithLabel: true,
+                        show: false,
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: axisLineColor
+                        }
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: splitLineColor
+                        }
+                    },
+                    splitArea: {     // 网格区域
+                        show: false   // 是否显示，默认为false
+                    },
+                    //scale: true, //是否自动计算最大最小值。
+                    min: 0,
+                    axisLabel: {
+                        formatter: function (v) {
+                            return v.toFixed(DecimalP);
+                        },
+                        fontSize: 14,
+                    },
+                    inverse: true, 
+                }
+            ],
+            series: function () {
+                var serie = [];
+                for (var j = 0; j < chartName.length; j++) {
+                    if (chartName[j] == "时间" || chartName[j] == "名称") //调过时间字段
+                    {
+                        continue;
+                    }
+                    var chartValue = []; 	//声明过线value集合
+                    for (var i = 0; i < m.length; i++) {
+                        if (Number(m[i][j]) >= 0) {
+                            chartValue.push(Number(m[i][j]).toFixed(DecimalP)); //循环价值
+                        } else {
+                            chartValue.push(null);
+                        }
+                    }
+                    if (chartName[j]== "雨量") {
+                        var jycolor=new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: '#0099FF'
+                        }, {
+                            offset: 1,
+                            color: '#00FFFF'
+                        }]);
+                        var item = {
+                            name: chartName[j],
+                            type: 'bar',
+                            data: chartValue,
+                            barWidth: barWidthVal,
+                            symbol: 'none',
+                            // label: {
+                            //     normal: {
+                            //         show: labelShow,
+                            //         position: 'top',
+                            //         formatter: function (params) {
+                            //             if (params.value == 0) {
+                            //                 return "";
+                            //             }
+                            //             else{
+                            //                 return params.value;
+                            //             }
+
+                            //         },
+                            //         textStyle: {
+                            //             color: labelColor, //color of value
+                            //             fontSize: 14
+                            //         }
+                            //     }
+                            // },
+                            // 相邻柱状之间的空隙
+                            // barGap: '0%',
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: jycolor,
+                                    borderWidth: 0,
+                                    barBorderRadius: [ 0, 0,15, 15],
+                                },
+                                emphasis: {
+                                    shadowBlur: 10,
+                                    shadowColor: 'rgba(105,123, 214, 0.7)'
+                                }
+                            },
+                            smooth: true,
+                            yAxisIndex:1,
+                        }
+                        serie.push(item);
+                    }
+                    else {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            // 光滑的折线
+                            smooth: true,
+                            connectNulls: true,
+                            symbol: 'none',
+                            data: chartValue,
+                            itemStyle: {
+                                color: "rgba(25,163,223,1)",
+                                //borderColor: "#646ace",
+                                //borderWidth: 1
+
+                            },
+                            markPoint: {
+                                data: [{ type: 'max', name: '最大值' }, { type: 'min', name: '最小值' }],
+                                // symbolSize: symbolSize,
+                                label: {
+                                    offset: [0, 0],
+                                    textStyle: {
+                                        color: "#ffffff",
+                                        // fontSize: markSize,
+                                    },
+                                    formatter: function (e) {
+                                        var value = Number(e.value).toFixed(2);
+                                        return value;
+                                    }
+                                },
+                            },
+                            areaStyle: { //区域填充样式
+                                normal: {
+                                    //线性渐变，前4个参数分别是x0,y0,x2,y2(范围0~1);相当于图形包围盒中的百分比。如果最后一个参数是‘true’，则该四个值是绝对像素位置。
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: "rgba(25,163,223,.6)"
+                                    },
+                                    {
+                                        offset: 1,
+                                        color: "rgba(25,163,223, 0.1)"
+                                    }
+                                    ], false),
+                                    shadowColor: 'rgba(25,163,223, 0.5)', //阴影颜色
+                                    shadowBlur: 20 //shadowBlur设图形阴影的模糊大小。配合shadowColor,shadowOffsetX/Y, 设置图形的阴影效果。
+                                }
+                            },
+                        };
+                        serie.push(item);
+                    }
+                };
+                return serie;
+            }()
+        };
+        // myChart.setOption(option);
+        var tt = chartValue.filter(function (ex) {
+            return ex != undefined && ex > 0;
+        })
+        return option;
+    },
     // 流量流速过程线
     chartLLLS: (ChartName, data, strNote, LineColor, max_min_Name, TimeType, theme, symbolSize, markSize) => {
         var axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor;
@@ -12141,6 +14010,403 @@ export default {
                 }
             },
             calculable: true,
+            xAxis: [{
+                type: 'category',
+                boundaryGap: false,
+                data: chartTM,
+                axisLine: {
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1 //这里是为了突出显示加上的
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: '16'
+                    }
+                },
+                axisLabel: {
+                    fontSize: 14,
+                }
+            }],
+            yAxis: [
+                {
+                name: '流量(m³/s)',
+                nameTextStyle: {
+                    padding: [0, 0, 0, -20]
+                },
+                type: 'value',
+                boundaryGap: false,
+                // splitNumeber:5,
+                scale: true, //是否自动计算最大最小值。
+                //min:max_min.min, //动态设置最大值最小值。
+                //max:max_min.max,
+                min: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5);
+
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        return value.min - (jiangenew - jiange) / 20;
+                    } else {
+                        return value.min - (jiangenew - jiange - 1) / 20;
+                    }
+
+
+                },
+                max: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+                    if (jiangenew < 5) jiangenew = 5;
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        return value.max + (jiangenew - jiange) / 30;
+                    } else {
+                        return value.max + (jiangenew - jiange + 1) / 30;
+                    }
+
+                },
+                axisLabel: {
+                    formatter: function (v) {
+                        return v.toFixed(0);
+                    },
+                    textStyle: {
+                        color: axisLabelColor
+                    },
+                    fontSize: 14,
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: splitLineColor
+                    }
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1, //这里是为了突出显示加上的
+                        shadowBlur: 0,
+                        shadowOffsetX: 0
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: '16'
+                    }
+                }
+            },
+             {
+                name: '流速(m/s)',
+                nameTextStyle: {
+                    padding: [0, 0, 0, -20]
+                },
+                type: 'value',
+                boundaryGap: false,
+                // splitNumeber:5,
+                scale: true, //是否自动计算最大最小值。
+                //min:max_min.min, //动态设置最大值最小值。
+                //max:max_min.max,
+                min: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5);
+
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        return value.min - (jiangenew - jiange) / 20;
+                    } else {
+                        return value.min - (jiangenew - jiange - 1) / 20;
+                    }
+
+
+                },
+                max: function (value) {
+                    var jiange = (value.max - value.min).toFixed(2) * 100;
+                    var jiangenew = Number(Number((jiange - (jiange % 5)) / 5 + 1).toFixed(0) * 5);
+
+                    jiangenew = jiangenew + ((jiangenew / 100).toFixed(0) * 5)
+                    if ((jiangenew - jiange - 1) == 0) {
+                        jiangenew = jiangenew * 2;
+                    }
+                    if (jiangenew < 5) jiangenew = 5;
+
+                    if ((jiangenew - jiange) % 2 == 0) {
+                        return value.max + (jiangenew - jiange) / 30;
+                    } else {
+                        return value.max + (jiangenew - jiange + 1) / 30;
+                    }
+
+                },
+                axisLabel: {
+                    formatter: function (v) {
+                        return v.toFixed(2);
+                    },
+                    textStyle: {
+                        color: axisLabelColor
+                    },
+                    fontSize: 14,
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: splitLineColor
+                    }
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: axisLineColor,
+                        width: 1, //这里是为了突出显示加上的
+                        shadowBlur: 0,
+                        shadowOffsetX: 0
+                    },
+                    textStyle: {
+                        color: axisLineColor,
+                        fontSize: '16'
+                    }
+                }
+            }    
+        ],
+            series: function () {
+                var serie = [];
+                for (var j = 0; j < chartName.length; j++) {
+                    if (chartName[j] == "时间" || chartName[j] == "名称") //调过时间字段
+                    {
+                        continue;
+                    }
+                    var chartValue = []; //声明过线value集合
+                    for (var i = 0; i < m.length; i++) {
+                        if (isNaN(m[i][j]) == false) {
+                            // 
+                            if (SetNull(m[i][j]) != "") {
+                                // chartValue.push(m[i][j]); //循环价值
+                                chartValue.push(changeTwoDecimal(m[i][j], 2)); //循环价值
+                            } else {
+                                chartValue.push(null);
+                            }
+
+                        }
+                    }
+                    if (chartName[j] == "流量") {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            data: chartValue,
+                            connectNulls: true,
+                            itemStyle: {
+                                normal: {
+                                    color: '#000',
+                                    label: {
+                                        show: true,
+                                        color: '#ffffff',//气泡中字体颜色
+                                    }
+                                }
+                            },
+                            markPoint: {
+                                data: [
+                                    { type: 'max', name: '最大值' },
+                                    { type: 'min', name: '最小值' },
+                                ],
+                                symbolSize: symbolSize,
+                                label: {
+                                    offset: [0, 0],
+                                    textStyle: {
+                                        color: "#000",
+                                        fontSize: markSize,
+                                    },
+                                },
+                            },
+                            symbol: "none",
+                            smooth: true,
+                            itemStyle: {
+                                //color: "rgba(20,253,129,1)",
+                                //borderColor: "#646ace",
+                                //borderWidth: 1
+                            },
+                            // areaStyle: { //区域填充样式
+                            //     normal: {
+                            //         //线性渐变，前4个参数分别是x0,y0,x2,y2(范围0~1);相当于图形包围盒中的百分比。如果最后一个参数是‘true’，则该四个值是绝对像素位置。
+                            //         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            //             offset: 0,
+                            //             color: "rgba(20,253,129,.3)"
+                            //         },
+                            //         {
+                            //             offset: 1,
+                            //             color: "rgba(25,163,223, 0)"
+                            //         }
+                            //         ], false),
+                            //         shadowColor: 'rgba(20,253,129, 0.5)', //阴影颜色
+                            //         shadowBlur: 20 //shadowBlur设图形阴影的模糊大小。配合shadowColor,shadowOffsetX/Y, 设置图形的阴影效果。
+                            //     }
+                            // },
+                        }
+                        serie.push(item);
+                    } else {
+                        var item = {
+                            name: chartName[j],
+                            type: 'line',
+                            data: chartValue,
+                            connectNulls: true,
+                            yAxisIndex: 1,
+                            //markPoint: {
+                            //    data: [{ type: 'max', name: '最大值' }, { type: 'min', name: '最小值' }]
+                            //},
+                            symbol: "none",
+                            smooth: true,
+                            itemStyle: {
+                                borderWidth: 1
+
+                            },
+                        }
+                        serie.push(item);
+                    }
+                };
+                return serie;
+            }()
+        };
+        // myChart.resize();
+        // myChart.setOption(option);
+        // window.addEventListener("resize", function () {
+        //     myChart.resize();
+        // }); 
+        return option;
+
+    },
+    chartLLLSZoom: (ChartName, data, strNote, LineColor, max_min_Name, TimeType, theme, symbolSize, markSize) => {
+        var axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor;
+        if (theme == "BlueTheme" || theme == "VioletTheme") {
+            axisLabelColor = "#000";
+            axisLineColor = "#000";
+            splitLineColor = "#eee";
+            legendColor = "#000";
+        } else if (theme == "default") {
+            axisLabelColor = "#00FFFF";
+            axisLineColor = "#00FFFF";
+            splitLineColor = "#074159";
+            legendColor = "#fff";
+        }
+        var showed = data.length > 0 ? false : true;
+        showed = false;
+        if (max_min_Name == "") {
+            max_min_Name = "流量(m³/s)";
+        }
+        // var myChart = echarts.init(document.getElementById(ChartName)); //获得控件对象
+        // myChart.clear();
+
+        //echarts.init(document.getElementById('quxian'), 'macarons');
+        var chartName = []; //控件元素名称
+        var chartTM = []; //时间序列
+        var chartValue = []; //时间序列
+        var liststr = ""; //拼装表格
+        var m = new Array();
+        var LineSelect = {};
+        strNote.forEach(item => {
+            chartName.push(item.name);
+            LineSelect[item.name] = item.isShow;
+        });
+
+        data.forEach(value => {
+            var charthan = []; 	//时间序列
+            strNote.forEach(item => {
+                charthan.push(value[item.codename]); //加入集合
+                if (item.name == "时间") {
+                    if (TimeType == "Mouth") {
+                        chartTM.push((dayjs(value[item.codename]).format("MM-DD HH:mm"))); //加入时间集合
+                    } else {
+                        chartTM.push(value[item.codename]); //加入时间集合
+                    }
+                    //chartTM.push(IsSubDate(value[value1.codename], "MM-dd hh:mm", "4")); //加入时间集合
+                } else if (item.name == "名称") {
+                    chartTM.push(value[item.codename]);
+                }
+                else {
+                    chartValue.push(Number(value[item.codename]).toFixed(2));
+                }
+            });
+            m.push(charthan); //加入集合
+        });
+        if (data.length == 0) {
+            chartTM = ['']
+        }
+        // 预报水位过程线
+        var option = {
+            title: {
+                show: showed, // 是否显示title
+                text: '暂无数据',
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    color: 'rgba(255,255,255,0.50)',
+                    fontSize: 18,
+                    fontWeight: 400
+                }
+            },
+            color:LineColor,
+            //backgroundColor: '#100E19',
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: chartName,
+                itemWidth: 8,
+                itemHeight: 8,
+                textStyle: {
+                    color: legendColor,
+                    fontSize: 14
+                },
+                selected: LineSelect,
+            },
+            grid: {
+                left: 20,
+                right: 20,
+                bottom: 60,
+                top: 40,
+                containLabel: true
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    mark: {
+                        show: false
+                    },
+                    dataView: {
+                        show: false,
+                        readOnly: false
+                    },
+                    magicType: {
+                        show: false,
+                        type: ['line', 'bar']
+                    },
+                    restore: {
+                        show: false
+                    },
+                    saveAsImage: {
+                        show: false
+                    }
+                }
+            },
+            calculable: true,
+            // ========== dataZoom ==========
+            dataZoom: [
+                { type: 'slider', start: 0, end: 100, height: 25, bottom: 10,
+                    borderColor: axisLineColor, fillerColor: 'rgba(0, 255, 255, 0.1)',
+                    handleStyle: { color: '#00FFFF' }, textStyle: { color: axisLabelColor },
+                    dataBackground: { lineStyle: { color: axisLineColor }, areaStyle: { color: 'rgba(0, 255, 255, 0.05)' } } },
+                { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false }
+            ],
             xAxis: [{
                 type: 'category',
                 boundaryGap: false,

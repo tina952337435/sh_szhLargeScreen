@@ -56,7 +56,7 @@
     </div>
   </div>
   <div class="TJList">
-   <div style="width: 220px;height: 210px;">
+   <div style="width: 220px;height:175px;">
       <div  class="ListTitle">
         <span class="ysts-numorder">1</span>运行情况
       </div>
@@ -73,6 +73,7 @@
       <span class="Listspan">工程总计：<span style="color: rgb(2 218 255);">{{ gateTotal }}</span> 座</span>
       <span class="Listspan">泵站总计：<span style="color: rgb(2 218 255);">{{ gateTotalBZ }} </span>台</span>
       <span class="Listspan">闸门总计：<span style="color: rgb(2 218 255);">{{ gateTotalZM }}</span> 孔</span>
+      <span class="Listspan">排涝流量：<span style="color: rgb(2 218 255);">{{ gateTotalQZong }}</span> m³/s</span>
     </div>      
   </div>
 
@@ -146,7 +147,8 @@ const gateTotalQ = ref(0);
 const gateTotalBZ = ref(0);
 const gateTotalZM = ref(0);
 const zmTotalOpen = ref(0);
-const WQClickData = ref()
+const WQClickData = ref();
+const gateTotalQZong = ref(0);
 var myData = [];
 
 const currentComponentTanchu = ref(null);
@@ -211,7 +213,7 @@ function addGCMarker() {
   gateTotal.value = GCJson.length;
   var resList = [];
   var totalQ_New = 0, totalOpen = 0, totalGuan = 0, totalQc = 0, totalOpenzm = 0;
-  var countBZ = 0, countZM = 0;
+  var countBZ = 0, countZM = 0,taqTotal = 0;
   if (GCJson.length > 0) {
     for (var num = 0; num < GCJson.length; num++) {
       var item = GCJson[num];
@@ -298,13 +300,17 @@ function addGCMarker() {
       countBZ += omcnum;
       countZM += gtopnum;
 
+      var taq = SetNull(item.taq) != "" ? Number(item.taq) : 0;  //总装机流量(m3/s)
+      taqTotal+=taq;
+
       resList.push(item);
-      gateTotalOpen.value = totalOpen;
-      zmTotalOpen.value = totalOpenzm;
-      gateTotalQ.value = (Number(totalQ_New).toFixed(2));
-      gateTotalBZ.value = countBZ;
-      gateTotalZM.value = countZM;
-    }
+    }    
+    gateTotalOpen.value = totalOpen;
+    zmTotalOpen.value = totalOpenzm;
+    gateTotalQ.value = (Number(totalQ_New).toFixed(2));
+    gateTotalBZ.value = countBZ;
+    gateTotalZM.value = countZM;
+    gateTotalQZong.value =taqTotal.toFixed(2);
   } else {
     gateTotal.value = 0;
     gateTotalOpen.value = totalOpen;

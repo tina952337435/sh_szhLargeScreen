@@ -328,8 +328,36 @@ function JosnSel(data, typeID) {
       }
     }
     // console.error(dt, strNote)
-    var LineColor = ['#6A5ACD', '#E9967A', "#FF3030", "#EE00EE", "#8B0000", "#8B008B", "#008B8B", "#90EE90", "#FFA500", "#9400D3", "#FFDAB9", "#6959CD", "#FF3030", "#E066FF", "#FF34B3", "#FF1493", "#FF4500", "#F4A460",
-      "#EEAD0E", "#53868B", "#79CDCD", "#66CDAA", "#43CD80", "#00FF00", "#FFFF00", "#8B658B",];
+    // 色轮均匀分布 + 交替亮度，最大化相邻曲线颜色区分度
+    // H: 0~360 均匀步进(~14°), S: 75~85%, L: 交替 58%/68% 适配深色背景
+    var LineColor = [
+      "#E85D5D", // H:0   红
+      "#5DB8B8", // H:14  青
+      "#E8A85D", // H:28  橙
+      "#5D7BE8", // H:42  蓝
+      "#A8E85D", // H:55  黄绿
+      "#C85DE8", // H:69  紫
+      "#5DE8C8", // H:83  青绿      
+      "#E8D35D", // H:138 金黄
+      "#E85DA8", // H:97  粉
+      "#8BE85D", // H:111 草绿
+      "#5D8BE8", // H:124 钴蓝
+      "#A05DE8", // H:152 紫罗兰
+      "#5DE885", // H:166 薄荷绿
+      "#E85D7B", // H:180 玫红
+      "#D3E85D", // H:194 黄
+      "#6B5DE8", // H:207 靛蓝
+      "#5DE8A8", // H:221 碧绿
+      "#E87B5D", // H:235 橘红
+      "#5DA0E8", // H:249 天蓝
+      "#C8E85D", // H:263 亮绿
+      "#A85DE8", // H:276 薰衣草
+      "#E85DC8", // H:290 品红
+      "#5DE8E8", // H:304 青
+      "#E8C85D", // H:318 琥珀
+      "#5D5DE8", // H:332 深蓝
+      "#E85D8B", // H:346 桃红
+    ];
 
     const _Option = ChartJs.chartSW("", dt, strNote, LineColor, "水位", "Mouth", _theme, 80, 20);
 
@@ -602,36 +630,58 @@ function JosnSel(data, typeID) {
 </style>
 
 <style lang="scss">
-.el-select-v2 .el-select-v2__wrapper {
+// el-select-v2 底层使用 el-select 命名空间，不是 el-select-v2
+// 输入框容器
+.el-select__wrapper {
   min-height: 29px;
   height: 29px;
   background-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 0 1px var(--popContentHeadbg) inset;
 }
-.el-select-v2 .el-select-v2__selection {
+// 选中区域
+.el-select__selection {
   line-height: 27px;
 }
-.el-select-v2 .el-select-v2__placeholder {
+// placeholder 文字
+.el-select__placeholder {
   color: var(--widgetcolor);
 }
-.el-select-v2 .el-select-v2__input {
+// 搜索输入文字
+.el-select__input {
   color: var(--widgetcolor);
 }
-.el-select-v2-dropdown {
-  max-height: 300px;
-  overflow-y: auto;
+// 标签（已选中的站点 tag）
+.el-select .el-tag {
+  background-color: var(--popContentHeadbg);
+  border-color: var(--popContentHeadbg);
+  color: var(--widgetcolor);
+}
+.el-select .el-tag .el-tag__close {
+  color: var(--widgetcolor);
+}
+.el-select .el-tag .el-tag__close:hover {
+  background-color: var(--swDivSelectcolor);
+  color: #fff;
+}
+// 下拉面板
+.el-select-dropdown {
   background: var(--boxtitlebg);
   border: 1px solid var(--popContentHeadbg);
+  overflow: hidden !important;
 }
-.el-select-v2-dropdown .el-select-v2-option {
+// 下拉选项 - 默认态
+.el-select-dropdown .el-select-dropdown__item {
   padding: 0 10px;
   color: var(--widgetcolor);
+  background: var(--boxtitlebg) !important;
 }
-.el-select-v2-dropdown .el-select-v2-option.is-hovering {
-  background: var(--popContentHeadbg);
+// 下拉选项 - 悬停态
+.el-select-dropdown .el-select-dropdown__item.is-hovering {
+  background: var(--popContentHeadbg) !important;
 }
-.el-select-v2-dropdown .el-select-v2-option.is-selected {
-  background: var(--popContentHeadbg);
+// 下拉选项 - 选中态
+.el-select-dropdown .el-select-dropdown__item.is-selected {
+  background: var(--popContentHeadbg) !important;
   color: var(--widgetcolor);
 }
 </style>

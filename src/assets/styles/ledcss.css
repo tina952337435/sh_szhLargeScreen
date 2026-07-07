@@ -16,14 +16,10 @@
 }
 
 
-.gcText {
-    /* border: 1px solid rgb(221, 221, 221); */
+/* .gcText {
     color: rgb(28, 28, 28);
     background: url(/images/PopupSmall.png) no-repeat 100% 100%;
     background-size: 100% 100%;
-
-    /* box-shadow: rgb(136, 134, 134) 0px 5px 10px; */
-    /* box-shadow: rgb(136, 134, 134) 0px px 10px; */
     text-align: center !important;
     font-size: 14px;
     color: #fff;
@@ -31,7 +27,7 @@
 .gcText span{
     line-height: 18px;
     border-radius: 5px 0 0 0;
-}
+} */
 
 .level_zc {
     /* background: url(/images/border.png); */
@@ -180,21 +176,21 @@
 }
 
 
-.rainText .amap-ui-district-cluster-marker-title {
+.rainText .amap-ui-district-cluster-marker-title,.gcText .amap-ui-district-cluster-marker-title {
     text-align: center;
     /* padding-top: 8px; */
     color: #ffffff;
 }
 
-.rainText .amap-ui-district-cluster-marker-body {
+.rainText .amap-ui-district-cluster-marker-body,.gcText .amap-ui-district-cluster-marker-body {
     /* text-align: left; */
     /*width: 50px;*/
     border-radius: 5px;
     padding: 0px 8px;
-    background: rgba(6, 111, 165, 0.8);
+    /* background: rgba(6, 111, 165, 0.8); */
     text-align: center;
     border-radius: 5px;
-    line-height: 28px;
+    /* line-height: 28px; */
     font-size: 16px;
     /* font-weight: 700; */
     color: #ffffff;
@@ -442,7 +438,7 @@
 .markerbottom {
     padding: 0px;
     /* padding-left: 10px; */
-    margin-top: -10px;
+    margin-top: -5px;
 }
 
 .markerbottom_left {
@@ -461,7 +457,9 @@
 
 .markertop {
     padding: 0px;
-    padding-left: 10px;
+    padding-left: 5px;
+    margin-top: 3px;
+    padding-top: 8px;
 }
 
 .markertop_right {
@@ -576,7 +574,7 @@
     background-size: 100% 100%;
     width: auto;
     height: auto;
-    padding: 4px 15px 12px 15px;
+    padding: 4px 15px 4px 15px;
 
 }
 
@@ -585,13 +583,14 @@
     /*width: 50px;*/
     border-radius: 5px;
     padding: 0px 8px;
-    background:#27e0d7;/* #27e0d7*/;
+    /*background:#27e0d7; #27e0d7*/;
     text-align: center;
     border-radius: 5px;
-    line-height: 28px;
+    /* line-height: 28px; */
     font-size: 16px;
     font-weight: 700;
-    color: #000000;
+    /* color: #000000; */
+    color: #FFFFFF;
     
     /* 新加 */
     width: fit-content;
@@ -621,13 +620,14 @@
     /*width: 50px;*/
     border-radius: 5px;
     padding: 0px 8px;
-    background:#27e0d7;/* #27e0d7*/;
+    /*background:#27e0d7; #27e0d7*/;
     text-align: center;
     border-radius: 5px;
-    line-height: 28px;
+    /* line-height: 28px; */
     font-size: 16px;
     font-weight: 700;
-    color: #000;
+    /* color: #000; */
+    color: #FFFFFF;
     
     /* 新加 */
     width: fit-content;
@@ -638,5 +638,5 @@
 .level_moren .amap-ui-district-cluster-marker-title {
     color: #FFFFFF;
     text-align: center;
-    padding-top: 8px;
+    /* padding-top: 8px; */
 }

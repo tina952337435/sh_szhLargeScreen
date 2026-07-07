@@ -69,7 +69,8 @@ import dayjs from "dayjs";
 import $ from "jquery";
 
 
-import { ref, onMounted, reactive, inject } from "vue";
+import { ref, onMounted, reactive, inject, nextTick } from "vue";
+import * as echarts from 'echarts';
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 const datekey = ref(null);
@@ -93,6 +94,11 @@ const tableHeaders = ref([
   { name: "drp", label: "雨量(mm)" },
 ]);
 const tableData = ref();
+// dataZoom 动态加载相关
+let queryStime = "";
+let queryEtime = "";
+let isLoadingMore = false;
+let currentStrNote = [];
 // 获取雨型的类型：1:(小~中雨);2:(中雨);3:(暴雨);4:(大暴雨);5:(特大暴雨);
 const props = defineProps({
   stcd: {
@@ -114,7 +120,7 @@ const props = defineProps({
 });
 function loadZhan() {
   value.value = stcd.value;
-  api.QuSel({ "pid": "201901101419326076-1-1" }).then((res) => {
+  api.QuSelDuo({ "pid": "201901101419326076-1-1,201901101419326076-5" }).then((res) => {
     console.error("res", res.data)
     var strJson = [];
     if (res.data.length > 0) {
@@ -138,6 +144,8 @@ function Weacontent() {
   strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   strParam["pathname"] = pathname.value;
   strParam["datasource"] ="BX";
+  queryStime = strParam["stime"];
+  queryEtime = strParam["etime"];
   api
     .queryDRPDANZHANList(strParam)
     .then((res) => {    
@@ -165,7 +173,8 @@ function YLload() {
     "#FE7923",
     "#8E30FF",
   ];
-  const _Option = ChartJs.chartYL(
+  currentStrNote = strNote;
+  const _Option = ChartJs.chartYLZoom(
     "",
     strJson,
     strNote,
@@ -180,20 +189,27 @@ function YLload() {
   lineOption.value = _Option;
   datekey.value = Date.now();
 
+  // 绑定 dataZoom 事件
+  nextTick(() => {
+    bindDataZoomEvent();
+  });
+
+  var tbResult = buildTableData(strJson);
+  $("#divEchartsData").html(tbResult.strMsg);
+  tableData.value = tbResult.tableData;
+}
+// 从原始数据构建表格数据和统计信息
+function buildTableData(strJson) {
   var result = [];
-  var maxDrp = 0, maxTM = "—";
+  var maxDrp = 0, maxTM = "--";
   var drpTotal = 0;
   for (var num = 0; num < strJson.reverse().length; num++) {
     var item = strJson.reverse()[num];
-    var drp = item.drp != undefined ? Number(item.drp).toFixed(1) : "—";
+    var drp = item.drp != undefined ? Number(item.drp).toFixed(1) : "--";
     var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
     if (Number(drp) > 0) {
-      if (drp > maxDrp) {
-        maxDrp = drp;
-        maxTM = tm;
-      }
+      if (drp > maxDrp) { maxDrp = drp; maxTM = tm; }
       drpTotal += Number(drp);
-      // console.error("drpTotal", drpTotal, Number(drp))
     }
     if (drpTotal == 0) {
       maxDrp = 0;
@@ -201,17 +217,84 @@ function YLload() {
     }
     result.push({ num: num + 1, tm: tm, drp: drp });
   }
-  if (Number(drpTotal) > 0) {
-    drpTotal = Number(drpTotal).toFixed(1);
-  }
-  var strMsg = `最大雨量：<span style='color:#0cdc0c;font-size: 18px;'>${maxDrp}</span>mm（${maxTM}）
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-  累计雨量：<span style='color:#0cdc0c;font-size: 18px;'>${drpTotal}</span>mm
-    `;
-  $("#divEchartsData").html(strMsg);
-  tableData.value = result;
+  if (Number(drpTotal) > 0) { drpTotal = Number(drpTotal).toFixed(1); }
+  var strMsg = "最大雨量：<span style='color:#0cdc0c;font-size: 18px;'>" + maxDrp + "</span>mm（" + maxTM + "）"
+    + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+    + "累计雨量：<span style='color:#0cdc0c;font-size: 18px;'>" + drpTotal + "</span>mm";
+  return { strMsg: strMsg, tableData: result };
 }
 
+// ========== dataZoom 动态加载 ==========
+function bindDataZoomEvent() {
+  var chartDom = document.getElementById('YQLine');
+  if (!chartDom) return;
+  var myChart = echarts.getInstanceByDom(chartDom);
+  if (!myChart) return;
+  myChart.off('dataZoom');
+  myChart.on('dataZoom', handleDataZoom);
+}
+function handleDataZoom(params) {
+  if (isLoadingMore) return;
+  var batch = params.batch || [params];
+  if (!batch.length) return;
+  var start = batch[0].start;
+  if (start < 10) {
+    isLoadingMore = true;
+    loadMorePrev();
+  }
+}
+function loadMorePrev() {
+  var currentStime = dayjs(queryStime);
+  var newStime = currentStime.add(-1, 'day').format('YYYY-MM-DD HH:mm') + ':00';
+  var newEtime = currentStime.format('YYYY-MM-DD HH:mm') + ':00';
+  window.loadingShow();
+  var strParam = {};
+  strParam["stcd"] = stcd.value;
+  strParam["stime"] = newStime;
+  strParam["etime"] = newEtime;
+  strParam["pathname"] = pathname.value;
+  strParam["datasource"] = "BX";
+  api.queryDRPDANZHANList(strParam).then(function (res) {
+    queryStime = newStime;
+    var newData = sortObjectArray(res.data || [], ["tm"], "asc");
+    var existingTms = {};
+    YLdata.value.forEach(function (d) { existingTms[d.tm] = true; });
+    var uniqueNew = [];
+    newData.forEach(function (d) {
+      if (!existingTms[d.tm]) { uniqueNew.push(d); }
+    });
+    var merged = uniqueNew.concat(YLdata.value).sort(function (a, b) {
+      return dayjs(a.tm).valueOf() - dayjs(b.tm).valueOf();
+    });
+    YLdata.value = merged;
+    mini.get("STIME").setValue(newStime.substring(0, 16));
+    var chartDom = document.getElementById('YQLine');
+    var myChart = echarts.getInstanceByDom(chartDom);
+    if (myChart && merged.length > 0 && currentStrNote.length > 0) {
+      var chartTM = merged.map(function (d) { return dayjs(d.tm).format("MM-DD HH:mm"); });
+      var seriesUpdates = [];
+      for (var j = 0; j < currentStrNote.length; j++) {
+        var note = currentStrNote[j];
+        if (note.name === "时间" || note.name === "名称") continue;
+        var values = merged.map(function (d) {
+          var val = d[note.codename];
+          return (isNaN(val) === false && val != null && val !== "") ? Number(val).toFixed(1) : null;
+        });
+        seriesUpdates.push({ name: note.name, data: values });
+      }
+      myChart.setOption({ xAxis: { data: chartTM }, series: seriesUpdates });
+    }
+    var tbResult = buildTableData(merged);
+    $("#divEchartsData").html(tbResult.strMsg);
+    tableData.value = tbResult.tableData;
+    window.loadingHide();
+    isLoadingMore = false;
+  }).catch(function () {
+    window.loadingHide();
+    isLoadingMore = false;
+  });
+}
+// =========================================
 function ExportData() {
   var listcolumnname = [];
   console.error("tableHeaders.value", tableHeaders.value)
@@ -278,19 +361,20 @@ onMounted(() => {
       stcd.value = inject("stcd").value;
     }
   }
+    
   if (SetNull(props.stime) != "") {
     stime.value = props.stime
   } else {
-    if(SetNull(inject("stime"))  != ""){
+    if(SetNull(inject("stime")) != "" && SetNull(inject("stime").value) !== ""){
       stime.value = inject("stime").value;
-    }else{          
+    }else{             
       stime.value = dayjs(now).add(-24, "hour").format("YYYY-MM-DD HH:mm:ss");
     }    
   }
   if (SetNull(props.etime) != "") {
     etime.value = props.etime
   } else {
-    if(SetNull(inject("etime"))  != ""){
+    if(SetNull(inject("etime")) != "" && SetNull(inject("etime").value) !== ""){
       etime.value = inject("etime").value;
     }
     else{

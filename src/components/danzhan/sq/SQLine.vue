@@ -89,7 +89,8 @@ import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElSelect, ElOption, 
 import dayjs from "dayjs";
 import $ from "jquery";
 
-import { ref, onMounted, provide, inject } from "vue";
+import { ref, onMounted, provide, inject, nextTick } from "vue";
+import * as echarts from 'echarts';
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 const datekey = ref(null);
@@ -115,6 +116,11 @@ const showDialogYB = ref(false);
 const titleYB = ref("单站水位预报");
 const typeValueYB = ref(false);
 const WarningInfoID = ref(false);
+// dataZoom 动态加载相关
+let queryStime = "";       // 当前已查询数据的开始时间
+let queryEtime = "";       // 当前已查询数据的结束时间
+let isLoadingMore = false; // 防止重复加载
+let currentStrNote = [];   // 当前strNote，供增量更新使用
 const tableHeaders = ref([
     { name: "num", label: "序号" },
     { name: "tm", label: "时间" },
@@ -171,6 +177,8 @@ function Weacontent() {
     strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
     strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
     strParam["datasource"] = mtype.value;
+    queryStime = strParam["stime"];
+    queryEtime = strParam["etime"];
     api
       .stPptnWaterLine(strParam)
       .then((res) => {        
@@ -254,7 +262,9 @@ function SQload() {
         "#FE7923",
         "#8E30FF",
     ];
-    const _Option = ChartJs.chartSW(
+    // 保存 strNote 供增量更新使用
+    currentStrNote = strNote;
+    const _Option = ChartJs.chartSWZoom(
         "",
         sortObjectArray(strJson, ["tm"], "asc"),
         strNote,
@@ -269,6 +279,17 @@ function SQload() {
     lineOption.value = _Option;
     datekey.value = Date.now();
 
+    // 绑定 dataZoom 事件
+    nextTick(() => {
+        bindDataZoomEvent();
+    });
+
+    var tbResult = buildTableData(strJson);
+    $("#divEchartsData").html(tbResult.strMsg);
+    tableData.value = tbResult.tableData;
+}
+// 从原始数据构建表格数据和统计信息（供 SQload 和增量加载共用）
+function buildTableData(strJson) {
     var result = [];
     var maxZ = -1, maxTM = null;
     var minZ = 999, minTM = null;
@@ -279,82 +300,50 @@ function SQload() {
         var upz = item.upz != undefined ? Number(item.upz).toFixed(2) : "—";
         var dwz = item.dwz != undefined ? Number(item.dwz).toFixed(2) : "—";
         var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
-
-        var wrzCha = "—";
         var colorCss = "";
         if (wrz != "—") {
-            if (upz != "—") {
-                wrzCha = Number(Number(upz) - Number(wrz)).toFixed(2);
-            } else {
-                if (dwz != "—") {
-                    wrzCha = Number(Number(dwz) - Number(wrz)).toFixed(2);
-                }
-            }
-            if (Number(wrzCha) > 0) {
-                colorCss = "#F9C33D";
-            }
+            if (upz != "—") { var wrzCha = Number(Number(upz) - Number(wrz)).toFixed(2); }
+            else { if (dwz != "—") { var wrzCha = Number(Number(dwz) - Number(wrz)).toFixed(2); } }
+            if (Number(wrzCha) > 0) { colorCss = "#F9C33D"; }
         }
-
         if (grz != "—") {
             if (upz != "—") {
-                if (Number(Number(upz) - Number(grz)).toFixed(2) > 0) {
-                    colorCss = "#F70019";
-                }
+                if (Number(Number(upz) - Number(grz)).toFixed(2) > 0) { colorCss = "#F70019"; }
             } else {
                 if (dwz != "—") {
-                    if (Number(Number(dwz) - Number(grz)).toFixed(2) > 0) {
-                        colorCss = "#F70019";
-                    }
+                    if (Number(Number(dwz) - Number(grz)).toFixed(2) > 0) { colorCss = "#F70019"; }
                 }
             }
         }
-
         if (SetNull(upz) != "") {
             if (SetNull(upz) != "—") {
-                if (upz > maxZ) {
-                    maxZ = upz;
-                    maxTM = tm;
-                }
-                if (upz < minZ) {
-                    minZ = upz;
-                    minTM = tm;
-                }
-            }
-            else {
+                if (upz > maxZ) { maxZ = upz; maxTM = tm; }
+                if (upz < minZ) { minZ = upz; minTM = tm; }
+            } else {
                 var tempUpz = dwz;
                 if (SetNull(tempUpz) != "—") {
-                    if (tempUpz > maxZ) {
-                        maxZ = tempUpz;
-                        maxTM = tm;
-                    }
-                    if (tempUpz < minZ) {
-                        minZ = tempUpz;
-                        minTM = tm;
-                    }
+                    if (tempUpz > maxZ) { maxZ = tempUpz; maxTM = tm; }
+                    if (tempUpz < minZ) { minZ = tempUpz; minTM = tm; }
                 }
             }
         }
-
         result.push({ tm: tm, upz: upz, dwz: dwz, wrz: wrz, grz: grz, colorCss: colorCss });
     }
-    var strMsg = `最低水位：<span style='color:#0cdc0c;font-size: 18px;'>${minZ}</span>m（${minTM}）
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-最高水位：<span style='color:#0cdc0c;font-size: 18px;'>${maxZ}</span>m（${maxTM}）
-    `;
-    if(minZ==999){
-        strMsg = `最低水位：<span style='color:#0cdc0c;font-size: 18px;'>-</span>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-最高水位：<span style='color:#0cdc0c;font-size: 18px;'>-</span>
-    `;
+    var strMsg = "最低水位：<span style='color:#0cdc0c;font-size: 18px;'>" + minZ + "</span>m（" + minTM + "）"
+        + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        + "最高水位：<span style='color:#0cdc0c;font-size: 18px;'>" + maxZ + "</span>m（" + maxTM + "）";
+    if (minZ == 999) {
+        strMsg = "最低水位：<span style='color:#0cdc0c;font-size: 18px;'>-</span>"
+            + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            + "最高水位：<span style='color:#0cdc0c;font-size: 18px;'>-</span>";
     }
-    $("#divEchartsData").html(strMsg);
-    // tableData.value = sortObjectArray(result, ["tm"], "desc");
-    let _index = 0;
-    tableData.value = sortObjectArray(result, ["tm"], "desc").filter(res => {
+    var _index = 0;
+    var td = sortObjectArray(result, ["tm"], "desc").filter(function (res) {
         _index = _index + 1;
         res.num = _index;
         return res;
     });
+    return { strMsg: strMsg, tableData: td };
 }
 function getType(obj) {
     mtype.value = obj;
@@ -449,6 +438,98 @@ function OnBoot(e) {
         img2.value = "/images/line-table3.png";
     }
 }
+// ========== dataZoom 动态加载 ==========
+function bindDataZoomEvent() {
+    var chartDom = document.getElementById('SQLine');
+    if (!chartDom) return;
+    var myChart = echarts.getInstanceByDom(chartDom);
+    if (!myChart) return;
+    myChart.off('dataZoom');
+    myChart.on('dataZoom', handleDataZoom);
+}
+
+function handleDataZoom(params) {
+    if (isLoadingMore) return;
+    // 取 batch 中第一个有效的 start/end
+    var batch = params.batch || [params];
+    if (!batch.length) return;
+    var start = batch[0].start;
+
+    // 滑到左边界 → 向前加载更早数据
+    if (start < 10) {
+        isLoadingMore = true;
+        loadMorePrev();
+    }
+}
+
+function loadMorePrev() {
+    var currentStime = dayjs(queryStime);
+    // 固定向前扩展1天
+    var newStime = currentStime.add(-1, 'day').format('YYYY-MM-DD HH:mm') + ':00';
+    var newEtime = currentStime.format('YYYY-MM-DD HH:mm') + ':00';
+
+    window.loadingShow();
+
+    var strParam = {};
+    strParam["stcd"] = stcd.value;
+    strParam["pathname"] = pathname.value;
+    strParam["stime"] = newStime;
+    strParam["etime"] = newEtime;
+    strParam["datasource"] = mtype.value;
+
+    api.stPptnWaterLine(strParam).then(function (res) {
+        queryStime = newStime;
+
+        var newData = res.data || [];
+        // 合并去重
+        var existingTms = {};
+        SQdata.value.forEach(function (d) { existingTms[d.tm] = true; });
+        var uniqueNew = [];
+        newData.forEach(function (d) {
+            if (!existingTms[d.tm]) { uniqueNew.push(d); }
+        });
+        var merged = uniqueNew.concat(SQdata.value).sort(function (a, b) {
+            return dayjs(a.tm).valueOf() - dayjs(b.tm).valueOf();
+        });
+        SQdata.value = merged;
+
+        // 更新界面时间选择器
+        mini.get("STIME").setValue(newStime.substring(0, 16));
+
+        // 增量图表更新（不调 SQload，保留 dataZoom 状态）
+        var chartDom = document.getElementById('SQLine');
+        var myChart = echarts.getInstanceByDom(chartDom);
+        if (myChart && merged.length > 0 && currentStrNote.length > 0) {
+            var chartTM = merged.map(function (d) {
+                return dayjs(d.tm).format("MM-DD HH:mm");
+            });
+            var seriesUpdates = [];
+            for (var j = 0; j < currentStrNote.length; j++) {
+                var note = currentStrNote[j];
+                if (note.name === "时间" || note.name === "名称") continue;
+                var values = merged.map(function (d) {
+                    var val = d[note.codename];
+                    return (isNaN(val) === false && val != null && val !== "") ? val : null;
+                });
+                seriesUpdates.push({ name: note.name, data: values });
+            }
+            myChart.setOption({ xAxis: { data: chartTM }, series: seriesUpdates });
+        }
+
+        // 更新表格和统计信息
+        var tbResult = buildTableData(merged);
+        $("#divEchartsData").html(tbResult.strMsg);
+        tableData.value = tbResult.tableData;
+
+        window.loadingHide();
+        isLoadingMore = false;
+    }).catch(function () {
+        window.loadingHide();
+        isLoadingMore = false;
+    });
+}
+// =========================================
+
 var STCD = "63203050,63203000,63205150,63403500,63204650";
 onMounted(() => {
     mini.parse();

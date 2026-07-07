@@ -178,8 +178,8 @@ function onaddYLMark(evt) {
         const props = {};
         props["stcd"] = item["stcd"]
         var nowTM = new Date();
-        var tempStime = dayjs(nowTM).add(-3, "HOUR").format("YYYY-MM-DD HH:00:00");
-        var tempEtime = dayjs(nowTM).add(1, "HOUR").format("YYYY-MM-DD HH:00:00");
+        var tempStime =item.stime!=undefined?item.stime:dayjs(nowTM).add(-3, "HOUR").format("YYYY-MM-DD HH:00:00");
+        var tempEtime = item.etime!=undefined?item.etime:dayjs(nowTM).add(1, "HOUR").format("YYYY-MM-DD HH:00:00");
         props["stime"] = tempStime;
         props["etime"] = tempEtime;
         props["mtype"] = item["mtype"]
@@ -223,6 +223,8 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                 var breakSymbol;
                 for (var i = 0; i < arr.length; i++) {
                     var item = arr[i];
+                    item.stime=stime;
+                    item.etime=etime;
                     var f = parseFloat(item.drp);
                     var cls = "rainText";
                     var pUrl = "/images/rain/";
@@ -308,11 +310,11 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                         
                         var textStr =arr[i].stnm+"@" +Number(arr[i].drp).toFixed(1);
                         if (switchChecked) {
-                            var label = new MapTextPagehome(map, point, arr[i], textStr, globallevel, _align, cls,
+                            var label = new MapTextPagehome(map, point, item, textStr, globallevel, _align, cls,
                                 12);
                             labels.push(label);
                         }
-                        var graphic = new Graphic(point, breakSymbol, arr[i], null);
+                        var graphic = new Graphic(point, breakSymbol, item, null);
                         RainLayerGraphicLayer.add(graphic);
                     }
                 }
@@ -586,19 +588,22 @@ function addYBSWMark(strJson, DD_ID, stime, etime, switchChecked) {
                     item.dd_id = DD_ID;
                     item.stime = stime;
                     item.etime = etime;
-                    var cls = " level_zc";
+                    var cls = " level_all";
                     breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 18, 38);
-                    if (item.grz != undefined) {
-                        if (Number(item.data) >= Number(item.grz)&&Number(item.grz)>0) {
-                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 18, 38);
-                            cls = " level_grz";
-                        }
-                    } else if (item.wrz != undefined) {
+                    if (item.wrz != undefined) {
                         if (Number(item.data) >= Number(item.wrz)&&Number(item.wrz)>0) {
                             breakSymbol = new PictureMarkerSymbol("/images/cheng2.png", 18, 38);
-                            cls = " level_wrz";
+                            // cls = " level_wrz";
                         }
                     }
+                    if (item.grz != undefined) {
+                        // console.error(item.stnm,'item.grz',item.grz,item.data);
+                        if (Number(item.data) >= Number(item.grz)&&Number(item.grz)>0) {
+                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 18, 38);
+                            // cls = " level_grz";
+                        }
+                    }  
+
                     var point = new Point({
                         "x": item.lgtd,
                         "y": item.lttd,
@@ -710,7 +715,7 @@ function addLLMark(strJson, switchChecked) {
                         _align=item.dir;
                     }
 
-                    var cls = "rainText";
+                    var cls = "gcText";
                     var q = formatFlow(item["q"]);
                     if (SetNull(item.rotate)!="") {
                         angle = parseInt(item.rotate);

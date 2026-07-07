@@ -32,7 +32,7 @@ import customTable from "@/components/Table/customTable.vue";
 import api from "@/api/mode/index.js";
 import dayjs from "dayjs";
 import $ from "jquery";
-import { SetNull, sortObjectArray } from "@/api/ComUnit.js";
+import { SetNull, sortObjectArray,groupBy } from "@/api/ComUnit.js";
 import { ElButton, ElMessage, ElTable, ElTableColumn } from "element-plus";
 import { onMounted, ref, shallowRef, defineAsyncComponent, nextTick, provide, inject, watch } from "vue";
 import { getDateDiff, convertToDate } from "@/api/dateUtil";
@@ -123,12 +123,14 @@ function Weacontent() {
                 var listTZ = data.data[num].listTZ.filter(function (e) {
                     return e.PTYPE == "0";//降雨
                 });
-                if (listTZ.length > 0) {
-                    listTZ = listTZ.filter(function (res) {
-                        return res.ZHANID == '1744830472';
-                    });
-                    avgDrp = listTZ.length > 0 ? Number(listTZ[0].DATA).toFixed(1) : 0;
-                }
+                var listTZG=groupBy(listTZ,"ZHANID");
+                var totalDrp=0;
+                listTZG.forEach(u=>{
+                    for(var i=0;i<u.length;i++){
+                        totalDrp+=Number(u[i].DATA);    
+                    }
+                });
+                avgDrp=listTZG.length>0?(totalDrp/listTZG.length).toFixed(1):0;
             }
             result.push({
                 name: name,

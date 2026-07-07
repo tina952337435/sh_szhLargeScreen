@@ -79,6 +79,9 @@ function Weacontent() {
         if (Number(wrzCha) > 0) {
           colorCss = "#F9C33D";
         }
+        else{//负数的不展示
+            wrzCha = "—";
+        }
       }
 
       if (grz != "—" && upz != "—") {

@@ -73,8 +73,8 @@ import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElSelect, ElOption }
 import dayjs from "dayjs";
 import $ from "jquery";
 
-import { ref, onMounted, reactive, inject } from "vue";
-import { number } from "echarts";
+import { ref, onMounted, reactive, inject, nextTick } from "vue";
+import * as echarts from 'echarts';
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 const datekey = ref(null);
@@ -99,6 +99,11 @@ const tableHeaders = ref([
   { name: "v", label: "流速(m/s)" },
 ]);
 const tableData = ref();
+// dataZoom 动态加载相关
+let queryStime = "";
+let queryEtime = "";
+let isLoadingMore = false;
+let currentStrNote = [];
 const props = defineProps({
   stcd: {
     type: String,
@@ -160,6 +165,8 @@ function Weacontent() {
   strParam["datasource"] = mtype.value;
   strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
   strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  queryStime = strParam["stime"];
+  queryEtime = strParam["etime"];
   api
     .stFlowVelLine(strParam)
     .then((res) => {
@@ -196,7 +203,8 @@ function LLload() {
     "#FE7923",
     "#8E30FF",
   ];
-  const _Option = ChartJs.chartLLLS(
+  currentStrNote = strNote;
+  const _Option = ChartJs.chartLLLSZoom(
     "",
     strJson,
     strNote,
@@ -211,57 +219,111 @@ function LLload() {
   lineOption.value = _Option;
   datekey.value = Date.now();
 
+  // 绑定 dataZoom 事件
+  nextTick(() => {
+    bindDataZoomEvent();
+  });
+
+  var tbResult = buildTableData(strJson);
+  $("#divEchartsData").html(tbResult.strMsg);
+  tableData.value = tbResult.tableData;
+}
+// 从原始数据构建表格数据和统计信息
+function buildTableData(strJson) {
   var result = [];
   var maxZ = -999, maxTM = "";
   var minZ = 999, minTM = "";
   var averageP = 0, averagePN = 0;
   for (var num = 0; num < strJson.length; num++) {
     var item = strJson[num];
-    var q = "—",v="—";
-    if(SetNull(item.q)!=""){
-      q = Number(item.q).toFixed(2);
-    }
-    if(SetNull(item.v)!=""){
-      v = Number(item.v).toFixed(2);
-    }
+    var q = "—", v = "—";
+    if (SetNull(item.q) != "") { q = Number(item.q).toFixed(2); }
+    if (SetNull(item.v) != "") { v = Number(item.v).toFixed(2); }
     var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
-
     if (SetNull(q) != "—") {
       averageP += Math.abs(Number(q));
-      // averageP += Number(q);
       averagePN++;
-      if (Number(q) < minZ) {
-        minZ = q;
-        minTM = tm;
-      }
-      if (Number(q) > maxZ) {
-        maxZ = q;
-        maxTM = tm;
-      }
+      if (Number(q) < minZ) { minZ = q; minTM = tm; }
+      if (Number(q) > maxZ) { maxZ = q; maxTM = tm; }
     }
-    result.push({ num: num + 1, tm: tm, q: q,v:v });
+    result.push({ num: num + 1, tm: tm, q: q, v: v });
   }
-  if (averageP > 0) {
-    averageP = Number(averageP / averagePN).toFixed(2)
-  }
-  if (SetNull(averageP) != "") {
-    if (Number(maxZ) < 0) {
-      averageP = -averageP;
-    }
-    else {
-      // averageP=Number(averageP).toFixed(2);
-    }
-  }
-  var strMsg = `
-  最低流量：<span style='color:#0cdc0c;font-size: 18px;'>${minZ}</span>m³/s（${minTM}）
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  最高流量：<span style='color:#0cdc0c;font-size: 18px;'>${maxZ}</span>m³/s（${maxTM}）
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  平均流量：<span style='color:#0cdc0c;font-size: 18px;'>${averageP}</span>m³/s
-    `;
-  $("#divEchartsData").html(strMsg);
-  tableData.value = sortObjectArray(result,["tm"],"desc");
+  if (averageP > 0) { averageP = Number(averageP / averagePN).toFixed(2); }
+  if (SetNull(averageP) != "") { if (Number(maxZ) < 0) { averageP = -averageP; } }
+  var strMsg = "最低流量：<span style='color:#0cdc0c;font-size: 18px;'>" + minZ + "</span>m³/s（" + minTM + "）"
+    + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+    + "最高流量：<span style='color:#0cdc0c;font-size: 18px;'>" + maxZ + "</span>m³/s（" + maxTM + "）"
+    + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+    + "平均流量：<span style='color:#0cdc0c;font-size: 18px;'>" + averageP + "</span>m³/s";
+  return { strMsg: strMsg, tableData: sortObjectArray(result, ["tm"], "desc") };
 }
+// ========== dataZoom 动态加载 ==========
+function bindDataZoomEvent() {
+  var chartDom = document.getElementById('LLLine');
+  if (!chartDom) return;
+  var myChart = echarts.getInstanceByDom(chartDom);
+  if (!myChart) return;
+  myChart.off('dataZoom');
+  myChart.on('dataZoom', handleDataZoom);
+}
+function handleDataZoom(params) {
+  if (isLoadingMore) return;
+  var batch = params.batch || [params];
+  if (!batch.length) return;
+  var start = batch[0].start;
+  if (start < 10) { isLoadingMore = true; loadMorePrev(); }
+}
+function loadMorePrev() {
+  var currentStime = dayjs(queryStime);
+  var newStime = currentStime.add(-1, 'day').format('YYYY-MM-DD HH:mm') + ':00';
+  var newEtime = currentStime.format('YYYY-MM-DD HH:mm') + ':00';
+  window.loadingShow();
+  var strParam = {};
+  strParam["stcd"] = stcd.value;
+  strParam["pathname"] = pathname.value;
+  strParam["datasource"] = mtype.value;
+  strParam["stime"] = newStime;
+  strParam["etime"] = newEtime;
+  api.stFlowVelLine(strParam).then(function (res) {
+    queryStime = newStime;
+    var newData = res.data || [];
+    for (var n = 0; n < newData.length; n++) {
+      if (SetNull(newData[n].q) != "") { newData[n].q = Number(newData[n].q).toFixed(2); }
+      else { newData[n].q = ""; }
+    }
+    var existingTms = {};
+    LLdata.value.forEach(function (d) { existingTms[d.tm] = true; });
+    var uniqueNew = [];
+    newData.forEach(function (d) { if (!existingTms[d.tm]) { uniqueNew.push(d); } });
+    var merged = uniqueNew.concat(LLdata.value).sort(function (a, b) {
+      return dayjs(a.tm).valueOf() - dayjs(b.tm).valueOf();
+    });
+    LLdata.value = merged;
+    mini.get("STIME").setValue(newStime.substring(0, 16));
+    var chartDom = document.getElementById('LLLine');
+    var myChart = echarts.getInstanceByDom(chartDom);
+    if (myChart && merged.length > 0 && currentStrNote.length > 0) {
+      var chartTM = merged.map(function (d) { return dayjs(d.tm).format("MM-DD HH:mm"); });
+      var seriesUpdates = [];
+      for (var j = 0; j < currentStrNote.length; j++) {
+        var note = currentStrNote[j];
+        if (note.name === "时间" || note.name === "名称") continue;
+        var values = merged.map(function (d) {
+          var val = d[note.codename];
+          return (isNaN(val) === false && val != null && val !== "") ? val : null;
+        });
+        seriesUpdates.push({ name: note.name, data: values });
+      }
+      myChart.setOption({ xAxis: { data: chartTM }, series: seriesUpdates });
+    }
+    var tbResult = buildTableData(merged);
+    $("#divEchartsData").html(tbResult.strMsg);
+    tableData.value = tbResult.tableData;
+    window.loadingHide();
+    isLoadingMore = false;
+  }).catch(function () { window.loadingHide(); isLoadingMore = false; });
+}
+// =========================================
 
 function ExportData() {
   var listcolumnname = [];

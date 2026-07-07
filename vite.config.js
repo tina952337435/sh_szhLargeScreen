@@ -50,7 +50,7 @@ export default defineConfig({
         // }
       },
       ['/HuishuiApi']: {
-        target: "http://10.91.5.63/modelproyx/HuishuiApi/", // 目标地址
+        target: "http://10.91.3.242:9090/HuishuiApi/", // 目标地址
         changeOrigin: true, // 是否换源， true 换源
         secure: false,
         rewrite: (path) => path.replace(new RegExp('^' + '/HuishuiApi'), ""), // 替换
@@ -95,6 +95,12 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(new RegExp('^' + '/onemapApi'), "/geoscene"), // 替换
       },
+      ['/shuiwupingtaiApi']: {//水务数据平台
+        target: "http://10.91.3.242:9090/shuiwupingtaiApi/", // 目标地址
+        changeOrigin: true, // 是否换源， true 换源
+        secure: false,
+        rewrite: (path) => path.replace(new RegExp('^' + '/shuiwupingtaiApi'), ""), // 替换
+      },      
     },
   },
   build: {

@@ -72,7 +72,8 @@ import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElSelect, ElOption, 
 import dayjs from "dayjs";
 import $ from "jquery";
 
-import { ref, onMounted, provide, inject } from "vue";
+import { ref, onMounted, provide, inject, nextTick } from "vue";
+import * as echarts from 'echarts';
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 const datekey = ref(null);
@@ -102,6 +103,10 @@ const tableHeaders = ref([
     { name: "wndpwr", label: "风力等级" },
 ]);
 const tableData = ref();
+// dataZoom 动态加载相关
+let queryStime = "";
+let queryEtime = "";
+let isLoadingMore = false;
 // 获取雨型的类型：1:(小~中雨);2:(中雨);3:(暴雨);4:(大暴雨);5:(特大暴雨);
 const props = defineProps({
     stcd: {
@@ -149,6 +154,8 @@ function Weacontent() {
     strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
     strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
     strParam["datasource"] = mtype.value;
+    queryStime = strParam["stime"];
+    queryEtime = strParam["etime"];
     api
       .stwdwvrFengLine(strParam)
       .then((res) => {        
@@ -213,7 +220,7 @@ function SQload() {
         "#FE7923",
         "#8E30FF",
     ];
-    const _Option = ChartJs.chartFX(
+    const _Option = ChartJs.chartFXZoom(
         flfxDataNew,
         xflfxDataNew,
         LineColor,
@@ -225,26 +232,110 @@ function SQload() {
     );
     lineOption.value = _Option;
     datekey.value = Date.now();
-     console.error("3",_Option);
-    var strMsg = `最低风速：<span style='color:#0cdc0c;font-size: 18px;'>${minZ}</span>m³/s（${minTM}）
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-最高风速：<span style='color:#0cdc0c;font-size: 18px;'>${maxZ}</span>m³/s（${maxTM}）
-    `;
-    if(minZ==999){
-        strMsg = `最低风速：<span style='color:#0cdc0c;font-size: 18px;'>-</span>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-最高风速：<span style='color:#0cdc0c;font-size: 18px;'>-</span>
-    `;
+
+    // 绑定 dataZoom 事件
+    nextTick(() => {
+        bindDataZoomEvent();
+    });
+  var tbResult = buildTableData(strJson);
+  $("#divEchartsData").html(tbResult.strMsg);
+  tableData.value = tbResult.tableData;
+}
+// 从原始数据构建表格数据和统计信息
+function buildTableData(strJson) {
+    var result = [];
+    var maxZ = -1, maxTM = null;
+    var minZ = 999, minTM = null;
+    for (var num = 0; num < strJson.length; num++) {
+        var item = strJson[num];
+        var WindDirName = SetNull(item.wnddir) == "" ? "-" : getWindDirectionName(item.wnddir);
+        var upz = item.wndv;
+        var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
+        if (SetNull(upz) != "") {
+            if (SetNull(upz) != "—") {
+                if (upz > maxZ) { maxZ = upz; maxTM = tm; }
+                if (upz < minZ) { minZ = upz; minTM = tm; }
+            }
+        }
+        result.push({ tm: tm, upz: upz, WindDirName: WindDirName, wndpwr: item.wndpwr });
     }
-    $("#divEchartsData").html(strMsg);
-    // tableData.value = sortObjectArray(result, ["tm"], "desc");
-    let _index = 0;
-    tableData.value = sortObjectArray(result, ["tm"], "desc").filter(res => {
+    var strMsg = "最低风速：<span style='color:#0cdc0c;font-size: 18px;'>" + minZ + "</span>m³/s（" + maxTM + "）"
+        + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        + "最高风速：<span style='color:#0cdc0c;font-size: 18px;'>" + maxZ + "</span>m³/s（" + maxTM + "）";
+    if (minZ == 999) {
+        strMsg = "最低风速：<span style='color:#0cdc0c;font-size: 18px;'>-</span>"
+            + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            + "最高风速：<span style='color:#0cdc0c;font-size: 18px;'>-</span>";
+    }
+    var _index = 0;
+    var td = sortObjectArray(result, ["tm"], "desc").filter(function (res) {
         _index = _index + 1;
         res.num = _index;
         return res;
     });
+    return { strMsg: strMsg, tableData: td };
 }
+// ========== dataZoom 动态加载 ==========
+function bindDataZoomEvent() {
+  var chartDom = document.getElementById('FCLine');
+  if (!chartDom) return;
+  var myChart = echarts.getInstanceByDom(chartDom);
+  if (!myChart) return;
+  myChart.off('dataZoom');
+  myChart.on('dataZoom', handleDataZoom);
+}
+function handleDataZoom(params) {
+  if (isLoadingMore) return;
+  var batch = params.batch || [params];
+  if (!batch.length) return;
+  var start = batch[0].start;
+  if (start < 10) { isLoadingMore = true; loadMorePrev(); }
+}
+function loadMorePrev() {
+  var currentStime = dayjs(queryStime);
+  var newStime = currentStime.add(-1, 'day').format('YYYY-MM-DD HH:mm') + ':00';
+  var newEtime = currentStime.format('YYYY-MM-DD HH:mm') + ':00';
+  window.loadingShow();
+  var strParam = {};
+  strParam["stcd"] = stcd.value;
+  strParam["pathname"] = pathname.value;
+  strParam["stime"] = newStime;
+  strParam["etime"] = newEtime;
+  strParam["datasource"] = mtype.value;
+  api.stwdwvrFengLine(strParam).then(function (res) {
+    queryStime = newStime;
+    var newData = res.data || [];
+    var existingTms = {};
+    SQdata.value.forEach(function (d) { existingTms[d.tm] = true; });
+    var uniqueNew = [];
+    newData.forEach(function (d) { if (!existingTms[d.tm]) { uniqueNew.push(d); } });
+    var merged = uniqueNew.concat(SQdata.value).sort(function (a, b) {
+      return dayjs(a.tm).valueOf() - dayjs(b.tm).valueOf();
+    });
+    SQdata.value = merged;
+    mini.get("STIME").setValue(newStime.substring(0, 16));
+    var xflfxDataNew = [], flfxDataNew = [];
+    for (var num = 0; num < merged.length; num++) {
+      var resD = merged[num];
+      xflfxDataNew.push(resD.tm);
+      var WindDirName2 = SetNull(resD.wnddir) == "" ? "-" : getWindDirectionName(resD.wnddir);
+      flfxDataNew.push({ TimePoint: resD.tm, WindDir: resD.wnangle, WindSpeed: resD.wndv, WindDirName: WindDirName2 });
+    }
+    var LineColor = ["#19A3DF","#4EFF4E","#FF0000","green","#1CB8B2","#01DDFF","#F9C823","#0264FD","#FE7923","#8E30FF"];
+    var opt = ChartJs.chartFXZoom(flfxDataNew, xflfxDataNew, LineColor, "水位", "Mouth", _theme, 80, 20);
+    var chartDom = document.getElementById('FCLine');
+    var myChart = echarts.getInstanceByDom(chartDom);
+    if (myChart && merged.length > 0) {
+      myChart.setOption({ xAxis: { data: opt.xAxis[0].data }, series: opt.series.map(function(s) { return { name: s.name, data: s.data }; }) });
+    }
+    var tbResult = buildTableData(merged);
+    $("#divEchartsData").html(tbResult.strMsg);
+    tableData.value = tbResult.tableData;
+    window.loadingHide();
+    isLoadingMore = false;
+  }).catch(function () { window.loadingHide(); isLoadingMore = false; });
+}
+// =========================================
 var dataFXNM= ["北", "北东北", "东北", "东东北", "东", "东东南", "东南", "南东南", "南", "南西南", "西南", "西西南", "西", "西西北", "西北", "北西北"];
 var dataFX=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
 var jibieArr = [

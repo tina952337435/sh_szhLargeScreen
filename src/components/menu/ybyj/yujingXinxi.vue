@@ -13,9 +13,9 @@
                                     <div class="imgdiv">
                                         <img src="/images/bao2.png" />
                                     </div>
-                                    <div class="responsivetitle">降雨预报</div>
+                                    <div class="responsivetitle">暴雨预警</div>
                                     <div class="responsivecontent">
-                                        <span id="rainWarning" class="responsivecontentvalue" style ="color:red;"   >2小时超100mm</span>
+                                        <span id="rainWarning" class="responsivecontentvalue" :style="computedStyle('暴雨')">{{rainstorm}}</span>
                                         <span style="font-size:14px;"></span>
                                     </div>
                                 </div>
@@ -27,31 +27,43 @@
                                     <div class="imgdiv">
                                          <img src="/images/feng2.png" />
                                     </div>
-                                    <div class="responsivetitle">台风预警</div>
+                                    <div class="responsivetitle">雷电预警</div>
                                     <div class="responsivecontent">
-                                        <span id="weatherWarning" class="responsivecontentvalue" style ="color:red;" >6小时进入上海市影响范围线内</span>
+                                        <span id="weatherWarning" class="responsivecontentvalue" :style="computedStyle('雷电')" >{{leidianWarning}}</span>
                                         <span style="font-size:14px;"></span>
                                     </div>
                                 </div>
                             </div>
                            
-
+                            <div style="height:90px;">
+                                <div  class="responsivekuai1"></div>
+                                <div class="responsivekuai">
+                                    <div class="imgdiv">
+                                         <img src="/images/feng2.png" />
+                                    </div>
+                                    <div class="responsivetitle">大风预警</div>
+                                    <div class="responsivecontent">
+                                        <span id="weatherWarning" class="responsivecontentvalue" :style="computedStyle('大风')" >{{dafengWarning}}</span>
+                                        <span style="font-size:14px;"></span>
+                                    </div>
+                                </div>
+                            </div>
                             <div style="height:90px;">
                                 <div  class="responsivekuai1"></div>
                                 <div class="responsivekuai">
                                     <div class="imgdiv">
                                         <img src="/images/qi2.png" />
                                     </div>
-                                    <div class="responsivetitle">潮位增水预警</div>
+                                    <div class="responsivetitle">潮位预警</div>
                                     <div class="responsivecontent">
-                                        <span id="weatherWarning" class="responsivecontentvalue" style ="color:red;" >I级</span>
+                                        <span id="weatherWarning" class="responsivecontentvalue" :style="computedStyle('潮位')" >{{chaoweiWarning}}</span>
                                         <span style="font-size:14px;"></span>
                                     </div>
                                 </div>
                             </div>
 
                             
-                            <div style="height:90px;">
+                            <!-- <div style="height:90px;">
                                 <div class="responsivekuai1"></div>
                                 <div class="responsivekuai">
                                     <div class="imgdiv">
@@ -76,7 +88,7 @@
                                         <span style="font-size:14px;"></span>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
 
 
@@ -98,13 +110,8 @@
   </div>
   <ComZujian :showDialog="showDialog" @close="showDialog = false" :title="titleName" :typeValue="typeValue"
     style="width: 70%; height: 700px">
-    <yubaoAreaChart :wqstrJson="wqstrJson" :key="datekeyDialog" />
+    <yujingXinxi :wqstrJson="wqstrJson" :key="datekeyDialog" />
   </ComZujian>
-
-  <MyDialog :showDialog="showDialogWQ" @close="showDialogWQ = false" :title="titleNameWQ"
-    style="width: 70%; height: 700px">
-    <yujingWQTJ :emergencyList="emergencyList" :closeLineDialog="closeLineDialog" ref="child" />
-  </MyDialog>
 </template>
 
 <script setup>
@@ -113,7 +120,7 @@ import { Postcard } from "@element-plus/icons-vue";
 import MyDialog from "@/components/ComDialog.vue";
 import yujingWQTJ from "@/components/danzhan/wq/yujingWQTJ.vue";
 import Table from "@/components/Table/Table.vue";
-import api from "@/api/mode/index.js";
+import apiWxxsq from "@/api/topHead/index.js";
 import TableJs from "@/api/Table/TableJs.js";
 import dayjs from "dayjs";
 
@@ -144,226 +151,142 @@ const datekeyDialog = ref(null);
 
 
 const _theme = localStorage.getItem("curTheme");
-const lineOptionWQWrz = ref({});
-const lineOptionDike = ref({});
-const lineOptionGW = ref({});
 
-const datekey20 = ref(null);
-const datekey50 = ref(null);
-const datekey100 = ref(null);
-
-const dateidWQWrz = ref("dateidWQWrz");
-const dateidDike = ref("dateidDike");
-const dateidGW = ref("dateidGW");
-
-
-// 判断弹窗是否显示,默认隐藏
-const showDialogWQ = ref(false);
-const titleNameWQ = ref('圩区预警统计');
-
-const props = defineProps({
-  DD_ARR: {
-    type: String,
-    default: ""
-  },
-  wqstrJson: {
-    type: Array,
-    default: []
-  },
-});
-var wqstrJson = props.wqstrJson;
-// watch(props.wqstrJson, () => {
-//   Weacontent();
-// });
+const rainstorm=ref("无");
+const leidianWarning=ref("无");
+const dafengWarning=ref("无");
+const chaoweiWarning = ref("无");
 
 onMounted(() => {
-  // if (props.wqstrJson != null) {
-  //   Weacontent();
-  // }
   Weacontent();
 });
-const totalWQData = ref([]);
 function Weacontent() {
-  var totalWQWrz = 15;
-  var totalDike = 45;
-  var totalGW = 0;
-  // for (var num = 0; num < wqstrJson.length; num++) {
-  //   var item = wqstrJson[num];
-  //   const wqgrz = SetNull(item.wq_flow) == "" ? "-" : Number(item.wq_flow).toFixed(2);//警戒水位
-  //   const wqwrz = SetNull(item.wq_theight) == "" ? "-" : Number(item.wq_theight).toFixed(2);//最高控制水位
-
-  //   const upz = SetNull(item.maxUpz) == "" ? "-" : Number(item.maxUpz).toFixed(2);;
-  //   if (wqgrz != "-" && upz != "-") {
-  //     if (Number(upz) >= Number(wqgrz)) {
-  //       totalWQWrz++;
-  //       totalWQData.value.push(item);
-  //     }
-  //   }
-  //   if (wqwrz != "-" && upz != "-") {
-  //     if (Number(upz) >= Number(wqwrz)) {
-  //       totalWQWrz++;
-  //       totalWQData.value.push(item);
-  //     }
-  //   }
-  // }
-
-  // console.error("totalWQData.valuetotalWQData.valuetotalWQData.value", totalWQData.value)
-  var itemBg = getWarningDuoColor("黄色预警");
-  var _Option = ChartJs.echartWaterPie(totalWQWrz, "", itemBg, _theme);
-  lineOptionWQWrz.value = _Option;
-  let chartDom = document.getElementById(dateidWQWrz.value);
-  let myChart = echarts.init(chartDom);
-  myChart.setOption(lineOptionWQWrz.value);
-  myChart.on("click", WQeSLChage);
-
-  var itemBgDike = getWarningDuoColor("黄色预警");
-  var OptionDike = ChartJs.echartWaterPie(totalDike, "", itemBgDike, _theme);
-  lineOptionDike.value = OptionDike;
-  let chartDomDike = document.getElementById(dateidDike.value);
-  let myChartDike = echarts.init(chartDomDike);
-  myChartDike.setOption(lineOptionDike.value);
-
-  // var itemBgGW = getWarningDuoColor("黄色预警");
-  // var OptionGW = ChartJs.echartWaterPie(totalGW, "", itemBgGW, _theme);
-  // lineOptionGW.value = OptionGW;
-  // let chartDomGW = document.getElementById(dateidGW.value);
-  // let myChartGW = echarts.init(chartDomGW);
-  // myChartGW.setOption(lineOptionGW.value);
+   getBYYJInfo();
 }
 
-const emergencyList = ref([]);
-function WQeSLChage() {
-  let uniqueArray = totalWQData.value.filter((value, index, self) =>
-    index === self.findIndex((t) => (t.wqid === value.wqid))
-  )
-  console.error(uniqueArray)
+//暴雨预警
+function getBYYJInfo() {
+  apiWxxsq.getSwptToken({}).then((obj) => {    
+    var stime = dayjs(dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss"))
+    .add(-30, "Day")
+    .format("YYYY-MM-DD 00:00:00");
+    var etime = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
+    var strParam = { 
+      access_token:obj.access_token,
+      STARTTIME:stime,
+      ENDTIME:etime
+    };
+    apiWxxsq
+      .getSwptQXYJ(strParam)
+      .then((res) => {
+        if(res.length > 0){
+          var resT= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE == "发布");//当前预警且不是解除的
+          var resRain=resT.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
+          rainstorm.value="无";
+          if(resRain.length > 0){
+            var st_name= resRain[0].ST_NAME;
+            if(st_name.indexOf("蓝色") > -1){
+              rainstorm.value = "蓝色";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              rainstorm.value = "黄色";         
+            }
+            else if(st_name.indexOf("橙色") > -1){
+               rainstorm.value = "橙色";        
+            } 
+            else if(st_name.indexOf("红色") > -1){
+               rainstorm.value = "红色";        
+            }            
+          }
 
-  $(".g-lside ").css({ "z-index": 90 });
-  $(".g-rside ").css({ "z-index": 99 });
+          leidianWarning.value="无";
+          var resLei=resT.filter((item) => item.ST_NAME.indexOf("雷电") > -1);//预警类型为雷电         
+          if(resLei.length > 0){
+            var st_name= resLei[0].ST_NAME;
+            if(st_name.indexOf("蓝色") > -1){
+              leidianWarning.value = "蓝色";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              leidianWarning.value = "黄色";         
+            }
+            else if(st_name.indexOf("橙色") > -1){
+               leidianWarning.value = "橙色";        
+            } 
+            else if(st_name.indexOf("红色") > -1){
+               leidianWarning.value = "红色";        
+            }            
+          }
 
-  emergencyList.value = uniqueArray
-  showDialogWQ.value = true;
+          dafengWarning.value="无";
+          var resDafeng=resT.filter((item) => item.ST_NAME.indexOf("大风") > -1);//预警类型为雷电         
+          if(resDafeng.length > 0){
+            var st_name= resDafeng[0].ST_NAME;
+            if(st_name.indexOf("蓝色") > -1){
+              dafengWarning.value = "蓝色";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              dafengWarning.value = "黄色";         
+            }
+            else if(st_name.indexOf("橙色") > -1){
+               dafengWarning.value = "橙色";        
+            } 
+            else if(st_name.indexOf("红色") > -1){
+               dafengWarning.value = "红色";        
+            }            
+          }
+        }
+      })
+      .catch((err) => {});
+  })
 }
-const closeLineDialog = () => {
-  showDialogWQ.value = false;
-};
-function getWarningDuoColor(name) {
-  //gcolor圆圈颜色
-  //fontColor文本字体颜色
-  //color 水波颜色
-  var item = {};
-  var color = [
-    {
-      offset: 1,
-      color: ["rgba(7,222,119,0.4)"], // 0% 处的颜色
-    },
-    {
-      offset: 0,
-      color: ["rgba(5,151,81,0.8)"], // 100% 处的颜色
-    },
-  ];
-  var bgcolor = new echarts.graphic.RadialGradient(0.5, 0.5, 0.5, [
-    {
-      offset: 1,
-      color: "rgba(111,234,140,0.3)",
-    },
-    {
-      offset: 0.95,
-      color: "rgba(111,234,140, 0.5)",
-    },
-    {
-      offset: 0.8,
-      color: "rgba(111,234,140, 0.3)",
-    },
-    {
-      offset: 0.4,
-      color: "rgba(30,209,73, 0.01)",
-    },
-  ]);
-  var fontColor = "#00ffff";// "#46F604";
-  var gcolor = [
-    {
-      offset: 1,
-      color: "rgba(30,209,73, 0.01)",
-    },
-    {
-      offset: 0,
-      color: "rgba(111,234,140, 0.6)",
-    },
-  ];
-  if (name == "黄色预警") {
-    gcolor = [
-      {
-        offset: 1,
-        color: "rgba(248,189,1, 1)",
-      },
-      {
-        offset: 0,
-        color: "rgba(248,189,1, 1)",
-      },
-    ];
-    color = [
-      {
-        offset: 0,
-        color: 'rgba(248,189,1, 1)',
-      },
-      {
-        offset: 0.75,
-        color: 'rgba(248,189,1, 1)',
-      },
-      {
-        offset: 1,
-        color: 'rgba(248,189,1, 1)',
-      },
-    ];
-    // fontColor = "#F8BD01";
+
+// 颜色
+function computedStyle(type) {  
+  var fontColor="rgb(185, 182, 182)";
+  if(type == "暴雨"){
+    if(rainstorm.value == "蓝色"){
+      fontColor="rgb(22, 164, 243)";
+    }
+    else if(rainstorm.value == "黄色"){
+      fontColor="rgb(255, 255, 0)";
+    }
+    else if(rainstorm.value == "橙色"){
+      fontColor="rgb(255, 165, 0)";
+    }
+    else if(rainstorm.value == "红色"){
+      fontColor="rgb(255, 0, 0)";
+    }
   }
-  if (name == "红色预警") {
-    gcolor = [
-      {
-        offset: 1,
-        color: "rgba(205,40,24, 0.01)",
-      },
-      {
-        offset: 0,
-        color: "rgba(231,76,60, 0.6)",
-      },
-    ];
-    color = [
-      {
-        offset: 1,
-        color: ["rgba(231,76,60,0.4)"], // 0% 处的颜色
-      },
-      {
-        offset: 0,
-        color: ["rgba(234,92,78,0.8)"], // 100% 处的颜色
-      },
-    ];
-    bgcolor = new echarts.graphic.RadialGradient(0.5, 0.5, 0.5, [
-      {
-        offset: 1,
-        color: "rgba(231,76,60,0.3)",
-      },
-      {
-        offset: 0.95,
-        color: "rgba(231,76,60, 0.5)",
-      },
-      {
-        offset: 0.8,
-        color: "rgba(231,76,60, 0.3)",
-      },
-      {
-        offset: 0.4,
-        color: "rgba(205,40,24, 0.01)",
-      },
-    ]);
+  else if(type == "雷电"){
+    if(leidianWarning.value == "蓝色"){
+      fontColor="rgb(22, 164, 243)";
+    }
+    else if(leidianWarning.value == "黄色"){
+      fontColor="rgb(255, 255, 0)";
+    }
+    else if(leidianWarning.value == "橙色"){
+      fontColor="rgb(255, 165, 0)";
+    }
+    else if(leidianWarning.value == "红色"){
+      fontColor="rgb(255, 0, 0)";
+    }
   }
-  item.color = color;
-  item.bgcolor = bgcolor;
-  item.gcolor = gcolor;
-  item.fontColor = fontColor;
-  return item;
+  else if(type == "大风"){
+    if(dafengWarning.value == "蓝色"){
+      fontColor="rgb(22, 164, 243)";
+    }
+    else if(dafengWarning.value == "黄色"){
+      fontColor="rgb(255, 255, 0)";
+    }
+    else if(dafengWarning.value == "橙色"){
+      fontColor="rgb(255, 165, 0)";
+    }
+    else if(dafengWarning.value == "红色"){
+      fontColor="rgb(255, 0, 0)";
+    }
+  }
+  return { color: fontColor};
 }
 
 function fangda() {

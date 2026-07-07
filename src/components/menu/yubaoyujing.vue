@@ -18,7 +18,7 @@
       <yujingCLQ :DD_ARR="DD_ARR" :CLQtableData="CLQtableData" :key="datekey" />
     </div> -->
     <div style="width: 100%">
-      <yujingFB :DD_ARR="DD_ARR" :key="datekeyYL" />
+      <yujingFB :DD_ARR="DD_ARR" :key="datekeyYL" :swstrJson="swstrJson"/>
     </div>
   </div>
 
@@ -154,6 +154,7 @@ function Weacontent() {
     .then(res => {
       swstrJson.value=res.data;
       datekey.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
+      datekeyYL.value = dayjs(dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
       PointMark.addYBSWMark(swstrJson.value,DD_ARR.value.DD_ID, DD_ARR.value.STIME, DD_ARR.value.ETIME, riverMarker.value);
       window.loadingHide();
     })

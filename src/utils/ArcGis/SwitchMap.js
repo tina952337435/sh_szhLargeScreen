@@ -13,7 +13,7 @@ function BaseMap(myMap, options) {
     myMap = window.map;
   }
   var str = options.type;
-  var dtlayers = ["gd_tdt", "vec_w", "img_w", "ter_w", "sz_hcdt", "img_wNote", "vec_wNote", "ter_wNote"];
+  var dtlayers = ["gd_tdt", "vec_w", "img_w", "ter_w", "sz_hcdt", "img_wNote", "vec_wNote", "ter_wNote", "local_img", "local_ibo"];
   for (var i = 0; i < dtlayers.length; i++) {
     var lysStr = dtlayers[i];
     try {
@@ -27,6 +27,10 @@ function BaseMap(myMap, options) {
       if (lysStr == "sz_hcdt") {
         myMap.getLayer("img_w").setVisibility(true);
         myMap.getLayer("img_wNote").setVisibility(true);
+      }
+      // 本地影像需要同时显示注记层
+      if (lysStr == "local_img") {
+        myMap.getLayer("local_ibo").setVisibility(true);
       }
     } catch (ex) { }
   }

@@ -36,7 +36,7 @@ const tableHeaders = ref([
     { name: "stnm", label: "站名"},
     { name: "drp", label: "雨量(mm)",width:"15%" },
     // { name: "addvnm", label: "分区",width:"15%" },
-    { name: "tm", label: "时间",width:"25%" },
+    { name: "tm", label: "来数时间",width:"25%" },
 ]);
 const tableData = ref([]);
 // 判断弹窗是否显示,默认隐藏

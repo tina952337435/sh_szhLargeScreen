@@ -120,7 +120,7 @@
               left: 380px;
               margin-top: -6px;
             "
-            id="rainstormImg"
+            id="typhoonImg"
           >
             <img :src="typhoonImg" alt="" style="width: 48px; height: 48px" />
           </div>
@@ -362,6 +362,14 @@
         >
           <span class="settingMaptext-xs">卫片图</span>
           <img src="/images/mapIcon/卫片图.png" alt="卫片图" />
+        </div>
+        <div
+          @click="setDtLayerKS('local_img')"
+          :class="mapName == 'local_img' && 'switch-imgSelect'"
+          class="switch-img"
+        >
+          <span class="settingMaptext-xs">本地影像</span>
+          <img src="/images/mapIcon/weixintu.png" alt="本地影像" />
         </div>
       </div>
 
@@ -615,6 +623,7 @@ function getWarningInfo() {
       var strJson = res.data;
       // console.error("-------------------",strJson)
       if (strJson.length > 0) {
+        strJson=strJson.filter((item) => item.SIGNAL_STAGE != "解除");
         var color0 = "#def1ff";
         var color1 = "#ED493F";
         var color2 = "#F79715";
@@ -646,6 +655,46 @@ function getWarningInfo() {
     })
     .catch((err) => {});
 }
+//暴雨预警
+function getBYYJInfo() {
+  apiWxxsq.getSwptToken({}).then((obj) => {    
+    var stime = dayjs(dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss"))
+    .add(-30, "Day")
+    .format("YYYY-MM-DD 00:00:00");
+    var etime = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+    var strParam = { 
+      access_token:obj.access_token,
+      STARTTIME:stime,
+      ENDTIME:etime
+    };
+    apiWxxsq
+      .getSwptQXYJ(strParam)
+      .then((res) => {
+        if(res.length > 0){
+          var resT= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE == "发布");//当前预警且不是解除的
+          resT=resT.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
+          rainstormImg.value="/images/warning/byyj_none.png"
+          if(resT.length > 0){
+            var st_name= resT[0].ST_NAME;
+            if(st_name.indexOf("蓝色") > -1){
+              rainstormImg.value = "/images/warning/rainstorm_blue.png";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              rainstormImg.value = "/images/warning/rainstorm_yellow.png";              
+            }
+            else if(st_name.indexOf("橙色") > -1){
+              rainstormImg.value = "/images/warning/rainstorm_orange.png";
+            } 
+            else if(st_name.indexOf("红色") > -1){
+              rainstormImg.value = "/images/warning/rainstorm_red.png";
+            }            
+          }
+        }
+      })
+      .catch((err) => {});
+  })
+}
 //语音
 const YUYINFalse = ref(false);
 const voiceFlae = ref(false);
@@ -653,6 +702,10 @@ const voiceFlae = ref(false);
 function setDtLayerKS(layerID) {
   mapName.value = layerID;
   var myMap = SetNull(map) == "" ? window.map : map;
+  // 备用：如果 map 和 window.map 都没有，直接用 window.myMap
+  if (SetNull(myMap) == "" && SetNull(window.myMap) != "") {
+    myMap = window.myMap;
+  }
   try {
     //隐藏图层
     var layerListID = [
@@ -667,13 +720,14 @@ function setDtLayerKS(layerID) {
       "sz_hcdt",
       "shsw_OneMapServerdark",
       "shsw_OneMapServer",
-      "shsw_OneMapServer_wxyx"
+      "shsw_OneMapServer_wxyx",
+      "local_img",
+      "local_ibo"
     ];
     if (layerListID.length > 0) {
       for (var num = 0; num < layerListID.length; num++) {
         var itemLayer = myMap.getLayer(layerListID[num]);
         if (SetNull(itemLayer) != "") {
-          console.error("itemLayer", itemLayer);
           itemLayer.setVisibility(false);
         }
       }
@@ -681,6 +735,13 @@ function setDtLayerKS(layerID) {
 
     var itemLayerCur = myMap.getLayer(layerID);
     itemLayerCur.setVisibility(true);
+    // 本地影像需要同时显示注记层
+    if (layerID == "local_img") {
+      var iboLayer = myMap.getLayer("local_ibo");
+      if (SetNull(iboLayer) != "") {
+        iboLayer.setVisibility(true);
+      }
+    }
   } catch (error) {
     console.error("setDtLayerKS-error", error);
   }
@@ -794,6 +855,7 @@ onMounted(() => {
   getVue();
   getWarningInfo();
   // FullScreen();
+  getBYYJInfo();
 });
 /******气象****/
 function Weacontent() {

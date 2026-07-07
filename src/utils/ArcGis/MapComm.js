@@ -340,19 +340,32 @@ function setMapZoom(myLayer, mapLevel, stType, field, switchChecked) {
         }
     }
 
-    if(mapLevel>=13){
+    if(mapLevel>=12){
         removeClassParamByClass("level_all .amap-ui-district-cluster-marker-title", "none");
     }
     else{
         addClassParamByClass("level_all .amap-ui-district-cluster-marker-title", "none");
     }
-    if(mapLevel>=13){
+
+    if(mapLevel>=12){
         removeClassParamByClass("rainText .amap-ui-district-cluster-marker-title", "none");
     }
     else{
         addClassParamByClass("rainText .amap-ui-district-cluster-marker-title", "none");
     }
+
+    if(mapLevel>=12){
+        removeClassParamByClass("gcText .amap-ui-district-cluster-marker-title", "none");
+    }
+    else{
+        addClassParamByClass("gcText .amap-ui-district-cluster-marker-title", "none");
+    } 
     
+    if(mapLevel>=13){       
+       removeClassParamByClass("lightGQ", "none");
+    }else{
+       addClassParamByClass("lightGQ", "none");
+    }
 }
 
 function removeClassParam(objID, objClass) {

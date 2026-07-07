@@ -76,11 +76,11 @@ watch(props.rainListSW, () => {
     Weacontent();
 });
 
-onMounted(() => {
-    if (props.rainListSW != undefined) {
-        Weacontent();
-    }
-});
+// onMounted(() => {
+//     if (props.rainListSW != undefined) {
+//         Weacontent();
+//     }
+// });
 function Weacontent() {    
     var chartTM = [], chartData = [];
     if (props.rainListSW.length > 0) {
@@ -109,7 +109,7 @@ function Weacontent() {
             }
 
             if(colorCss=="#FF9E43"){
-              wrzcount.value++;
+              wrzCount.value++;
             }
             else if(colorCss=="#F70019"){
               grzCount.value++;

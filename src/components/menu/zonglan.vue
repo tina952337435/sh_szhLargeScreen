@@ -67,6 +67,14 @@
     <div>
       <el-switch
         class="switch-xs iconMarker"
+        @click="SpanItem('riverYLMarker')"
+        v-model="riverYLMarker"
+      />
+      <span style="vertical-align: -10px; margin-left: 50px">雨量</span>
+    </div>
+    <div>
+      <el-switch
+        class="switch-xs iconMarker"
         @click="SpanItem('riverLLMarker')"
         v-model="riverLLMarker"
       />
@@ -198,6 +206,7 @@ const { viewer } = store.state;
 const riverLX = ref(true);
 const riverMarker = ref(true);
 const riverSWMarker = ref(true);
+const riverYLMarker= ref(false);
 const riverLLMarker = ref(false);
 const yldzmMarker = ref(false);
 
@@ -207,6 +216,7 @@ const strJsonDataNew = ref([]);
 const strJsonData = ref([]);
 const strJsonDataLL = ref([]);
 const strJsonDataYL = ref([]);
+const strJsonDataYLDBZ = ref([]);//代表站雨量
 const datekeyAll = ref(null);
 const datekeyAllYL = ref(null);
 const cb_waterZC = ref(true),
@@ -376,36 +386,45 @@ function getTLObj(obj) {
 function SpanItem(obj) {
   if (obj == "riverMarker") {
     if (riverMarker.value) {
-      SWload();
+      if (riverSWMarker.value) {
+        SWload();
+      }
       if (riverLLMarker.value) {
         PointMark.addLLMark(strJsonDataLL.value, riverMarker.value);
+      }
+      if (riverYLMarker.value) {
+        PointMark.addYLMark(null,strJsonDataYLDBZ.value,ylStime.value,ylEtime.value, riverMarker.value);
       }
     } else {
       $(".LabelPlotBeautiful-container").remove();
       $(".gcText").remove();
     }
-  } else if (obj == "riverLX") {
+  } 
+  else if (obj == "riverLX") {
     if (riverLX.value == true) {
       PointMark.readJosn(viewer);
     } else {
       // PointMark.removePrimitiveByName(viewer, obj)
       clearALL("centerLineGraphicLayer");
     }
-  } else if (obj == "riverSWMarker") {
+  } 
+  else if (obj == "riverSWMarker") {
     if (riverSWMarker.value) {
       SWload();
     } else {
-      $(".LabelPlotBeautiful-container").remove();
+      $(".level_moren").remove();
       RemoveLayer("addSWMark");
     }
-  } else if (obj == "riverLLMarker") {
+  } 
+  else if (obj == "riverLLMarker") {
     if (riverLLMarker.value) {
       WeacontentLL();
     } else {
       $(".gcText").remove();
       RemoveLayer("addLLMark");
     }
-  } else if (obj == "yldzmMarker") {
+  } 
+  else if (obj == "yldzmMarker") {
     if (yldzmMarker.value) {
       MapRainfall();
     } else {
@@ -414,6 +433,14 @@ function SpanItem(obj) {
       if (DZMRainLayerGraphicLayer != null) {
         DZMRainLayerGraphicLayer.clear();
       }
+    }
+  }
+  else if(obj=="riverYLMarker"){
+    if (riverYLMarker.value) {
+      WeacontentYLDBZ();
+    } else {
+      $(".rainText").remove();
+      RemoveLayer("addYLMark");
     }
   }
 }
@@ -426,6 +453,20 @@ function WeacontentLL() {
   api.stFlowJC(strParam).then((res) => {
     strJsonDataLL.value = res.data;
     PointMark.addLLMark(strJsonDataLL.value, riverMarker.value);
+    window.loadingHide();
+  });
+}
+function WeacontentYLDBZ() {
+  window.loadingShow();
+  var strParam = {
+    pid: "201901101419326076-3",
+    stime: ylStime.value,
+    etime: ylEtime.value,
+    pathname: "SUM",
+  };
+  api.stPptnRain(strParam).then((res) => {
+    strJsonDataYLDBZ.value = res.data;
+    PointMark.addYLMark(null,strJsonDataYLDBZ.value,ylStime.value,ylEtime.value, riverMarker.value);
     window.loadingHide();
   });
 }
@@ -459,7 +500,7 @@ function YLload() {
         item.drp = 0.0;
       }
       var f = Number(item.drp);
-      if (f > 0) {
+      // if (f > 0) {
         if (SetNull(item.lgtd) != "" && SetNull(item.lttd) != "") {
           RainfallStr.push({ lon: item.lgtd, lat: item.lttd, value: f });
           if(item.stcd=="63422650"){//边角需要插值的点
@@ -472,7 +513,7 @@ function YLload() {
             RainfallStr.push({ lon:-18971.869913,lat:-60205.822566, value: f });         
           }
         }
-      }
+      // }
     }
     // console.error('RainfallStr',JSON.stringify(RainfallStr));
     SpanItem("yldzmMarker");

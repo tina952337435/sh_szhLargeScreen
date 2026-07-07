@@ -145,12 +145,14 @@ function initMapArcGis(container) {
     "myJs/shswOneMapServer",
     "myJs/shswOneMapServer_wxyx",
     "myJs/shsw_dfcmapMapServer",
+    "myJs/LocalImgLayer",
+    "myJs/LocalIboLayer",
     "esri/layers/ArcGISTiledMapServiceLayer",
     "esri/layers/ArcGISDynamicMapServiceLayer",
     "esri/layers/FeatureLayer",
     "esri/request",
     "dojo/domReady!"
-  ], function (Map, GraphicsLayer, Point, SpatialReference, shswOneMapj02_basemap_dark,shswOneMapServer,shswOneMapServer_wxyx,shsw_dfcmapMapServer,ArcGISTiledMapServiceLayer,
+  ], function (Map, GraphicsLayer, Point, SpatialReference, shswOneMapj02_basemap_dark,shswOneMapServer,shswOneMapServer_wxyx,shsw_dfcmapMapServer,LocalImgLayer,LocalIboLayer,ArcGISTiledMapServiceLayer,
   ArcGISDynamicMapServiceLayer,FeatureLayer,esriRequest) {
     var map = new Map(container, {
       logo: false,
@@ -173,6 +175,13 @@ function initMapArcGis(container) {
 
     var shswOneMapServer_wxyxLayer=new shswOneMapServer_wxyx("shsw_OneMapServer_wxyx", { visible: false });
     map.addLayer(shswOneMapServer_wxyxLayer);
+
+    // 本地影像底图
+    var localImgLayer = new LocalImgLayer("local_img", { visible: false });
+    map.addLayer(localImgLayer);
+    // 本地影像注记
+    var localIboLayer = new LocalIboLayer("local_ibo", { visible: false });
+    map.addLayer(localIboLayer);
 
 
     //切换主题默认不同的地图

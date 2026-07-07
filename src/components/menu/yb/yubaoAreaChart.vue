@@ -156,7 +156,7 @@ function ylHtml(data) {
 		strNote,
 		LineColor,
 		"雨量",
-		"false",
+		"true",
 		_theme
 	);
 	lineOption.value = _Option;
