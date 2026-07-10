@@ -193,7 +193,7 @@ function handleStationChange(selectedValues) {
     selectedValues.forEach(stcd => {
       strID += "," + stcd;
       // 查找对应的节点信息
-      const option = stationOptions.value.find(opt => opt.value === stcd);
+      const option = stationOptionsForSelect.value.find(opt => opt.value === stcd);
       if (option) {
         tempNode.push({ stcd: stcd, stnm: option.label.split('-').pop() });
       }

@@ -672,8 +672,8 @@ function getBYYJInfo() {
       .getSwptQXYJ(strParam)
       .then((res) => {
         if(res.length > 0){
-          var resT= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE == "发布");//当前预警且不是解除的
-          resT=resT.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
+          var resALL= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE == "发布");//当前预警且不是解除的
+          var resT=resALL.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
           rainstormImg.value="/images/warning/byyj_none.png"
           if(resT.length > 0){
             var st_name= resT[0].ST_NAME;
@@ -688,6 +688,24 @@ function getBYYJInfo() {
             } 
             else if(st_name.indexOf("红色") > -1){
               rainstormImg.value = "/images/warning/rainstorm_red.png";
+            }            
+          }
+          //台风预警
+          resT=resALL.filter((item) => item.ST_NAME.indexOf("台风") > -1);//预警类型为台风
+          typhoonImg.value="/images/warning/typhoon_none.png";
+          if(resT.length > 0){
+            var st_name= resT[0].ST_NAME;
+            if(st_name.indexOf("蓝色") > -1){
+              typhoonImg.value = "/images/warning/typhoon_blue.png";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              typhoonImg.value = "/images/warning/typhoon_yellow.png";              
+            }
+            else if(st_name.indexOf("橙色") > -1){
+              typhoonImg.value = "/images/warning/typhoon_orange.png";
+            } 
+            else if(st_name.indexOf("红色") > -1){
+              typhoonImg.value = "/images/warning/typhoon_red.png";
             }            
           }
         }
