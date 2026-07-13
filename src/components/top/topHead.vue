@@ -106,23 +106,35 @@
             style="
               position: absolute;
               float: left;
-              left: 320px;
+              left: 300px;
               margin-top: -6px;
             "
             id="rainstormImg"
           >
-            <img :src="rainstormImg" alt="" style="width: 48px; height: 48px" />
+            <img :src="rainstormImg" alt="暴雨预警" tilte="暴雨预警" style="width: 48px; height: 48px" />
           </div>
           <div
             style="
               position: absolute;
               float: left;
-              left: 380px;
+              left: 360px;
               margin-top: -6px;
             "
             id="typhoonImg"
           >
-            <img :src="typhoonImg" alt="" style="width: 48px; height: 48px" />
+            <img :src="typhoonImg" alt="台风预警" tilte="台风预警" style="width: 48px; height: 48px" />
+          </div>
+
+          <div
+            style="
+              position: absolute;
+              float: left;
+              left: 415px;
+              margin-top: -6px;
+            "
+            id="chaoweiImg"
+          >
+            <img :src="chaoweiImg" alt="黄浦江潮位预警" tilte="黄浦江潮位预警" style="width: 45px; height: 45px" />
           </div>
         </div>
       </div>
@@ -594,6 +606,7 @@ const typeValue = ref();
 const child = ref();
 const rainstormImg = ref("/images/warning/byyj_none.png");
 const typhoonImg = ref("/images/warning/typhoon_none.png");
+const chaoweiImg=ref("/images/warning/chaowei_none.png");
 
 const showDialogFX = ref(false);
 const titleNameFX = ref("风险图成果");
@@ -672,7 +685,7 @@ function getBYYJInfo() {
       .getSwptQXYJ(strParam)
       .then((res) => {
         if(res.length > 0){
-          var resALL= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE == "发布");//当前预警且不是解除的
+          var resALL= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE != "解除");//当前预警且不是解除的
           var resT=resALL.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
           rainstormImg.value="/images/warning/byyj_none.png"
           if(resT.length > 0){
@@ -691,10 +704,13 @@ function getBYYJInfo() {
             }            
           }
           //台风预警
+          // console.error("台风预警resALL",resALL);
           resT=resALL.filter((item) => item.ST_NAME.indexOf("台风") > -1);//预警类型为台风
           typhoonImg.value="/images/warning/typhoon_none.png";
+          // console.error("台风预警",resT);
           if(resT.length > 0){
             var st_name= resT[0].ST_NAME;
+            // console.error("台风预警",st_name);
             if(st_name.indexOf("蓝色") > -1){
               typhoonImg.value = "/images/warning/typhoon_blue.png";
             }
@@ -707,6 +723,33 @@ function getBYYJInfo() {
             else if(st_name.indexOf("红色") > -1){
               typhoonImg.value = "/images/warning/typhoon_red.png";
             }            
+          }
+        }
+      })
+      .catch((err) => {});
+
+    apiWxxsq
+      .getChaoWeiYuJing(strParam)
+      .then((res) => {
+        console.error("潮位预警",res);
+        if(res.length > 0){
+          var resT= res.filter((item) =>item.YJZT != "解除");//当前预警且不是解除的
+          var resRain=resT;
+          chaoweiImg.value="/images/warning/chaowei_none.png";
+          if(resRain.length > 0){
+            var st_name= resRain[0].YJXH+"色";
+            if(st_name.indexOf("蓝色") > -1){
+              chaoweiImg.value = "/images/warning/chaowei_blue.png";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              chaoweiImg.value = "/images/warning/chaowei_yellw.png";         
+            }
+            else if(st_name.indexOf("橙色") > -1){
+               chaoweiImg.value = "/images/warning/chaowei_orange.png";        
+            } 
+            else if(st_name.indexOf("红色") > -1){
+               chaoweiImg.value = "/images/warning/chaowei_red.png";        
+            }        
           }
         }
       })

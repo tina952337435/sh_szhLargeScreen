@@ -35,6 +35,6 @@ export default {
   },
   //潮位预警  
   getChaoWeiYuJing: (params) => {
-    return requestSWPT.get("/service/api/swic/ChaoWeiYuJing", params)
+    return requestSWPT.get("/service/api/swic/getChaoWeiYuJing", params)
   },
 }

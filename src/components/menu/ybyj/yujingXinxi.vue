@@ -162,6 +162,7 @@ onMounted(() => {
 });
 function Weacontent() {
    getBYYJInfo();
+   getChaoweiInfo();
 }
 
 //暴雨预警
@@ -241,6 +242,41 @@ function getBYYJInfo() {
   })
 }
 
+//潮位预警
+function getChaoweiInfo() {
+  apiWxxsq.getSwptToken({}).then((obj) => {
+    var strParam = { 
+      access_token:obj.access_token
+    };
+    apiWxxsq
+      .getChaoWeiYuJing(strParam)
+      .then((res) => {
+        console.error("潮位预警",res);
+        if(res.length > 0){
+          var resT= res.filter((item) =>item.YJZT != "解除");//当前预警且不是解除的
+          var resRain=resT;
+          chaoweiWarning.value="无";
+          if(resRain.length > 0){
+            var st_name= resRain[0].YJXH+"色";
+            if(st_name.indexOf("蓝色") > -1){
+              chaoweiWarning.value = "蓝色";
+            }
+            else if(st_name.indexOf("黄色") > -1){
+              chaoweiWarning.value = "黄色";         
+            }
+            else if(st_name.indexOf("橙色") > -1){
+               chaoweiWarning.value = "橙色";        
+            } 
+            else if(st_name.indexOf("红色") > -1){
+               chaoweiWarning.value = "红色";        
+            }        
+          }
+        }
+      })
+      .catch((err) => {});
+  })
+}
+
 // 颜色
 function computedStyle(type) {  
   var fontColor="rgb(185, 182, 182)";
@@ -283,6 +319,20 @@ function computedStyle(type) {
       fontColor="rgb(255, 165, 0)";
     }
     else if(dafengWarning.value == "红色"){
+      fontColor="rgb(255, 0, 0)";
+    }
+  }
+  else if(type=="潮位"){
+    if(chaoweiWarning.value == "蓝色"){
+      fontColor="rgb(22, 164, 243)";
+    }
+    else if(chaoweiWarning.value == "黄色"){
+      fontColor="rgb(255, 255, 0)";
+    }
+    else if(chaoweiWarning.value == "橙色"){
+      fontColor="rgb(255, 165, 0)";
+    }
+    else if(chaoweiWarning.value == "红色"){
       fontColor="rgb(255, 0, 0)";
     }
   }
