@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全屏按钮 · 科技感方案预览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cyan: #1cb1c3;
+    --cyan-bright: #00e5ff;
+    --cyan-dim: rgba(28, 177, 195, 0.4);
+    --bg-deep: #060e18;
+    --panel-bg: rgba(6, 20, 38, 0.92);
+    --panel-border: rgba(28, 177, 195, 0.18);
+    --gold: #ffb800;
+    --white-soft: rgba(255,255,255,0.85);
+  }
+
+  body {
+    background: radial-gradient(ellipse at 50% 0%, #0a1a30 0%, #050d18 60%, #020810 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    gap: 24px;
+  }
+
+  /* 背景网格线 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(28,177,195,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(28,177,195,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* 顶部扫描线 */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(28,177,195,0.3), transparent);
+    animation: scan-horizontal 4s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scan-horizontal {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(100vh); }
+  }
+
+  .preview-container {
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+  }
+
+  .variant-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .variant-name {
+    color: var(--cyan-bright);
+    font-size: 14px;
+    letter-spacing: 3px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0,229,255,0.4);
+  }
+
+  .aside-mock {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+  }
+
+  /* 面板角标 */
+  .aside-mock::before,
+  .aside-mock::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border-color: rgba(28,177,195,0.5);
+    border-style: solid;
+  }
+  .aside-mock::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .aside-mock::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  /* 模拟选项卡 */
+  .tab-mock {
+    width: 76px; height: 28px; line-height: 28px; text-align: center;
+    background: linear-gradient(135deg, rgba(28,177,195,0.08), rgba(28,177,195,0.02));
+    border: 1px solid rgba(28,177,195,0.12);
+    color: rgba(255,255,255,0.5);
+    font-size: 13px; cursor: pointer; user-select: none;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 6px) 100%, 0% 100%, 0% 8px);
+    position: relative;
+  }
+  .tab-mock.active {
+    background: linear-gradient(135deg, rgba(28,177,195,0.35), rgba(28,177,195,0.12));
+    color: #fff;
+    border-color: rgba(28,177,195,0.5);
+    box-shadow: 0 0 12px rgba(28,177,195,0.15), inset 0 0 8px rgba(28,177,195,0.08);
+  }
+
+  .hint-text {
+    color: rgba(255,255,255,0.2);
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* ================================================================
+     方案1: 切角发光 + 角标装饰 (推荐)
+     ================================================================ */
+  .btn-v1 {
+    cursor: pointer; user-select: none; position: relative;
+    width: 42px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(28,177,195,0.12), rgba(28,177,195,0.03));
+    /* 切角 */
+    clip-path: polygon(
+      7px 0, calc(100% - 7px) 0, 100% 7px,
+      100% calc(100% - 7px), calc(100% - 7px) 100%,
+      7px 100%, 0 calc(100% - 7px), 0 7px
+    );
+    border: none;
+    transition: all 0.3s ease;
+  }
+  /* 外发光边框用伪元素实现 */
+  .btn-v1::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(28,177,195,0.5), rgba(28,177,195,0.1), rgba(28,177,195,0.5));
+    clip-path: polygon(
+      7px 0, calc(100% - 7px) 0, 100% 7px,
+      100% calc(100% - 7px), calc(100% - 7px) 100%,
+      7px 100%, 0 calc(100% - 7px), 0 7px
+    );
+    z-index: -1;
+    padding: 1.5px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 6px rgba(28,177,195,0.2);
+  }
+  /* 四角装饰点 */
+  .btn-v1::after {
+    content: ''; position: absolute; inset: -2px;
+    background:
+      radial-gradient(2px at 7px 7px, rgba(28,177,195,0.8) 50%, transparent 50%),
+      radial-gradient(2px at calc(100% - 7px) 7px, rgba(28,177,195,0.8) 50%, transparent 50%),
+      radial-gradient(2px at 7px calc(100% - 7px), rgba(28,177,195,0.8) 50%, transparent 50%),
+      radial-gradient(2px at calc(100% - 7px) calc(100% - 7px), rgba(28,177,195,0.8) 50%, transparent 50%);
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .btn-v1 svg { width: 18px; height: 18px; color: rgba(28,177,195,0.75); transition: all 0.3s ease; position: relative; z-index: 1; }
+
+  .btn-v1:hover {
+    background: linear-gradient(135deg, rgba(28,177,195,0.22), rgba(28,177,195,0.06));
+  }
+  .btn-v1:hover::before {
+    box-shadow: 0 0 14px rgba(28,177,195,0.45);
+  }
+  .btn-v1:hover svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 6px rgba(0,229,255,0.5));
+  }
+  .btn-v1:active { transform: scale(0.93); }
+
+  .btn-v1.is-fullscreen {
+    background: linear-gradient(135deg, rgba(28,177,195,0.3), rgba(28,177,195,0.1));
+  }
+  .btn-v1.is-fullscreen::before {
+    box-shadow: 0 0 10px rgba(28,177,195,0.35);
+    animation: v1-pulse 2s ease-in-out infinite;
+  }
+  .btn-v1.is-fullscreen svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 8px rgba(0,229,255,0.6));
+  }
+  @keyframes v1-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(28,177,195,0.25); }
+    50%      { box-shadow: 0 0 18px rgba(28,177,195,0.55); }
+  }
+
+  /* ================================================================
+     方案2: 六边形蜂巢风格
+     ================================================================ */
+  .btn-v2 {
+    cursor: pointer; user-select: none; position: relative;
+    width: 42px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(28,177,195,0.08);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    transition: all 0.3s ease;
+  }
+  .btn-v2::before {
+    content: ''; position: absolute; inset: -1.5px;
+    background: linear-gradient(135deg, rgba(28,177,195,0.6), rgba(28,177,195,0.15));
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    z-index: -1;
+    box-shadow: 0 0 8px rgba(28,177,195,0.25);
+    transition: all 0.3s ease;
+  }
+  .btn-v2 svg { width: 18px; height: 18px; color: rgba(28,177,195,0.8); transition: all 0.3s ease; }
+
+  .btn-v2:hover::before {
+    box-shadow: 0 0 18px rgba(28,177,195,0.5), 0 0 4px rgba(0,229,255,0.3);
+  }
+  .btn-v2:hover svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 6px rgba(0,229,255,0.5));
+  }
+  .btn-v2:active { transform: scale(0.93); }
+
+  .btn-v2.is-fullscreen {
+    background: rgba(28,177,195,0.2);
+  }
+  .btn-v2.is-fullscreen::before {
+    box-shadow: 0 0 14px rgba(28,177,195,0.45);
+    animation: v1-pulse 2s ease-in-out infinite;
+  }
+  .btn-v2.is-fullscreen svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 8px rgba(0,229,255,0.6));
+  }
+
+  /* ================================================================
+     方案3: L形角标框 + 流光边框
+     ================================================================ */
+  .btn-v3-wrap {
+    position: relative;
+    width: 48px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-v3 {
+    cursor: pointer; user-select: none; position: relative;
+    width: 38px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, rgba(28,177,195,0.1), rgba(28,177,195,0.02));
+    border: 1px solid rgba(28,177,195,0.3);
+    transition: all 0.3s ease;
+  }
+  .btn-v3 svg { width: 18px; height: 18px; color: rgba(28,177,195,0.75); transition: all 0.3s ease; position: relative; z-index: 1; }
+
+  /* L形角标 */
+  .corner { position: absolute; pointer-events: none; z-index: 2; }
+  .corner::before,
+  .corner::after {
+    content: ''; position: absolute;
+    background: rgba(28,177,195,0.7);
+    transition: all 0.3s ease;
+  }
+  .corner-tl { top: 0; left: 0; }
+  .corner-tl::before { width: 12px; height: 1.5px; top: 0; left: 0; }
+  .corner-tl::after  { width: 1.5px; height: 12px; top: 0; left: 0; }
+
+  .corner-tr { top: 0; right: 0; }
+  .corner-tr::before { width: 12px; height: 1.5px; top: 0; right: 0; }
+  .corner-tr::after  { width: 1.5px; height: 12px; top: 0; right: 0; }
+
+  .corner-bl { bottom: 0; left: 0; }
+  .corner-bl::before { width: 12px; height: 1.5px; bottom: 0; left: 0; }
+  .corner-bl::after  { width: 1.5px; height: 12px; bottom: 0; left: 0; }
+
+  .corner-br { bottom: 0; right: 0; }
+  .corner-br::before { width: 12px; height: 1.5px; bottom: 0; right: 0; }
+  .corner-br::after  { width: 1.5px; height: 12px; bottom: 0; right: 0; }
+
+  /* 对角线装饰 */
+  .diagonal { position: absolute; pointer-events: none; z-index: 0; opacity: 0.25; }
+  .diagonal::before {
+    content: ''; position: absolute;
+    width: 8px; height: 1px;
+    background: rgba(28,177,195,0.6);
+    transform-origin: center;
+  }
+  .diagonal-1 { top: -4px; left: 4px; }
+  .diagonal-1::before { transform: rotate(45deg); width: 6px; }
+  .diagonal-2 { bottom: -4px; right: 4px; }
+  .diagonal-2::before { transform: rotate(45deg); width: 6px; }
+
+  .btn-v3-wrap:hover .btn-v3 {
+    background: linear-gradient(180deg, rgba(28,177,195,0.18), rgba(28,177,195,0.04));
+    border-color: rgba(28,177,195,0.55);
+    box-shadow: 0 0 12px rgba(28,177,195,0.25), inset 0 0 6px rgba(28,177,195,0.08);
+  }
+  .btn-v3-wrap:hover .btn-v3 svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 6px rgba(0,229,255,0.5));
+  }
+  .btn-v3-wrap:hover .corner::before,
+  .btn-v3-wrap:hover .corner::after {
+    background: rgba(0,229,255,0.9);
+    box-shadow: 0 0 6px rgba(0,229,255,0.5);
+  }
+  .btn-v3-wrap:hover .diagonal { opacity: 0.6; }
+
+  .btn-v3:active { transform: scale(0.93); }
+
+  /* 激活态 */
+  .btn-v3-wrap.is-fullscreen .btn-v3 {
+    background: linear-gradient(180deg, rgba(28,177,195,0.25), rgba(28,177,195,0.05));
+    border-color: rgba(28,177,195,0.6);
+    box-shadow: 0 0 14px rgba(28,177,195,0.3), inset 0 0 8px rgba(28,177,195,0.1);
+  }
+  .btn-v3-wrap.is-fullscreen .btn-v3 svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 8px rgba(0,229,255,0.6));
+  }
+  .btn-v3-wrap.is-fullscreen .corner::before,
+  .btn-v3-wrap.is-fullscreen .corner::after {
+    background: var(--cyan-bright);
+    box-shadow: 0 0 6px rgba(0,229,255,0.5);
+    animation: corner-pulse 2s ease-in-out infinite;
+  }
+  .btn-v3-wrap.is-fullscreen .diagonal { opacity: 0.7; animation: diag-pulse 2s ease-in-out infinite; }
+  @keyframes corner-pulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(0,229,255,0.3); }
+    50%      { box-shadow: 0 0 10px rgba(0,229,255,0.7); }
+  }
+  @keyframes diag-pulse {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.8; }
+  }
+
+  /* ================================================================
+     方案4: 全息扫描风格
+     ================================================================ */
+  .btn-v4-wrap {
+    position: relative;
+    width: 44px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-v4 {
+    cursor: pointer; user-select: none; position: relative;
+    width: 38px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(6,20,35,0.8);
+    border: 1px solid rgba(28,177,195,0.25);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .btn-v4 svg { width: 18px; height: 18px; color: rgba(28,177,195,0.7); transition: all 0.3s ease; position: relative; z-index: 1; }
+  /* 扫描线 */
+  .scan-line {
+    position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background: linear-gradient(180deg,
+      transparent 0%, transparent 45%,
+      rgba(28,177,195,0.12) 48%, rgba(28,177,195,0.25) 50%, rgba(28,177,195,0.12) 52%,
+      transparent 55%, transparent 100%);
+    animation: scan 2.5s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  @keyframes scan {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+  /* 外发光 */
+  .btn-v4-wrap .glow-ring {
+    position: absolute; inset: -3px;
+    border: 1px solid rgba(28,177,195,0.1);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-v4-wrap:hover .btn-v4 {
+    border-color: rgba(28,177,195,0.55);
+    box-shadow: 0 0 14px rgba(28,177,195,0.2);
+  }
+  .btn-v4-wrap:hover .btn-v4 svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 6px rgba(0,229,255,0.5));
+  }
+  .btn-v4-wrap:hover .scan-line { opacity: 1; }
+  .btn-v4-wrap:hover .glow-ring {
+    border-color: rgba(28,177,195,0.4);
+    box-shadow: 0 0 16px rgba(28,177,195,0.15);
+  }
+  .btn-v4:active { transform: scale(0.93); }
+
+  .btn-v4-wrap.is-fullscreen .btn-v4 {
+    border-color: rgba(28,177,195,0.6);
+    background: rgba(28,177,195,0.12);
+    box-shadow: 0 0 14px rgba(28,177,195,0.25);
+  }
+  .btn-v4-wrap.is-fullscreen .btn-v4 svg {
+    color: var(--cyan-bright);
+    filter: drop-shadow(0 0 8px rgba(0,229,255,0.6));
+  }
+  .btn-v4-wrap.is-fullscreen .scan-line { opacity: 1; }
+  .btn-v4-wrap.is-fullscreen .glow-ring {
+    border-color: rgba(28,177,195,0.5);
+    box-shadow: 0 0 20px rgba(28,177,195,0.25);
+    animation: v1-pulse 2s ease-in-out infinite;
+  }
+
+  /* 分隔线 */
+  .divider {
+    width: 1px;
+    align-self: stretch;
+    background: linear-gradient(180deg, transparent, rgba(28,177,195,0.15), transparent);
+  }
+
+  /* 底部提示 */
+  .hint-bar {
+    position: fixed;
+    bottom: 36px;
+    color: rgba(255,255,255,0.25);
+    font-size: 13px;
+    letter-spacing: 1px;
+    z-index: 1;
+  }
+  .hint-bar span {
+    color: rgba(0,229,255,0.55);
+  }
+</style>
+</head>
+<body>
+
+<div class="preview-container">
+
+  <!-- ====== 方案1: 切角发光 + 角点装饰 ====== -->
+  <div class="variant-group">
+    <div class="variant-name">01 · 切角发光</div>
+    <div class="aside-mock">
+      <div class="btn-v1" onclick="this.classList.toggle('is-fullscreen')" title="点击切换">
+        <svg viewBox="0 0 1024 1024" fill="currentColor">
+          <path d="M160 96.064l0.064 255.936H224V192h159.936V128L160 96.064zM800 128v64h160l-0.064 160H896l0.064-160H864l0.064-64L800 128zM384 832v64h-64v64h128v-64l-64-0.064V832z m448-64v64h-64v64h128v-64l-64-0.064V768h-64zM864 160v64h0.064l-0.064 160H928l-0.064-160H896l0.064-64L864 160zM160 928v-64h-0.064l0.064-160H96l0.064 160H128l-0.064 64H160zM160 864v-64H96v-64H64v128h128v-64l-64-0.064V864z"/>
+        </svg>
+      </div>
+      <div class="tab-mock">总览</div>
+      <div class="tab-mock active">水情</div>
+      <div class="tab-mock">雨情</div>
+      <div class="hint-text">八边形切角 + 角点光点</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 方案2: 六边形蜂巢 ====== -->
+  <div class="variant-group">
+    <div class="variant-name">02 · 蜂巢六边</div>
+    <div class="aside-mock">
+      <div class="btn-v2" onclick="this.classList.toggle('is-fullscreen')" title="点击切换">
+        <svg viewBox="0 0 1024 1024" fill="currentColor">
+          <path d="M160 96.064l0.064 255.936H224V192h159.936V128L160 96.064zM800 128v64h160l-0.064 160H896l0.064-160H864l0.064-64L800 128zM384 832v64h-64v64h128v-64l-64-0.064V832z m448-64v64h-64v64h128v-64l-64-0.064V768h-64zM864 160v64h0.064l-0.064 160H928l-0.064-160H896l0.064-64L864 160zM160 928v-64h-0.064l0.064-160H96l0.064 160H128l-0.064 64H160zM160 864v-64H96v-64H64v128h128v-64l-64-0.064V864z"/>
+        </svg>
+      </div>
+      <div class="tab-mock">总览</div>
+      <div class="tab-mock active">水情</div>
+      <div class="tab-mock">雨情</div>
+      <div class="hint-text">clip-path 六边形</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 方案3: L形角标框 ====== -->
+  <div class="variant-group">
+    <div class="variant-name">03 · 角标装甲</div>
+    <div class="aside-mock">
+      <div class="btn-v3-wrap" onclick="this.classList.toggle('is-fullscreen')">
+        <div class="btn-v3">
+          <svg viewBox="0 0 1024 1024" fill="currentColor">
+            <path d="M160 96.064l0.064 255.936H224V192h159.936V128L160 96.064zM800 128v64h160l-0.064 160H896l0.064-160H864l0.064-64L800 128zM384 832v64h-64v64h128v-64l-64-0.064V832z m448-64v64h-64v64h128v-64l-64-0.064V768h-64zM864 160v64h0.064l-0.064 160H928l-0.064-160H896l0.064-64L864 160zM160 928v-64h-0.064l0.064-160H96l0.064 160H128l-0.064 64H160zM160 864v-64H96v-64H64v128h128v-64l-64-0.064V864z"/>
+          </svg>
+        </div>
+        <span class="corner corner-tl"></span>
+        <span class="corner corner-tr"></span>
+        <span class="corner corner-bl"></span>
+        <span class="corner corner-br"></span>
+        <span class="diagonal diagonal-1"></span>
+        <span class="diagonal diagonal-2"></span>
+      </div>
+      <div class="tab-mock">总览</div>
+      <div class="tab-mock active">水情</div>
+      <div class="tab-mock">雨情</div>
+      <div class="hint-text">L 形角标 + 对角装饰线</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 方案4: 全息扫描 ====== -->
+  <div class="variant-group">
+    <div class="variant-name">04 · 全息扫描</div>
+    <div class="aside-mock">
+      <div class="btn-v4-wrap" onclick="this.classList.toggle('is-fullscreen')">
+        <div class="btn-v4">
+          <svg viewBox="0 0 1024 1024" fill="currentColor">
+            <path d="M160 96.064l0.064 255.936H224V192h159.936V128L160 96.064zM800 128v64h160l-0.064 160H896l0.064-160H864l0.064-64L800 128zM384 832v64h-64v64h128v-64l-64-0.064V832z m448-64v64h-64v64h128v-64l-64-0.064V768h-64zM864 160v64h0.064l-0.064 160H928l-0.064-160H896l0.064-64L864 160zM160 928v-64h-0.064l0.064-160H96l0.064 160H128l-0.064 64H160zM160 864v-64H96v-64H64v128h128v-64l-64-0.064V864z"/>
+          </svg>
+          <div class="scan-line"></div>
+        </div>
+        <div class="glow-ring"></div>
+      </div>
+      <div class="tab-mock">总览</div>
+      <div class="tab-mock active">水情</div>
+      <div class="tab-mock">雨情</div>
+      <div class="hint-text">切角 + 扫描线 + 光晕环</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="hint-bar">💡 <span>点击按钮</span> 切换正常态 ↔ 全屏激活 &nbsp;|&nbsp; <span>Hover</span> 查看悬停效果 &nbsp;|&nbsp; 底部为同风格选项卡参考</div>
+
+</body>
+</html>

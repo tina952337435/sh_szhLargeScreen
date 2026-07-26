@@ -19,8 +19,10 @@
   --def1ff: #000000;
   --ztitemtit1: #594bdd;
   --ztboxbg: #7e73e985;
-  --indexseven: url(/images/index_07_purple.png) no-repeat;
-  --indexeight: url(/images/index_08_purple.png) no-repeat;
+  /* --indexseven: url(/images/index_07_purple.png) no-repeat;
+  --indexeight: url(/images/index_08_purple.png) no-repeat; */
+  --indexseven: url(/images/bg2-8purpleSelect.png) no-repeat;
+  --indexeight: url(/images/bg2-8purple.png) no-repeat;
   --portal: #c9c5ee;
   --portalborder: 1px solid #7365FF;
   --swDivSelectcolor: #7365FF;
@@ -149,5 +151,13 @@
   --pingguRightBack: url(/images/amiddboxttopVioletTheme3.png);
   --pingguSelectFangAn: rgba(115, 101, 255, 0.5);
   /* 站网 */
-  --bgYear: #7e73e985;
+  --bgYear: #7e73e985;  
+  --windbg: url(/images/windbgP.png);
+  /* 基础资料里面的每个行的背景 */
+  --basicInformationBg:linear-gradient(to right, #ffffff 0%, #ffffff 20%, #ffffff 65%, #ffffff 100%);
+  --rcUlTitleBg:linear-gradient(180deg, #5c4fd0 0, #463bab);  
+  --rcUlValueBg:#7e73e952;
+
+   /* 工情左边 */
+  --TJListGQBg:rgba(88,0,219, 0.2);
 }

@@ -102,40 +102,63 @@
               >
             </div>
           </div>
-          <div
-            style="
-              position: absolute;
-              float: left;
-              left: 300px;
-              margin-top: -6px;
-            "
-            id="rainstormImg"
-          >
-            <img :src="rainstormImg" alt="暴雨预警" tilte="暴雨预警" style="width: 48px; height: 48px" />
-          </div>
-          <div
-            style="
-              position: absolute;
-              float: left;
-              left: 360px;
-              margin-top: -6px;
-            "
-            id="typhoonImg"
-          >
-            <img :src="typhoonImg" alt="台风预警" tilte="台风预警" style="width: 48px; height: 48px" />
-          </div>
 
+          <!-- 预警信息 -->
           <div
             style="
               position: absolute;
               float: left;
-              left: 415px;
+              left: 280px;
               margin-top: -6px;
             "
-            id="chaoweiImg"
           >
-            <img :src="chaoweiImg" alt="黄浦江潮位预警" tilte="黄浦江潮位预警" style="width: 45px; height: 45px" />
+            <div
+              style="
+                float: left;
+              "
+              id="rainstormImg"
+              v-if="showRainstormComponent"
+            >
+              <img
+                :src="rainstormImg"
+                alt="暴雨预警"
+                tilte="暴雨预警"
+                style="width: 48px; height: 48px"
+              />
+            </div>
+            <div
+              style="
+                float: left;
+                padding-left: 8px;
+              "
+              id="typhoonImg"
+              v-if="showTyphoonComponent"
+            >
+              <img
+                :src="typhoonImg"
+                alt="台风预警"
+                tilte="台风预警"
+                style="width: 48px; height: 48px"
+              />
+            </div>
+
+            <div
+              style="
+                float: left;
+                padding-left: 5px;
+              "
+              id="chaoweiImg"
+              v-if="showChaoweiComponent"
+            >
+              <img
+                :src="chaoweiImg"
+                alt="黄浦江潮位预警"
+                tilte="黄浦江潮位预警"
+                style="width: 45px; height: 45px"
+              />
+            </div>
           </div>
+          <!-- 预警信息 -->
         </div>
       </div>
       <div
@@ -569,7 +592,7 @@ import indexapi from "@/api/zonglan/index.js";
 import modeapi from "@/api/mode/index.js";
 import dayjs from "dayjs";
 
-import { addAreaLineQS, CreateLayer,map } from "@/utils/ArcGis/MapComm.js";
+import { addAreaLineQS, CreateLayer, map } from "@/utils/ArcGis/MapComm.js";
 import { setMeasureTool } from "@/utils/ArcGis/CommonTool.js";
 
 import domain from "@/assets/json/domain.json";
@@ -606,7 +629,12 @@ const typeValue = ref();
 const child = ref();
 const rainstormImg = ref("/images/warning/byyj_none.png");
 const typhoonImg = ref("/images/warning/typhoon_none.png");
-const chaoweiImg=ref("/images/warning/chaowei_none.png");
+const chaoweiImg = ref("/images/warning/chaowei_none.png");
+
+const showRainstormComponent=ref(false);
+const showTyphoonComponent=ref(false);
+const showChaoweiComponent=ref(false);
+
 
 const showDialogFX = ref(false);
 const titleNameFX = ref("风险图成果");
@@ -629,14 +657,14 @@ function closeLineDialog() {
 }
 // 应急响应查询
 function getWarningInfo() {
-  var strParam = { };
+  var strParam = {};
   apiWxxsq
     .getUsePremission(strParam)
     .then((res) => {
       var strJson = res.data;
       // console.error("-------------------",strJson)
       if (strJson.length > 0) {
-        strJson=strJson.filter((item) => item.SIGNAL_STAGE != "解除");
+        strJson = strJson.filter((item) => item.SIGNAL_STAGE != "解除");
         var color0 = "#def1ff";
         var color1 = "#ED493F";
         var color2 = "#F79715";
@@ -652,77 +680,81 @@ function getWarningInfo() {
           $(".warningTitleSpan").css("color", color3);
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
         } else if (strJson[0].SIGNAL_LEVEL == "Ⅳ") {
-          $(".warningTitleSpan").css("color", color4);   
+          $(".warningTitleSpan").css("color", color4);
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
-        } 
-        else if (strJson[0].SIGNAL_LEVEL == "0") {
+        } else if (strJson[0].SIGNAL_LEVEL == "0") {
           WarningInfoNum.value = strJson[0].SIGNAL_LEVEL;
           $(".warningTitleSpan").css("color", color0);
         }
         console.error("当前应急响应情况======", WarningInfo.value);
-      }
-      else{
-          WarningInfoNum.value ="无";
-          $(".warningTitle").css("color", color0);
+      } else {
+        WarningInfoNum.value = "无";
+        $(".warningTitle").css("color", color0);
       }
     })
     .catch((err) => {});
 }
 //暴雨预警
 function getBYYJInfo() {
-  apiWxxsq.getSwptToken({}).then((obj) => {    
+  apiWxxsq.getSwptToken({}).then((obj) => {
     var stime = dayjs(dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss"))
-    .add(-30, "Day")
-    .format("YYYY-MM-DD 00:00:00");
+      .add(-30, "Day")
+      .format("YYYY-MM-DD 00:00:00");
     var etime = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-    var strParam = { 
-      access_token:obj.access_token,
-      STARTTIME:stime,
-      ENDTIME:etime
+    var strParam = {
+      access_token: obj.access_token,
+      STARTTIME: stime,
+      ENDTIME: etime,
     };
     apiWxxsq
       .getSwptQXYJ(strParam)
       .then((res) => {
-        if(res.length > 0){
-          var resALL= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE != "解除");//当前预警且不是解除的
-          var resT=resALL.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
-          rainstormImg.value="/images/warning/byyj_none.png"
-          if(resT.length > 0){
-            var st_name= resT[0].ST_NAME;
-            if(st_name.indexOf("蓝色") > -1){
+        if (res.length > 0) {
+          var resALL = res.filter(
+            (item) => item.ST_STATE == "current" && item.ST_FBTYPE != "解除",
+          ); //当前预警且不是解除的
+          var resT = resALL.filter((item) => item.ST_NAME.indexOf("暴雨") > -1); //预警类型为暴雨
+          rainstormImg.value = "/images/warning/byyj_none.png";
+          showRainstormComponent.value=false;
+          if (resT.length > 0) {
+            var st_name = resT[0].ST_NAME;
+            if (st_name.indexOf("蓝色") > -1) {
               rainstormImg.value = "/images/warning/rainstorm_blue.png";
-            }
-            else if(st_name.indexOf("黄色") > -1){
-              rainstormImg.value = "/images/warning/rainstorm_yellow.png";              
-            }
-            else if(st_name.indexOf("橙色") > -1){
+              showRainstormComponent.value=true;
+            } else if (st_name.indexOf("黄色") > -1) {
+              rainstormImg.value = "/images/warning/rainstorm_yellow.png";
+              showRainstormComponent.value=true;
+            } else if (st_name.indexOf("橙色") > -1) {
               rainstormImg.value = "/images/warning/rainstorm_orange.png";
-            } 
-            else if(st_name.indexOf("红色") > -1){
+              showRainstormComponent.value=true;
+            } else if (st_name.indexOf("红色") > -1) {
               rainstormImg.value = "/images/warning/rainstorm_red.png";
-            }            
+              showRainstormComponent.value=true;
+            }
           }
           //台风预警
           // console.error("台风预警resALL",resALL);
-          resT=resALL.filter((item) => item.ST_NAME.indexOf("台风") > -1);//预警类型为台风
-          typhoonImg.value="/images/warning/typhoon_none.png";
+          resT = resALL.filter((item) => item.ST_NAME.indexOf("台风") > -1); //预警类型为台风
+          typhoonImg.value = "/images/warning/typhoon_none.png";
+          showTyphoonComponent.value=false;
           // console.error("台风预警",resT);
-          if(resT.length > 0){
-            var st_name= resT[0].ST_NAME;
+          if (resT.length > 0) {
+            var st_name = resT[0].ST_NAME;
             // console.error("台风预警",st_name);
-            if(st_name.indexOf("蓝色") > -1){
+            if (st_name.indexOf("蓝色") > -1) {
               typhoonImg.value = "/images/warning/typhoon_blue.png";
-            }
-            else if(st_name.indexOf("黄色") > -1){
-              typhoonImg.value = "/images/warning/typhoon_yellow.png";              
-            }
-            else if(st_name.indexOf("橙色") > -1){
+              showTyphoonComponent.value=true;
+            } else if (st_name.indexOf("黄色") > -1) {
+              typhoonImg.value = "/images/warning/typhoon_yellow.png";
+              showTyphoonComponent.value=true;
+            } else if (st_name.indexOf("橙色") > -1) {
               typhoonImg.value = "/images/warning/typhoon_orange.png";
-            } 
-            else if(st_name.indexOf("红色") > -1){
+              showTyphoonComponent.value=true;
+            } else if (st_name.indexOf("红色") > -1) {
               typhoonImg.value = "/images/warning/typhoon_red.png";
-            }            
+              showTyphoonComponent.value=true;
+            }
           }
         }
       })
@@ -731,30 +763,32 @@ function getBYYJInfo() {
     apiWxxsq
       .getChaoWeiYuJing(strParam)
       .then((res) => {
-        console.error("潮位预警",res);
-        if(res.length > 0){
-          var resT= res.filter((item) =>item.YJZT != "解除");//当前预警且不是解除的
-          var resRain=resT;
-          chaoweiImg.value="/images/warning/chaowei_none.png";
-          if(resRain.length > 0){
-            var st_name= resRain[0].YJXH+"色";
-            if(st_name.indexOf("蓝色") > -1){
+        console.error("潮位预警", res);
+        if (res.length > 0) {
+          var resT = res.filter((item) => item.YJZT != "解除"); //当前预警且不是解除的
+          var resRain = resT;
+          chaoweiImg.value = "/images/warning/chaowei_none.png";
+          showChaoweiComponent.value=false;
+          if (resRain.length > 0) {
+            var st_name = resRain[0].YJXH + "色";
+            if (st_name.indexOf("蓝色") > -1) {
               chaoweiImg.value = "/images/warning/chaowei_blue.png";
+              showChaoweiComponent.value=true;
+            } else if (st_name.indexOf("黄色") > -1) {
+              chaoweiImg.value = "/images/warning/chaowei_yellw.png";
+              showChaoweiComponent.value=true;
+            } else if (st_name.indexOf("橙色") > -1) {
+              chaoweiImg.value = "/images/warning/chaowei_orange.png";
+              showChaoweiComponent.value=true;
+            } else if (st_name.indexOf("红色") > -1) {
+              chaoweiImg.value = "/images/warning/chaowei_red.png";
+              showChaoweiComponent.value=true;
             }
-            else if(st_name.indexOf("黄色") > -1){
-              chaoweiImg.value = "/images/warning/chaowei_yellw.png";         
-            }
-            else if(st_name.indexOf("橙色") > -1){
-               chaoweiImg.value = "/images/warning/chaowei_orange.png";        
-            } 
-            else if(st_name.indexOf("红色") > -1){
-               chaoweiImg.value = "/images/warning/chaowei_red.png";        
-            }        
           }
         }
       })
       .catch((err) => {});
-  })
+  });
 }
 //语音
 const YUYINFalse = ref(false);
@@ -783,7 +817,7 @@ function setDtLayerKS(layerID) {
       "shsw_OneMapServer",
       "shsw_OneMapServer_wxyx",
       "local_img",
-      "local_ibo"
+      "local_ibo",
     ];
     if (layerListID.length > 0) {
       for (var num = 0; num < layerListID.length; num++) {

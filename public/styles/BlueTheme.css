@@ -20,8 +20,9 @@
   --def1ff: #000000;
   --ztitemtit1: #3284f2;
   --ztboxbg: url(/images/zxboxbg3.png) 0 0 no-repeat;
-  --indexseven: url(/images/index_07_7.png) no-repeat;
-  --indexeight: url(/images/index_08_8_blue.png) no-repeat;
+  --indexseven: url(/images/bg2-8BlueSelect.png) no-repeat;
+  /* --indexeight: url(/images/index_08_8_blue.png) no-repeat; */
+   --indexeight: url(/images/bg2-8Blue.png) no-repeat;
   --portal: #D2EAFF;
   --portalborder: 1px solid #10b5f7;
   --swDivSelectcolor: #006BFB;
@@ -151,5 +152,11 @@
   --pingguRightBack: url(/images/amiddboxttopBlueTheme2.png);
   --pingguSelectFangAn: rgba(0, 163, 255, 0.5);
   /* 站网 */
-  --bgYear: #3284f280;
+  --bgYear: #3284f280;  
+  --windbg: url(/images/windbgB.png);
+  /* 基础资料里面的每个行的背景 */
+  --basicInformationBg:linear-gradient(to right, #ffffff 0%, #ffffff 20%, #ffffff 65%, #ffffff 100%);
+  --rcUlTitleBg:linear-gradient(180deg, #63affc 0, #3090f2);
+  --rcUlValueBg:#63affc52;
+  --TJListGQBg:rgba(12,77,165, 0.3);
 }

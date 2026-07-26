@@ -65,7 +65,9 @@ define(["dojo/_base/declare",
                                     temp2 = "";
                                 }
                             }
-                            html += "<p class='TipClass'>" + temp1 + "：<span>" + value + temp2+ "</span></p>";
+                            if (value != "-"&&value!=null&&value!=""&&value!=undefined) {
+                                html += "<p class='TipClass'>" + temp1 + "：<span>" + value + temp2+ "</span></p>";
+                            }                            
                         });
                     } else {
                         fdarr.forEach(function (val, index, arr) {

@@ -453,6 +453,10 @@ export default {
   //面雨量时段统计
   getRainDashboardr: (params) => {
     return request.post(`${serveName}SWZZ_RTSQ_ST_PPTN_R/getRainDashboard`, params)
+  },
+  // 单站最大滑动降雨量
+  queryMaxSlidingRainfall: (params) => {
+    return request.post(`${serveName}SWZZ_RTSQ_ST_PPTN_R/queryMaxSlidingRainfall`, params)
   }, 
   //代表站场次降雨排序
   getEventRain32: (params) => {

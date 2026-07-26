@@ -9,7 +9,7 @@ import $ from "jquery";
 import SHBJ from "@/assets/json/SHBJ.json";
 import SHBJArea from "@/assets/json/SHBJArea.json";
 
-import weiquURL from "@/assets/json/四片圩区2000.json"; //圩区 
+import weiquURL from "@/assets/json/四片圩区2000.json"; //圩区
 
 import xingzhengArea from "@/assets/json/上海市2000.json";
 
@@ -71,19 +71,19 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 15, 30);
                     if(dan){
                         if(item.atcunit=="上海水文总站"){
-                            breakSymbol = new PictureMarkerSymbol("/images/water/水位(正常).png", 14, 14);
+                            breakSymbol = new PictureMarkerSymbol("/images/water/水位(正常).png", 12, 12);
                         }
                         else{
-                            breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(正常).png", 20, 20);
+                            breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(正常).png", 18, 18);
                         }
                     }
                     if (item.wrz && Number(item.upz) >= Number(item.wrz)&&Number(item.wrz)>0) {
                         if(dan){   
                             if(item.atcunit=="上海水文总站"){
-                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超警).png", 14, 14);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超警).png", 12, 12);
                             }
                             else{
-                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超警).png", 20, 20);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超警).png", 18, 18);
                             }
                          }else{  
                             breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
@@ -94,10 +94,10 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                     if (item.grz && Number(item.upz) >= Number(item.grz)&&Number(item.grz)>0) {
                          if(dan){   
                             if(item.atcunit=="上海水文总站"){
-                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超保).png", 14, 14);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/水位(超保).png", 12, 12);
                             }
                             else{
-                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超保).png", 20, 20);
+                                breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超保).png", 18, 18);
                             }
                          }else{                            
                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
@@ -287,12 +287,12 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                     }
                     var _width=14,_height=18;
                     if(item.atcunit=="上海水文总站"){
-                        _width=14;
-                        _height=18;
+                        _width=12;
+                        _height=16;
                     }
                     else{
-                         _width=15;
-                         _height=15;
+                         _width=12;
+                         _height=12;
                     }
                     breakSymbol = new PictureMarkerSymbol(pUrl + imgUrl, _width, _height);
 
@@ -308,7 +308,11 @@ function addYLMark(viw, strJson, stime, etime, switchChecked) {
                             _align = item["dir"];
                         }
                         
-                        var textStr =arr[i].stnm+"@" +Number(arr[i].drp).toFixed(1);
+                        var textStr =arr[i].stnm
+                        if(Number(arr[i].drp)>0){
+                            textStr+="@" +Number(arr[i].drp).toFixed(1);
+                        }
+
                         if (switchChecked) {
                             var label = new MapTextPagehome(map, point, item, textStr, globallevel, _align, cls,
                                 12);
@@ -537,7 +541,7 @@ function onaddYBSWMark(evt) {
     var item = evt.graphic.attributes;
     if (SetNull(item) != "") {
         const ChildVue = defineAsyncComponent(() =>
-            import("@/components/danzhan/yb/SQYBLine.vue")
+            import("@/components/danzhan/yb/DanZHanSelYB.vue")
         );
         const props = {};
         props["dd_id"] = item["dd_id"];
@@ -589,17 +593,17 @@ function addYBSWMark(strJson, DD_ID, stime, etime, switchChecked) {
                     item.stime = stime;
                     item.etime = etime;
                     var cls = " level_all";
-                    breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 18, 38);
+                    breakSymbol = new PictureMarkerSymbol("/images/icon_51.png", 15, 30);
                     if (item.wrz != undefined) {
                         if (Number(item.data) >= Number(item.wrz)&&Number(item.wrz)>0) {
-                            breakSymbol = new PictureMarkerSymbol("/images/cheng2.png", 18, 38);
+                            breakSymbol = new PictureMarkerSymbol("/images/cheng2.png",15, 30);
                             // cls = " level_wrz";
                         }
                     }
                     if (item.grz != undefined) {
                         // console.error(item.stnm,'item.grz',item.grz,item.data);
                         if (Number(item.data) >= Number(item.grz)&&Number(item.grz)>0) {
-                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 18, 38);
+                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
                             // cls = " level_grz";
                         }
                     }  
@@ -1846,6 +1850,150 @@ function addXSLMark(strJson, switchChecked) {
     });
 }
 
+//蓄水量-新版（科技感卡片+水滴定位点，全内联样式）
+var xslAreaNames = []; // 记录所有片区MC名，用于重置
+function highlightXSLabel(mc) {
+    // 重置所有卡片为默认样式
+    xslAreaNames.forEach(function (name) {
+        var card = document.getElementById('xsl-card-' + name);
+        if (card) {
+            card.style.borderColor = 'rgba(0,180,210,0.35)';
+            card.style.boxShadow = '0 0 20px rgba(0,160,180,0.12), inset 0 1px 0 rgba(255,255,255,0.03)';
+        }
+    });
+    // 高亮选中卡片
+    if (mc) {
+        var card = document.getElementById('xsl-card-' + mc);
+        if (card) {
+            card.style.borderColor = '#00e5ff';
+            card.style.boxShadow = '0 0 26px rgba(0,229,255,0.4), 0 0 10px rgba(0,229,255,0.25), inset 0 1px 0 rgba(255,255,255,0.05)';
+        }
+    }
+}
+
+function addXSLMarkNew(strJson, switchChecked) {
+    var layerId = "addXSLMarkNew";
+    var xslLayerGraphicLayer = CreateLayer(layerId);
+    if (SetNull(xslLayerGraphicLayer) != "") {
+        xslLayerGraphicLayer.clear();
+    }
+    require(["esri/geometry/Point",
+        "esri/graphic",
+        "myJs/MapText",
+    ], function (Point, Graphic, MapText) {
+        for (var num = 0; num < strJson.length; num++) {
+            var properties = strJson[num];
+            if (properties.lgtd != undefined) {
+                var point = new Point({
+                    "x": properties.lgtd,
+                    "y": properties.lttd,
+                    "spatialReference": { "wkid": 4326 }
+                });
+
+                var _align = "bottom";
+                if (properties.MC == "嘉宝北片") { _align = "top"; }
+                if (properties.MC == "蕴南片") { _align = "right"; }
+                if (properties.MC == "青松片" || properties.MC == "淀北片") { _align = "left"; }
+
+                var isV = (_align == "top" || _align == "bottom");
+                var uid = "xslg" + num;
+
+                // flex-direction: top→column(锚点在下), bottom→column-reverse(锚点在上)
+                //                  left→row(锚点在右),  right→row-reverse(锚点在左)
+                var flexDir = "column";
+                if (_align == "bottom") { flexDir = "column-reverse"; }
+                else if (_align == "left") { flexDir = "row"; }
+                else if (_align == "right") { flexDir = "row-reverse"; }
+
+                // ---- 构建 HTML (全内联样式，不依赖外部CSS) ----
+                var h = '';
+
+                // 外层容器
+                h += '<div style="display:flex;align-items:center;color:#fff;';
+                h += 'flex-direction:' + flexDir + ';" data-align="' + _align + '">';
+
+                var cardId = 'xsl-card-' + (properties.MC || num);
+
+                // ===== 信息卡片 =====
+                h += '<div id="' + cardId + '" style="';
+                h += 'background:linear-gradient(180deg,rgba(5,25,45,0.94),rgba(2,12,25,0.97));';
+                h += 'border:1px solid rgba(0,180,210,0.35);border-radius:6px;';
+                h += 'padding:10px 14px;min-width:150px;';
+                h += 'box-shadow:0 0 20px rgba(0,160,180,0.12),inset 0 1px 0 rgba(255,255,255,0.03);';
+                h += 'font-family:Microsoft YaHei,sans-serif;font-size:13px;line-height:1.7;';
+                h += '">';
+
+                // 标题栏
+                h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;';
+                h += 'padding-bottom:6px;border-bottom:1px solid rgba(0,200,220,0.2);">';
+                h += '<svg viewBox="0 0 24 24" style="width:14px;height:14px;flex-shrink:0;" fill="#14a3a8">';
+                h += '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>';
+                h += '</svg>';
+                h += '<span style="font-size:15px;font-weight:600;color:#b2ebf2;">' + properties.MC + '</span>';
+                h += '</div>';
+
+                var dotBlue = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#78909c"/></svg>';
+                var dotCyan = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#4fc3f7"/></svg>';
+                var dotGreen = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#69f0ae"/></svg>';
+
+                // 数据行：水位
+                h += '<div style="display:flex;align-items:center;">';
+                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotBlue + '水位</span>';
+                h += '<span style="color:#e0e0e0;flex:1;text-align:right;">' + (properties.z || "—") + ' <small style="font-size:11px;color:#546e7a;">m</small></span>';
+                h += '</div>';
+
+                // 数据行：蓄量
+                h += '<div style="display:flex;align-items:center;">';
+                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotCyan + '蓄量</span>';
+                h += '<span style="color:#4fc3f7;font-weight:600;flex:1;text-align:right;">' + (properties.sl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">万方</small></span>';
+                h += '</div>';
+
+                // 数据行：余量（高亮）
+                h += '<div style="display:flex;align-items:center;';
+                h += 'padding:2px 6px;margin:1px -6px 0;';
+                h += 'background:rgba(105,240,174,0.08);border-radius:3px;">';
+                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotGreen + '余量</span>';
+                h += '<span style="color:#69f0ae;font-weight:600;flex:1;text-align:right;">' + (properties.ssl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">万方</small></span>';
+                h += '</div>';
+
+                h += '</div>'; // 卡片结束
+
+                // ===== 连接线 =====
+                if (isV) {
+                    h += '<div style="flex-shrink:0;width:0;height:8px;';
+                    h += 'border-left:1px dashed rgba(0,200,220,0.35);"></div>';
+                } else {
+                    h += '<div style="flex-shrink:0;width:12px;height:0;';
+                    h += 'border-top:1px dashed rgba(0,200,220,0.35);"></div>';
+                }
+
+                // ===== 水滴定位锚点 =====
+                h += '<div style="flex-shrink:0;line-height:0;';
+                h += 'filter:drop-shadow(0 0 6px rgba(0,229,255,0.4));">';
+                h += '<svg viewBox="0 0 24 32" style="width:16px;height:20px;display:block;">';
+                h += '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1">';
+                h += '<stop offset="0%" stop-color="#00e5ff"/>';
+                h += '<stop offset="100%" stop-color="#006064"/>';
+                h += '</linearGradient></defs>';
+                h += '<path d="M12 0C12 0 0 12 0 20c0 6.6 5.4 12 12 12s12-5.4 12-12C24 12 12 0 12 0z" fill="url(#' + uid + ')"/>';
+                h += '</svg></div>';
+
+                h += '</div>'; // 外层容器结束
+
+                var cls = "xsl-marker-container";
+                var label = new MapText(map, point, properties, h, globallevel, _align, cls, 12);
+                labels.push(label);
+                // 记录片区名，供高亮切换
+                if (properties.MC) {
+                    xslAreaNames.push(properties.MC);
+                }
+            } else {
+                console.error("缺少中心点经纬度的区域", properties.MC);
+            }
+        }
+    });
+}
+
 
 function riverPoint(evt){
     var graphic=evt.graphic;
@@ -2216,6 +2364,8 @@ export {
     addXunjianPointMark,
     addWQMark,
     addXSLMark,
+    addXSLMarkNew,
+    highlightXSLabel,
     queryCompleteSWLL,
     MapRainfallArea,
     MapRainfall,

@@ -24,7 +24,7 @@ import customTable from "@/components/Table/customTable.vue";
 import api from "@/api/zonglan/index.js";
 import dayjs from "dayjs";
 import $ from "jquery";
-import { SetNull, groupBy } from "@/api/ComUnit.js";
+import { SetNull, groupBy,sortObjectArray  } from "@/api/ComUnit.js";
 import { ElMessage } from "element-plus";
 import { ref, onMounted, watch } from "vue";
 import { convertToDate } from "@/api/dateUtil.js";
@@ -76,6 +76,7 @@ function Weacontent() {
           })
           var gcOpen=false;
           if (bzdataALL.length > 0) {
+            zmdataALL=sortObjectArray(zmdataALL, ['exkey'], 'asc');
             for (var i = 0; i < bzdataALL.length; i++) {
               if (Number(bzdataALL[i].gtq) > 0||Number(bzdataALL[i].gtophgt) > 0) {
                 gcOpen=true;
@@ -90,6 +91,7 @@ function Weacontent() {
             }
           }
           if (zmdataALL.length > 0) {
+            zmdataALL=sortObjectArray(zmdataALL, ['exkey'], 'asc');
             for (var i = 0; i < zmdataALL.length; i++) {
               if (Number(zmdataALL[i].gtophgt) >=0.1) {
                 gcOpen=true;

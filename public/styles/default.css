@@ -159,4 +159,13 @@
   --pingguSelectFangAn: rgba(12, 220, 12, 0.5);
   /* 站网 */
   --bgYear: #0ce0f8bb;
+  --windbg: url(/images/windbg.png);
+
+  /* 基础资料里面的每个行的背景 */
+  --basicInformationBg:linear-gradient(to right, #022e53 0%, #012849 20%, #011933 65%, #02131B 100%);
+  --rcUlTitleBg:linear-gradient(180deg, #064364 0, #092f42);
+  --rcUlValueBg:#112f507d;
+
+  /* 工情左边 */
+  --TJListGQBg:rgba(0, 0, 0, 0.5);
 }

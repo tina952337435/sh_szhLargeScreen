@@ -267,12 +267,13 @@ onMounted(() => {
             /*font-size: 15px;*/
             border-radius: 10px 10px 0px 0px;
             /*background: #3AC082;*/
-            background: linear-gradient(180deg, #3AC082 0, #073c24);
-            background: linear-gradient(180deg, #0299f5 0, #132a61);
-            background: linear-gradient(180deg, #064364 0, #092f42);
+            /* background: linear-gradient(180deg, #3AC082 0, #073c24);
+            background: linear-gradient(180deg, #0299f5 0, #132a61); */
+            background: var(--rcUlTitleBg);
             height: 40px;
             line-height: 40px;
             color: white;
+            font-size: 15px;
         }
 
         .rcUlValue {
@@ -288,8 +289,7 @@ onMounted(() => {
             color: rgb(27, 137, 243);
             color: rgb(26 212 115);
             color: var(--titled1);
-            background-color: #097bf733;
-            background-color: #112f507d;
+            background-color:var(--rcUlValueBg);
             cursor: pointer;
         }
 </style>

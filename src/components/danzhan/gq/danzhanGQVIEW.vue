@@ -176,10 +176,10 @@ function GQload(strJsonAll) {
       strMsg += "       </td>";
       strMsg += '          <td align="left">';
       if (Number(temp3[0].gtq) > 0) {
-        if (SetNull(temp3[0].insflow) != "") {
+        if (SetNull(temp3[0].gtq) != "") {
           strMsg +=
             '<span class="SpanColor">' +
-            Number(temp3[0].insflow).toFixed(1) +
+            Number(temp3[0].gtq).toFixed(1) +
             "m³/s</span>";
         } else {
           strMsg += '<span class="SpanColor">—</span>';

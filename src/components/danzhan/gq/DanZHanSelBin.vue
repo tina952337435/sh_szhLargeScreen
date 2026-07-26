@@ -283,7 +283,7 @@ provide("typeValuePDF", typeValue)
  .tab {
      background: var(--menuTop) no-repeat center;
      background-size: 100% 100%;
-     color: #fff;
+     color: var(--mtablecolor);
      border: 0px;
      display: inline-block;
      list-style: none;

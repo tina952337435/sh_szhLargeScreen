@@ -29,12 +29,22 @@
           class="swiper-slide"
           style="width: 33%"
           :class="
+            Drpswiper == '6小时' && 'swiper-slide swiper-slide-thumb-active'
+          "
+          @click="qiehuan('6小时')"
+        >
+          6小时
+        </div>
+        <!-- <div
+          class="swiper-slide"
+          style="width: 33%"
+          :class="
             Drpswiper == '场次降雨' && 'swiper-slide swiper-slide-thumb-active'
           "
           @click="qiehuan('场次降雨')"
         >
           场次降雨
-        </div>
+        </div> -->
       </div>
       <span class="spanTitle"></span>
     </div>
@@ -79,9 +89,9 @@ const props = defineProps({
 });
 const tableData = ref([]);
 const tableHeaders = ref([
-  { name: "sortnum", label: "序号" },
-  { name: "name", label: "区域" },
-  { name: "maxdrp", label: "最大雨量(mm)" },
+  { name: "sortnum", label: "序号",width:"10%" },
+  { name: "name", label: "区域" ,width:"20%"},
+  { name: "maxdrp", label: "最大雨量(mm)",width:"25%" },
   { name: "maxstnm", label: "站名" },
 ]);
 const Drpswiper = ref("1小时");
@@ -103,42 +113,18 @@ function YLload(areaData) {
     areaData.map(e=>{
          var item=e;
          item.name=e.addvnm;
-         item.maxdrp=e.drp;
+         item.maxdrp=parseFloat(e.drp).toFixed(1);
+         item.drp=e.drp;
          item.maxstnm=e.stnm;
          item.sortnum=_index;
          dataNew.push(item);
         _index++;    
     });
-    dataNew=sortObjectArray(dataNew, ['maxdrp'], 'desc');
+    dataNew=sortObjectArray(dataNew, ['drp'], 'desc');
     dataNew.filter(function(e,_index){
         e.sortnum=_index+ 1;
     });
     tableData.value=dataNew;
-    // console.error('stationData',JSON.stringify(stationData));
-
-    const strNote = [];
-      strNote.push({ name: "名称", codename: "name", tableV: "0", isShow: true });
-      strNote.push({ name: "雨量", codename: "drp", tableV: "0", isShow: true });
-      var LineColor = [
-        "#3E8BFF",
-        "#1CB8B2",
-        "#01DDFF",
-        "#F9C823",
-        "#0264FD",
-        "#FE7923",
-        "#8E30FF",
-      ];
-      const _Option = ChartJs.chartYL(
-        "",
-        dataNew,
-        strNote,
-        LineColor,
-        "雨量",
-        "true",
-        _theme
-      );
-      lineOption.value = _Option;
-      datekey.value = Date.now();
 }
 
 function fangda() {
@@ -153,23 +139,20 @@ function fangda() {
 }
 onMounted(() => {
   var now = new Date();
-  stime.value = dayjs(now).format("YYYY-MM-DD 08:00:00");
-  if (dayjs(now).format("HH") < 8) {
-    stime.value = dayjs(dayjs(now).format("YYYY-MM-DD 08:00:00"))
-      .add(-1, "day")
+  stime.value = dayjs(dayjs(now).format("YYYY-MM-DD HH:mm:ss"))
+      .add(-1, "hour")
       .format("YYYY-MM-DD HH:mm:ss");
-  } else {
-    stime.value = dayjs(now).format("YYYY-MM-DD 08:00:00");
-  }
   etime.value = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
-
-  // stime.value = "2025-05-08 08:00:00";
-  // etime.value = "2025-05-08 23:00:00";
   Weacontent();
 });
 
 function qiehuan(stcd) {
   Drpswiper.value = stcd;
+  var now = new Date();
+  stime.value = dayjs(dayjs(now).format("YYYY-MM-DD HH:mm:ss"))
+      .add(-parseInt(Drpswiper.value.replace("小时", "")), "hour")
+      .format("YYYY-MM-DD HH:mm:ss");
+  etime.value = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
   var stnm = "";
   if (stcd == "63405800") {
     stnm = "芦潮港";

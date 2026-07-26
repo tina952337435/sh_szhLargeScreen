@@ -1098,7 +1098,7 @@ export default {
             title: {
                 // 是否显示title
                 show: titleShow,
-                text: '无数据',
+                text: '无降雨',
                 x: 'center',
                 y: Yoffset,
                 textStyle: {

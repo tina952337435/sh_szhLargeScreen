@@ -130,7 +130,7 @@
             return res.stcd== props.sid&& res.data_TYPE == "15";//蓄量
         });
         // alert(dataTempXSL.length);
-        console.error(dataTempXSL);
+        // console.error(dataTempXSL);
         ycXSLStart.value=dataTempXSL.length>0?Number(dataTempXSL[0].data):0;
         ycXSLEnd.value=dataTempXSL.length>0?Number(dataTempXSL[dataTempXSL.length-1].data):0;
 
@@ -186,6 +186,9 @@
             var zhanDianTemp = zhanDian.value.filter(function (res) {
                 return res.name.indexOf(name) > -1 && res.type == "24";
             });
+            if(zhanDianTemp.length==0){
+                continue;
+            }
             var stcd =SetNull(zhanDianTemp[0].stcd)==""?zhanDianTemp[0].id:zhanDianTemp[0].stcd;
             var zhanDianDataTemp = zhanDianData.value.filter(function (res) {
                 return res.stcd == stcd;

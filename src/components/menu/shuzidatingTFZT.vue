@@ -44,7 +44,7 @@
       "
     /> -->
     <div class="colorL">
-      <div style="color: white; padding: 5px">台风等级</div>
+      <!-- <div style="color: white; padding: 5px">台风等级</div> -->
       <ul style="padding-inline-start: 0px">
         <li style="float: left; list-style: none">
           <img src="/images/typhoon/1.png" alt />
@@ -527,10 +527,9 @@ function closeDislog(type) {
   cursor: pointer;
   position: absolute;
   border-radius: 8px;
-  /* bottom: 150px; */
   bottom: 10px;
   height: auto !important;
-  left: 24%;
+  right: 29rem;
   padding: 0px 10px !important;
   z-index: 2;
   font-size: 14px;

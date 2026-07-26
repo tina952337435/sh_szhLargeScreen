@@ -247,7 +247,7 @@ function FullScreen_Type(_type) {
     $(".g-lside ").css("display", "block");
     $(".g-rside ").css("display", "block");
     $(".g-bside ").css("display", "flex");
-    $(".aside ").css("right", "30rem");
+    $(".aside ").css("right", "29rem");
     $(".tuli ").css("right", "29rem");
     router.push({ path: window.location.pathname });
   }

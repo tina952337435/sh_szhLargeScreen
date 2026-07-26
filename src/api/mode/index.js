@@ -62,4 +62,7 @@ export default {
   findResultBDMSPREDICT: (params) => {
     return request.post(`${serveName}/SWZZ_MODE_BDMS_PREDICT/findResult`, params)
   },
+  findLatestPredictByStation: (params) => {
+    return request.post(`${serveName}/SWZZ_MODE_DD_SOLUTION/findLatestPredictByStation`, params)
+  },
 } 

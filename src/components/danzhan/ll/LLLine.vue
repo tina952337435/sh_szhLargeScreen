@@ -125,7 +125,7 @@ const props = defineProps({
 
 function loadZhan() {
   value.value = stcd.value;
-  api.QuSel({ "pid": "2026031114184492913-4" }).then((res) => {
+  api.QuSelDuo({ "pid": "2026031114184492913-4,2019011015353464106" }).then((res) => {
     var strJson = [];
     if (res.data.length > 0) {
       for (var i = 0; i < res.data.length; i++) {

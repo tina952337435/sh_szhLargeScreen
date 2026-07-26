@@ -1,0 +1,41 @@
+<h2>苏州河水利片蓄量标注 — 优化方案对比</h2>
+<p class="subtitle">当前方案 + 3个优化方案。请在地图背景上对比视觉效果（假设深色大屏地图背景）</p>
+
+<div class="section">
+  <h3 style="color:#ff6b6b;">❌ 当前方案：大卡片背景图</h3>
+  <p style="color:#aaa;margin-bottom:12px;">140×140px 固定背景图卡片，无边角定位点，文字拥挤，与地图融合感差</p>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+    <div class="mockup" style="flex:0 0 auto;">
+      <div class="mockup-header">当前：cockpit__bottommenu4.png 卡片</div>
+      <div class="mockup-body" style="background:#0a1628;padding:20px;display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;">
+        <!-- 模拟当前样式 -->
+        <div style="background:linear-gradient(180deg, rgba(0,40,70,0.95), rgba(0,20,40,0.95));border:1px solid rgba(0,180,220,0.4);width:140px;height:140px;text-align:center;padding:20px 10px;position:relative;font-family:'Microsoft YaHei',sans-serif;">
+          <div style="color:#7ec8e3;font-size:15px;font-weight:bold;margin-bottom:8px;">嘉宝北片</div>
+          <div style="color:#ccc;font-size:12px;margin:4px 0;">当前水位：<span style="color:#4fc3f7;">3.25</span></div>
+          <div style="color:#ccc;font-size:12px;margin:4px 0;">当前蓄量：<span style="color:#4fc3f7;">1234.5</span></div>
+          <div style="color:#ccc;font-size:12px;margin:4px 0;">蓄量余量：<span style="color:#4fc3f7;">567.8</span></div>
+        </div>
+        <div style="background:linear-gradient(180deg, rgba(0,40,70,0.95), rgba(0,20,40,0.95));border:1px solid rgba(0,180,220,0.4);width:140px;height:140px;text-align:center;padding:20px 10px;position:relative;font-family:'Microsoft YaHei',sans-serif;">
+          <div style="color:#7ec8e3;font-size:15px;font-weight:bold;margin-bottom:8px;">青松片</div>
+          <div style="color:#ccc;font-size:12px;margin:4px 0;">当前水位：<span style="color:#4fc3f7;">2.88</span></div>
+          <div style="color:#ccc;font-size:12px;margin:4px 0;">当前蓄量：<span style="color:#4fc3f7;">987.3</span></div>
+          <div style="color:#ccc;font-size:12px;margin:4px 0;">蓄量余量：<span style="color:#4fc3f7;">432.1</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pros-cons" style="margin-top:16px;">
+    <div class="cons"><h4>当前问题</h4><ul>
+      <li>依赖外部PNG背景图，无法自适应内容</li>
+      <li>140×140px硬编码尺寸，内容多时溢出</li>
+      <li>没有点位标记，不知道数据属于哪个坐标</li>
+      <li>偏移量硬编码(lttd-0.012)，不同缩放级别错位</li>
+      <li>文字层级不清晰，所有数据同样大小</li>
+    </ul></div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:40px;">
+  <h3 style="color:#4fc3f7;">方案一览（3个方案，由简到繁）</h3>
+  <p style="color:#aaa;">每个方案的地图背景模拟深色大屏，请重点关注：标注尺寸、信息层级、与地图的融合感</p>
+</div>

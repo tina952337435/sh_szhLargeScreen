@@ -33,12 +33,22 @@
           class="swiper-slide"
           style="width: 33%"
           :class="
+            Drpswiper == '6小时' && 'swiper-slide swiper-slide-thumb-active'
+          "
+          @click="qiehuan('6小时')"
+        >
+          6小时
+        </div>
+        <!-- <div
+          class="swiper-slide"
+          style="width: 33%"
+          :class="
             Drpswiper == '场次降雨' && 'swiper-slide swiper-slide-thumb-active'
           "
           @click="qiehuan('场次降雨')"
         >
           场次降雨
-        </div>
+        </div> -->
       </div>
       
       <span class="spanTitle"></span>

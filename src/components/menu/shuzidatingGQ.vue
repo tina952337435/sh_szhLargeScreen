@@ -746,16 +746,16 @@ const cancel = () => {
 }
 
 .TJList div {
-  height: 30px;
-  line-height: 30px;
+  /* height: 30px;
+  line-height: 30px; */
   margin-bottom: 20px;
   cursor: pointer;
   font-size: 16px;
-  color: #ffffff;
+  color: var(--sel_wraplabelcolor);
   list-style: none;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 10px 8px;
+  background: var(--TJListGQBg);
+  padding: 5px 8px;
 }
 
 .TJList .Listspan {
@@ -770,6 +770,7 @@ const cancel = () => {
 .ListTitle{
   font-size: 19px !important;
   font-family: "number";
+  margin-bottom: 0px !important;
 }
 .ListTitle .ysts-numorder{
     width: 26px;

@@ -7,6 +7,20 @@
     </div>
     <div class="txt" style="padding:0PX 10PX;">
       <div class="table-responsive">
+                            <div style="height:90px;">
+                                <div class="responsivekuai2"></div>
+                                <div class="responsivekuai">
+                                    <div class="imgdiv">
+                                        <img src="/images/taifengyujing.png" />
+                                    </div>
+                                    <div class="responsivetitle">台风预警</div>
+                                    <div class="responsivecontent">
+                                        <span id="rainWarning" class="responsivecontentvalue" :style="computedStyle('台风')">{{typhoonWarning}}</span>
+                                        <span style="font-size:14px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+
                              <div style="height:90px;">
                                 <div class="responsivekuai2"></div>
                                 <div class="responsivekuai">
@@ -25,7 +39,7 @@
                                 <div  class="responsivekuai1"></div>
                                 <div class="responsivekuai">
                                     <div class="imgdiv">
-                                         <img src="/images/feng2.png" />
+                                         <img src="/images/leidianyujing.png" />
                                     </div>
                                     <div class="responsivetitle">雷电预警</div>
                                     <div class="responsivecontent">
@@ -52,7 +66,7 @@
                                 <div  class="responsivekuai1"></div>
                                 <div class="responsivekuai">
                                     <div class="imgdiv">
-                                        <img src="/images/qi2.png" />
+                                        <img src="/images/chaoweiyujing.png" style="padding-left: 5px;" />
                                     </div>
                                     <div class="responsivetitle">潮位预警</div>
                                     <div class="responsivecontent">
@@ -156,6 +170,7 @@ const rainstorm=ref("无");
 const leidianWarning=ref("无");
 const dafengWarning=ref("无");
 const chaoweiWarning = ref("无");
+const typhoonWarning=ref("无");
 
 onMounted(() => {
   Weacontent();
@@ -182,7 +197,7 @@ function getBYYJInfo() {
       .getSwptQXYJ(strParam)
       .then((res) => {
         if(res.length > 0){
-          var resT= res.filter((item) => item.ST_STATE == "current"&&item.ST_FBTYPE == "发布");//当前预警且不是解除的
+          var resT= res.filter((item) => item.ST_STATE == "current"&& item.ST_FBTYPE != "解除");//当前预警且不是解除的
           var resRain=resT.filter((item) => item.ST_NAME.indexOf("暴雨") > -1);//预警类型为暴雨
           rainstorm.value="无";
           if(resRain.length > 0){
@@ -235,6 +250,23 @@ function getBYYJInfo() {
             else if(st_name.indexOf("红色") > -1){
                dafengWarning.value = "红色";        
             }            
+          }
+
+
+          //台风预警
+          var resTaifeng = resT.filter((item) => item.ST_NAME.indexOf("台风") > -1); //预警类型为台风
+          typhoonWarning.value = "无";
+          if (resTaifeng.length > 0) {
+            var st_name = resTaifeng[0].ST_NAME;
+            if (st_name.indexOf("蓝色") > -1) {
+              typhoonWarning.value = "蓝色";
+            } else if (st_name.indexOf("黄色") > -1) {
+              typhoonWarning.value = "黄色";
+            } else if (st_name.indexOf("橙色") > -1) {
+              typhoonWarning.value = "橙色";
+            } else if (st_name.indexOf("红色") > -1) {
+              typhoonWarning.value = "红色";
+            }
           }
         }
       })
@@ -333,6 +365,20 @@ function computedStyle(type) {
       fontColor="rgb(255, 165, 0)";
     }
     else if(chaoweiWarning.value == "红色"){
+      fontColor="rgb(255, 0, 0)";
+    }
+  }
+  else if(type=="台风"){
+    if(typhoonWarning.value == "蓝色"){
+      fontColor="rgb(22, 164, 243)";
+    }
+    else if(typhoonWarning.value == "黄色"){
+      fontColor="rgb(255, 255, 0)";
+    }
+    else if(typhoonWarning.value == "橙色"){
+      fontColor="rgb(255, 165, 0)";
+    }
+    else if(typhoonWarning.value == "红色"){
       fontColor="rgb(255, 0, 0)";
     }
   }

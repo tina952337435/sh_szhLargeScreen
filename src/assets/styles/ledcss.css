@@ -588,7 +588,7 @@
     border-radius: 5px;
     /* line-height: 28px; */
     font-size: 16px;
-    font-weight: 700;
+    /* font-weight: 700; */
     /* color: #000000; */
     color: #FFFFFF;
     
@@ -625,7 +625,7 @@
     border-radius: 5px;
     /* line-height: 28px; */
     font-size: 16px;
-    font-weight: 700;
+    /* font-weight: 700; */
     /* color: #000; */
     color: #FFFFFF;
     
@@ -639,4 +639,20 @@
     color: #FFFFFF;
     text-align: center;
     /* padding-top: 8px; */
+}
+
+/* ========== 蓄量标注新样式 (addXSLMarkNew) ========== */
+.MapText.xsl-marker-container {
+    padding: 0 !important;
+    border-radius: 0 !important;
+    min-width: 0 !important;
+    background: none !important;
+    line-height: 1 !important;
+    overflow: visible !important;
+}
+.MapText.xsl-marker-container > span {
+    display: block;
+}
+.MapText.xsl-marker-container .TextTri {
+    display: none !important;
 }

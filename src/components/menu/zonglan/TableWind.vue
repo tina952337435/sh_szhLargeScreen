@@ -19,7 +19,7 @@
             class="text-num"
             @click="open('all')"
             style="
-              color: #57f1e9;
+              color:var(--titled1);
               margin-top: 50px;
               text-align: right;
               cursor: pointer;
@@ -35,7 +35,7 @@
           style="margin-top: 50px; cursor: pointer"
         >        
           <div class="text-name">风力最大测站</div>
-          <div class="text-num" style="color: #57f1e9;padding-top:10px;" @click="openDanZhan()">
+          <div class="text-num" style="color:var(--titled1);padding-top:10px;" @click="openDanZhan()">
             {{ maxStnm }}<span></span>
           </div>
         </div>
@@ -60,7 +60,7 @@
           </div>
         </div>
         <div class="box-item box-itemright" style="margin-top:-25px">
-          <div class="text-num" style="color: #57f1e9">
+          <div class="text-num" style="color:var(--titled1)">
             {{ maxDir }}<span></span>
           </div>
           <!-- <div class="text-name">风力方向</div> -->
@@ -234,7 +234,7 @@ function openDanZhan() {
 
 <style scoped>
 .box {
-  background-image: url(/images/windbg.png);
+  background-image:var(--windbg);/**url(/images/windbg.png); **/ 
   background-size: 100% 100%;
   background-repeat: no-repeat;
   width: 98%;

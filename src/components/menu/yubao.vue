@@ -57,8 +57,13 @@
     
   </div>
 
+  <!-- 全屏按钮 -->
+  <div :style="{ position:'absolute', top:'6rem', right: fsRight, zIndex:2 }">
+    <FullscreenBtn ref="fsBtn" />
+  </div>
+
   <!-- 右侧天数的切换 -->
-  <div id="sqTopToggle" style="height: 40px; position: absolute; top: 8.5rem; right: 30rem;z-index: 2;">
+  <div id="sqTopToggle" :style="{ height:'40px', position:'absolute', top:'8.5rem', right: fsRight, zIndex:2 }">
     <div class="shdswDiv" id="sswz">
       <div class="swDiv" style="width:90px;">
         <div class="sel_wrap" style="position:relative;">
@@ -125,9 +130,10 @@ import yubaoDanZhanLineCW from "@/components/menu/yb/yubaoDanZhanLineCW.vue";
 import yubaoWQTable from "@/components/menu/yb/yubaoWQTable.vue";
 import progresstime from "@/components/menu/yb/progress-time.vue";
 import EchartSQRiver from "@/components/menu/sq/EchartSQRiver.vue";
+import FullscreenBtn from "@/components/untils/FullscreenBtn.vue";
 
 import $ from "jquery";
-import { onMounted, ref, provide, defineAsyncComponent, reactive, onUnmounted, watch, h, nextTick } from "vue";
+import { onMounted, ref, provide, defineAsyncComponent, reactive, onUnmounted, watch, h, nextTick, computed } from "vue";
 import { useStore } from "vuex";
 import * as PointMark from "@/utils/ArcGis/PointMark.js";
 
@@ -174,6 +180,8 @@ const currentComponentTanchu = ref(null);
 const tmCenter = ref(null);
 const heatMapFlag = ref(false);
 const diaoduList=ref([]);
+const fsBtn = ref(null);
+const fsRight = computed(() => fsBtn.value?.fullscreen ? '1rem' : '29rem');
 
 onUnmounted(() => {
   clearALL();
@@ -681,5 +689,10 @@ provide("tabWQnameArr", ybdrplist);
   background-color: var(--swDivSelectcolor);
   border: 1px solid var(--swDivSelectcolor);
   color: var(--sel_wraplabelcolorSel);
+}
+
+.fullscreen-btn{
+  margin-left:0px;
+  margin-right:25px;
 }
 </style>

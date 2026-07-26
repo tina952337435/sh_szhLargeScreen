@@ -63,7 +63,7 @@ function Weacontent() {
     stime.value = props.stime;
     etime.value = props.etime;
     var strJson = [];
-    strJson.push({ "title": "工程运行情况", "url": "danzhanGQVIEW", "showActive": true, "showCloseButton": false });
+    strJson.push({ "title": "运行情况", "url": "danzhanGQVIEW", "showActive": true, "showCloseButton": false });
     strJson.push({ "title": "工情监测", "url": "danzhanGQJC", "showActive": false, "showCloseButton": false });
     // strJson.push({ "title": "基础信息", "url": "GQVIEW", "showActive": false, "showCloseButton": false });
 
@@ -143,7 +143,7 @@ provide("item", props.item);
  .tab {
      background: var(--menuTop) no-repeat center;
      background-size: 100% 100%;
-     color: #fff;
+     color: var(--mtablecolor);
      border: 0px;
      display: inline-block;
      list-style: none;

@@ -6,7 +6,7 @@
                 <div class="d2"></div>
                 <p class="base-p" id="title2" @click="fangda()">水利片</p>
             </div>
-            <!-- <div style="width:calc(100% - 170px);" class="div-swiper">
+            <div style="width:calc(100% - 170px);" class="div-swiper">
                 <div class="swiper-slide" style="width: 50%;"
                     :class="Typeswiper == 'district' && 'swiper-slide swiper-slide-thumb-active'"
                     @click="GetType('district')">
@@ -14,7 +14,7 @@
                 <div class="swiper-slide" style="width: 50%;"
                     :class="Typeswiper == 'river' && 'swiper-slide swiper-slide-thumb-active'" @click="GetType('river')">
                     骨干河道</div>
-            </div> -->
+            </div>
         </div>
         <div class="txt" style="overflow-y: auto">
             <Table :headers="tableHeaders" :rows="tableData" :key="datekey" class="m-table river-table" :border="0"

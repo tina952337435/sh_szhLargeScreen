@@ -47,6 +47,11 @@
       <span style="padding-left: 2px; color: white; vertical-align: 15px">超保</span>
     </div>
   </div>
+
+  <!-- 全屏按钮 -->
+  <div :style="{ position:'absolute', top:'6rem', right: fsRight, zIndex:2 }">
+    <FullscreenBtn ref="fsBtn" />
+  </div>
 </template>
 <script setup>
 import yujingTongji from "@/components/menu/ybyj/yujingTongji.vue";
@@ -56,7 +61,7 @@ import yujingCLQ from "@/components/menu/ybyj/yujingCLQ.vue";
 import yujingFB from "@/components/menu/ybyj/yujingFB.vue";
 
 import $ from "jquery";
-import { onMounted, ref, provide, defineAsyncComponent, reactive, h, onUnmounted } from "vue";
+import { onMounted, ref, provide, defineAsyncComponent, reactive, h, onUnmounted, computed } from "vue";
 import { useStore } from "vuex";
 import * as PointMark from "@/utils/ArcGis/PointMark.js"; 
 import { SetNull, sortObjectArray } from "@/api/ComUnit.js";
@@ -68,8 +73,11 @@ import Dialog from "@/api/utils/Dialog.js";
 
 import { getGeojson } from "@/api/Common/api.js"
 import {destroy,dyCenter,removeEntityByName,addAreaLineQS,setZOOM} from "@/utils/ArcGis/MapComm.js";
+import FullscreenBtn from "@/components/untils/FullscreenBtn.vue";
 
 const CLQtableData = ref([]);
+const fsBtn = ref(null);
+const fsRight = computed(() => fsBtn.value?.fullscreen ? '1rem' : '29rem');
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
 

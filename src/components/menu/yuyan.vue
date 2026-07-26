@@ -44,10 +44,7 @@
 
     </div>
   </div>
-  <div id="SSTTL" style="background: rgba(0,0,0,0.2) 30%;position:absolute;left:29rem;top:250px;height:275px;
-    width: 75px;-moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;display:block;">
+  <div id="SSTTL" :style="{ background:'rgba(0,0,0,0.2) 30%', position:'absolute', left: fsLeft, top:'250px', height:'275px', width:'75px', borderRadius:'5px', display:'block' }">
       <div id="swTuli" class="colorL">
               <p><span class="colorSpan" style="background-color:#000049"></span><span class="colorSpanValue">4.00</span></p>
               <p><span class="colorSpan" style="background-color:#000087"></span><span class="colorSpanValue">3.80</span></p>
@@ -78,11 +75,10 @@
           <p><span class="colorSpan" style="background-color:#C1F1FF"></span><span class="colorSpanValue">0.0</span></p>
       </div>
     </div>
-  <!-- 底图图层切换 -->
-  <!-- <div style="cursor: pointer;margin-right: 25px;width: 40px;  height: 40px; text-align: center; border-radius: 30%; background: rgb(28 177 195 / 40%);margin-top: 5px;
-    position: absolute;top:7rem; right: 30rem;" @click="reductionSystem">
-    <img style="width: 30px;padding-top: 8px;" src="/images/suzhoumapSmall.png" alt="全视角" />
-  </div> -->
+  <!-- 全屏按钮 -->
+  <div :style="{ position:'absolute', top:'6rem', right: fsRight, zIndex:2 }">
+    <FullscreenBtn ref="fsBtn" />
+  </div>
 
   <!--播放条-->
   <div class="progresspanel">
@@ -101,8 +97,9 @@ import SWEchart from "@/components/menu/yuyan/SWEchart.vue";
 import CJEChart from "@/components/menu/yuyan/CJEChart.vue";
 import LLEchart from "@/components/menu/yuyan/LLEchart.vue";
 import progresstime from "@/components/menu/yb/progress-time.vue";
+import FullscreenBtn from "@/components/untils/FullscreenBtn.vue";
 import $ from "jquery";
-import { onMounted, ref, provide, defineAsyncComponent, onUnmounted, watch, h, nextTick } from "vue";
+import { onMounted, ref, provide, defineAsyncComponent, onUnmounted, watch, h, nextTick, computed } from "vue";
 import { useStore } from "vuex";
 import * as PointMark from "@/utils/ArcGis/PointMark.js";
 
@@ -148,6 +145,9 @@ const currentComponentTanchu = ref(null);
 const tmCenterName = ref(null);
 const tmCenter = ref(null);
 const heatMapFlag = ref(false);
+const fsBtn = ref(null);
+const fsRight = computed(() => fsBtn.value?.fullscreen ? '1rem' : '29rem');
+const fsLeft = computed(() => fsBtn.value?.fullscreen ? '1rem' : '29rem');
 const colorLSW1 = ref(true), colorLSW2 = ref(true), colorLSW3 = ref(true), colorLSW4 = ref(true), colorLSW5 = ref(true);
 
 const DDData = ref([]);

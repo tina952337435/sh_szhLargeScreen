@@ -391,9 +391,9 @@ ul li div {
 }
 
 .ClassName {
-    background: linear-gradient(to right, #022e53 0%, #012849 20%, #011933 65%, #02131B 100%);
+    background: var(--basicInformationBg);
     font-weight: normal;
-    color: #ccc;
+    color: var(--mtablecolor);
     font-size: 14px;
     text-align: left;
     padding-left: 30px;
@@ -410,7 +410,7 @@ ul li div {
 }
 
 .View {
-    color: aqua !important;
+    color: var(--titled1) !important;
 }
 
 /* 自定义滚动条样式 */
@@ -437,7 +437,7 @@ ul li div {
     margin-bottom: 20px;
     cursor: pointer;
     font-size: 16px;
-    color: #ffffff;
+    color: var(--title2);
     list-style: none;
     border-radius: 10px;
     /* background: rgba(0, 0, 0, 0.5); */
@@ -468,7 +468,7 @@ ul li div {
     margin-right: 15px;
     font-size: 18px;
     font-weight: bold;
-    color: #38bdf8;
+    color: var(--titled1);
 }
 
 /* 标签页导航 - 右侧悬浮 */
@@ -495,7 +495,7 @@ ul li div {
 .section-tabs-right .toggle-btn {
     /* width: 28px; */
     height: 28px;
-    background: rgba(2, 41, 77, 0.95);
+    background:var(--popContentHeadbg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -506,7 +506,7 @@ ul li div {
 }
 
 .section-tabs-right .toggle-btn:hover {
-    background: rgba(56, 189, 248, 0.2);
+    background: var(--titled1);
 }
 
 .section-tabs-right .tab-item {
@@ -515,7 +515,7 @@ ul li div {
     color: #ccc;
     font-size: 13px;
     transition: all 0.3s;
-    background: rgba(2, 41, 77, 0.9);
+    background: var(--popContentHeadbg);
     text-align: center;
     border-bottom: 1px solid rgba(56, 189, 248, 0.15);
 }
@@ -525,13 +525,13 @@ ul li div {
 }
 
 .section-tabs-right .tab-item:hover {
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.2);
+    color: var(--sel_wraplabelcolorSel);
+    background: var(--titled1);
 }
 
 .section-tabs-right .tab-item.active {
-    color: #fff;
-    background: rgba(56, 189, 248, 0.3);
+    color: var(--sel_wraplabelcolorSel);
+    background: var(--titled1);
 }
 
 /* 区块折叠样式 */

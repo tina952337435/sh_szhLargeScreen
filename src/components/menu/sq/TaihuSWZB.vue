@@ -104,7 +104,24 @@ onMounted(() => {
 });
 
 function chartSW(data, strNote, LineColor, max_min_Name) {
-           
+           var toolboxColor, axisLabelColor, axisLineColor, splitLineColor, legendColor, labelColor, titleColor;
+        if (_theme == "BlueTheme" || _theme == "VioletTheme") {
+            toolboxColor = "#ccc";
+            axisLabelColor = "#000";
+            axisLineColor = "#000";
+            splitLineColor = "#eee";
+            legendColor = "#000";
+            labelColor = "#0099FF";
+            titleColor = 'rgba(0,0,0,0.70)';
+        } else if (_theme == "default") {
+            toolboxColor = "#074159";
+            axisLabelColor = "#00FFFF";
+            axisLineColor = "#00FFFF";
+            splitLineColor = "#074159";
+            legendColor = "#fff";
+            labelColor = "#57CDF9";
+            titleColor = 'rgba(255,255,255,0.60)';
+        }
             //echarts.init(document.getElementById('quxian'), 'macarons');
             var chartName = []; 	//控件元素名称
             var chartTM = []; 	//时间序列
@@ -168,7 +185,7 @@ function chartSW(data, strNote, LineColor, max_min_Name) {
                     itemWidth: 8,
                     itemHeight: 8,
                     textStyle: {
-                        color: '#cbcccc',
+                        color:legendColor,
                         fontSize: 12
                     },
                     selected: ShowSelected
@@ -190,11 +207,11 @@ function chartSW(data, strNote, LineColor, max_min_Name) {
                         data: chartTM,
                         axisLine: {
                             lineStyle: {
-                                color: '#00FFFF',
+                                color: axisLineColor,
                                 width: 1, //这里是为了突出显示加上的
                             },
                             textStyle: {
-                                color: '#00FFFF',
+                                color: axisLabelColor,
                                 fontSize: '16'
                             }
                         }
@@ -210,7 +227,7 @@ function chartSW(data, strNote, LineColor, max_min_Name) {
                         splitLine: {
                             show: true,
                             lineStyle: {
-								color: 'rgba(0,255,255,.2)',
+								color: splitLineColor,
                             }
                         },
                         min: function (value) {
@@ -258,18 +275,18 @@ function chartSW(data, strNote, LineColor, max_min_Name) {
                                 return v.toFixed(2);
                             },
 							textStyle: {
-								color: '#00FFFF'
+								color: axisLabelColor
 							}
                         },
                         axisLine: {
                             lineStyle: {
-                                color: '#00FFFF',
+                                color:axisLineColor,
                                 width: 1,//这里是为了突出显示加上的
                                 shadowBlur: 0,
                                 shadowOffsetX: 0,
                             },
                             textStyle: {
-                                color: '#00FFFF',
+                                color: axisLabelColor,
                                 fontSize: '16'
                             },
                         }

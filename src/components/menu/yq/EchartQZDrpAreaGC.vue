@@ -7,7 +7,7 @@
       <div style="width: calc(100% - 220px)" class="div-swiper">
         <div
           class="swiper-slide"
-          style="width:33%"
+          style="width:50%"
           :class="
             Drpswiper == '12小时' && 'swiper-slide swiper-slide-thumb-active'
           "
@@ -17,7 +17,7 @@
         </div>
         <div
           class="swiper-slide"
-          style="width: 33%"
+          style="width: 50%"
           :class="
             Drpswiper == '24小时' && 'swiper-slide swiper-slide-thumb-active'
           "
@@ -25,7 +25,7 @@
         >
           24小时
         </div>
-        <div
+        <!-- <div
           class="swiper-slide"
           style="width: 33%"
           :class="
@@ -34,7 +34,7 @@
           @click="qiehuan('场次降雨')"
         >
           场次降雨
-        </div>
+        </div> -->
       </div>
       <span class="spanTitle"></span>
     </div>
@@ -81,7 +81,7 @@ const tableData = ref([]);
 const Drpswiper = ref("12小时");
 function Weacontent() {
     var strParam = {};
-    strParam["pid"] = "201901101419326076-1-1";
+    strParam["pid"] = "201901101419326076-1-1,201901101419326076-5";
     strParam["stime"] = stime.value;
     strParam["etime"] = etime.value;
     strParam["datasource"] = "BX";
