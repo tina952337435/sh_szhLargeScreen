@@ -125,10 +125,10 @@
     function loadXsl(){
         var idStr = areaList.value.map(function(a){ return a.id; }).join(",");
         var now = new Date();
-        var etime = dayjs(now).add(0, "hour").format("YYYY-MM-DD HH:mm:ss");
-        var stime = dayjs(dayjs(now).format("YYYY-MM-DD HH:mm:ss"))
-            .add(-24, "hour")
-            .format("YYYY-MM-DD HH:mm:ss");
+        var etime = dayjs(now).add(0, "hour").format("YYYY-MM-DD HH:00:00");
+        var stime = dayjs(dayjs(now).format("YYYY-MM-DD HH:00:00"))
+            .add(-12, "hour")
+            .format("YYYY-MM-DD HH:00:00");
         var strParam = {
             startdate: stime,
             enddate: etime,

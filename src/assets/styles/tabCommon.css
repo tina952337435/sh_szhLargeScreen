@@ -91,6 +91,7 @@
   padding: 0 5px;
   font-size: 0.9rem;
   color: var(--qixianglefttitlebglabel);
+  font-family: arial, "Hiragino Sans GB";
 }
 
 .el-dropdown-menu li:hover {
@@ -139,4 +140,7 @@
 
 #swDivMoreULZW ul li:hover {
   color: var(--swDivSelectcolor) !important;
+}
+.xiala label{
+  font-family: arial, "Hiragino Sans GB" !important;
 }

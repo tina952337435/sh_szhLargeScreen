@@ -151,6 +151,7 @@ function handleNodeClick() {
         strID += "," + data[num]["stcd"];
         tempNode.push(data[num]);
       }
+      strID = strID.substring(1); // 去掉开头的逗号
     }
   }
   $.data(myData, "WD_XUHAO", strID);
@@ -198,6 +199,7 @@ function handleStationChange(selectedValues) {
         tempNode.push({ stcd: stcd, stnm: option.label.split('-').pop() });
       }
     });
+    strID = strID.substring(1); // 去掉开头的逗号
   }
   $.data(myData, "WD_XUHAO", strID);
   $.data(myData, "NODE", tempNode);
@@ -294,6 +296,7 @@ function JosnSel(data, typeID) {
     Phomedata.value = mergedData;
     //转换树形数据为扁平选项用于下拉框
     stationOptions.value = convertToStationOptions(mergedData);
+    strID = strID.substring(1); // 去掉开头的逗号
     $.data(myData, "WD_XUHAO", strID);
     // 默认选中树的第一个河系的第一个站点
     if (strID) {

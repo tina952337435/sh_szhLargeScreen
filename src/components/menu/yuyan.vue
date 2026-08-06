@@ -2,7 +2,7 @@
   <!-- 左侧 -->
   <div class="g-lside">
     <div style="width: 100%">
-      <DDTable :DDData="DDData" :key="DDdatekey" @DDValue="getDDType" />
+      <DDTable :DDData="DDData" :key="DDdatekey" :selectedDate="selectedDate" @DDValue="getDDType" @dateChange="onDateChange" />
     </div>
     <div style="width: 100%">
       <SWMaxTable :SWData="SWData" :SWHeader="SWHeader" :key="datekey" />
@@ -154,6 +154,7 @@ const DDData = ref([]);
 const SWData = ref([]);
 const SWHeader = ref([]);
 const DDdatekey = ref(null);
+const selectedDate = ref(dayjs().format("YYYY-MM-DD")); // 日期选择，默认当天
 
 const CJData = ref([]);
 const CJCount = ref(0);
@@ -165,7 +166,7 @@ onMounted(async () => {
   $("#m_yuyan").addClass("z-crtitem z-crt wow slideInUp link-item");
   clearALL();
   BaseZhan();
-  loadFangList();
+  loadFangList(dayjs().format("YYYY-MM-DD"));
   reductionSystem();
 });
 
@@ -194,11 +195,21 @@ function BaseZhan() {
   .catch(err => { console.error(err);});
 }
 //方案列表
-function loadFangList() {
+function loadFangList(selectedDate) {
   var strParam = {};
-  api.loadFangListTZ(strParam).then(res => { 
+  if (selectedDate) {
+    strParam["startdate"] = dayjs(selectedDate).format("YYYY-MM-DD") + " 00:00:00";
+    strParam["enddate"] = dayjs(selectedDate).format("YYYY-MM-DD") + " 23:59:59";
+  }
+  api.loadFangListTZ(strParam).then(res => {
      JosnSel(res, "MODE_DD_SOLUTIONTZSel");
   }).catch(err => { });
+}
+function onDateChange(date) {
+  if (date) {
+    selectedDate.value = date;
+    loadFangList(date);
+  }
 }
 //勾选数据,选中行数据
 const selectData = ref([]);

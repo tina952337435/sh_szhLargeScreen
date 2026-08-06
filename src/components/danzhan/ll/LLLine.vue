@@ -17,8 +17,8 @@
 
     <el-radio-group style="margin-left: 20px">
       <el-radio @click="TypeeChange('Minute')" v-model="pathname" label="Minute">分钟</el-radio>
-      <el-radio @click="TypeeChange('HOUR')" v-model="pathname" label="HOUR">小时</el-radio>
-      <el-radio @click="TypeeChange('DAY')" v-model="pathname" label="DAY">8时</el-radio>
+      <!-- <el-radio @click="TypeeChange('HOUR')" v-model="pathname" label="HOUR">小时</el-radio> -->
+      <el-radio @click="TypeeChange('DAY')" v-model="pathname" label="DAY">日均</el-radio>
     </el-radio-group>
      <ul class="toptabTop" style="margin-right: 20px">
       <li :class="TMtype == 'week' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="geTMtType('week')"
@@ -29,7 +29,8 @@
       <li :class="TMtype == 'year' && 'toptabToponlyliHover'" class="toptabToponlyli" @click="geTMtType('year')">一年</li>
     </ul>
     <el-button type="primary" @click="BtnSearch()">查询</el-button>
-    <el-button type="success" style="margin-left: 20px" @click="ExportData()">导出</el-button>
+    <el-button type="success" style="margin-left:10px" @click="ExportData()">导出</el-button>
+    <el-button type="warning" style="margin-left:10px" @click="DuoSearch()">多站对比</el-button>
     <span style="
         position: absolute;
         right: 20px;
@@ -60,6 +61,10 @@
   </div>
   <div id="divEchartsData" class="echartsmaxmindata">
   </div>
+  <MyDialog :showDialog="showDialog" @close="showDialog = false" :title="title" :typeValue="typeValue"
+    style="width: 1400px; height: 800px">
+    <LLLineDuo :stime="duoStime" :etime="duoEtime" />
+  </MyDialog>
 </template>
 <script setup>
 import Table from "@/components/Table/Table.vue";
@@ -68,6 +73,8 @@ import Echarts from "@/components/MyEcharts/echartsLine.vue";
 import ChartJs from "@/api/MyEcharts/ChartJs.js";
 import { SetNull, sortObjectArray } from "@/api/ComUnit.js";
 import { downloadFile } from "@/utils/share/downFile.js";
+import MyDialog from "@/components/ComDialog.vue";
+import LLLineDuo from "@/components/danzhan/ll/LLLineDuo.vue";
 // ElConfigProvider：时间选择框汉化
 import { ElDatePicker, ElRadio, ElButton, ElConfigProvider, ElSelect, ElOption } from "element-plus";
 import dayjs from "dayjs";
@@ -91,6 +98,11 @@ const img2 = ref("/images/line-table4.png");
 const Liststnm = ref([]);
 const value = ref([])
 const TMtype=ref("");
+const showDialog = ref(false);
+const title = ref("流量多站对比");
+const typeValue = ref("");
+const duoStime = ref("");
+const duoEtime = ref("");
 
 const tableHeaders = ref([
   { name: "num", label: "序号" },
@@ -150,9 +162,14 @@ function geTMtType(obj){
     stime.value = dayjs(etime.value).add(-1, "month").format("YYYY-MM-DD HH:mm:ss");
   } else if (obj == "year") {
     stime.value = dayjs(etime.value).add(-1, "year").format("YYYY-MM-DD HH:mm:ss");
-  } 
-  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+  }
+  if (pathname.value == "Minute") {
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+  } else {
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD"));
+  }
   setTimeout(function(){
     Weacontent()
   },100)
@@ -163,38 +180,82 @@ function Weacontent() {
   strParam["stcd"] = stcd.value;
   strParam["pathname"] = pathname.value;
   strParam["datasource"] = mtype.value;
-  strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  if (pathname.value == "Minute") {
+    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  } else {
+    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD") + " 00:00:00";
+    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD") + " 23:59:59";
+  }
   queryStime = strParam["stime"];
   queryEtime = strParam["etime"];
-  api
-    .stFlowVelLine(strParam)
-    .then((res) => {
-      const strJson = res.data;
-      var jsondata = strJson.sort(function (a, b) {
-        return dayjs(a.tm).format("YYYY-MM-DD HH:mm:ss") - dayjs(b.tm).format("YYYY-MM-DD HH:mm:ss"); //时间正序
-      });
-      if(jsondata.length>0){
-        for(var num=0;num<jsondata.length;num++){ 
-          if (SetNull(jsondata[num].q) != "") {
-            jsondata[num].q = Number(jsondata[num].q).toFixed(2);
-          } else {
-            jsondata[num].q = "";
+
+  if (pathname.value == "Minute") {
+    // 分钟：流量+流速
+    api.stFlowVelLine(strParam)
+      .then((res) => {
+        tableHeaders.value = [
+          { name: "num", label: "序号" },
+          { name: "tm", label: "时间" },
+          { name: "q", label: "流量(m³/s)" },
+          { name: "v", label: "流速(m/s)" },
+        ];
+        const strJson = res.data;
+        var jsondata = strJson.sort(function (a, b) {
+          return dayjs(a.tm).format("YYYY-MM-DD HH:mm:ss") - dayjs(b.tm).format("YYYY-MM-DD HH:mm:ss");
+        });
+        if(jsondata.length>0){
+          for(var num=0;num<jsondata.length;num++){
+            if (SetNull(jsondata[num].q) != "") {
+              jsondata[num].q = Number(jsondata[num].q).toFixed(2);
+            } else {
+              jsondata[num].q = "";
+            }
           }
         }
-      }
-      LLdata.value = jsondata; 
-      LLload();
-    })
-    .catch((err) => { });
+        LLdata.value = jsondata;
+        LLload();
+      })
+      .catch((err) => { });
+  } else if (pathname.value == "DAY") {
+    // 日均：仅流量
+    api.stFlowDay(strParam)
+      .then((res) => {
+        tableHeaders.value = [
+          { name: "num", label: "序号" },
+          { name: "tm", label: "时间" },
+          { name: "q", label: "日均流量(m³/s)" },
+        ];
+        const strJson = res.data;
+        var jsondata = strJson.sort(function (a, b) {
+          return dayjs(a.tm).format("YYYY-MM-DD HH:mm:ss") - dayjs(b.tm).format("YYYY-MM-DD HH:mm:ss");
+        });
+        if(jsondata.length>0){
+          for(var num=0;num<jsondata.length;num++){
+            if (SetNull(jsondata[num].q) != "") {
+              jsondata[num].q = Number(jsondata[num].q).toFixed(2);
+            } else {
+              jsondata[num].q = "";
+            }
+          }
+        }
+        LLdata.value = jsondata;
+        LLload();
+      })
+      .catch((err) => { });
+  }
 }
 function LLload() {
-  const strJson = sortObjectArray(LLdata.value,["tm"],"asc"); 
+  const strJson = sortObjectArray(LLdata.value,["tm"],"asc");
   const strNote = [];
   strNote.push({ name: "时间", codename: "tm", tableV: "0", isShow: true });
   strNote.push({ name: "流量", codename: "q", tableV: "0", isShow: true });
-  strNote.push({ name: "流速", codename: "v", tableV: "0", isShow: true });
+  if (pathname.value == "Minute") {
+    strNote.push({ name: "流速", codename: "v", tableV: "0", isShow: true });
+  }
   var LineColor = [
+    "#0CDC0C",
+    "#F3F387",
     "#3E8BFF",
     "#1CB8B2",
     "#01DDFF",
@@ -204,12 +265,13 @@ function LLload() {
     "#8E30FF",
   ];
   currentStrNote = strNote;
+  const chartTitle = pathname.value == "Minute" ? "流量/流速" : "日均流量";
   const _Option = ChartJs.chartLLLSZoom(
     "",
     strJson,
     strNote,
     LineColor,
-    "流量",
+    chartTitle,
     "Mouth",
     _theme,
     100,
@@ -234,22 +296,27 @@ function buildTableData(strJson) {
   var maxZ = -999, maxTM = "";
   var minZ = 999, minTM = "";
   var averageP = 0, averagePN = 0;
+  var isMinute = pathname.value == "Minute";
   for (var num = 0; num < strJson.length; num++) {
     var item = strJson[num];
     var q = "—", v = "—";
     if (SetNull(item.q) != "") { q = Number(item.q).toFixed(2); }
-    if (SetNull(item.v) != "") { v = Number(item.v).toFixed(2); }
-    var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
+    if (isMinute && SetNull(item.v) != "") { v = Number(item.v).toFixed(2); }
+    var tmFormat = isMinute ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD";
+    var tm = dayjs(new Date(item.tm)).format(tmFormat);
     if (SetNull(q) != "—") {
-      averageP += Math.abs(Number(q));
+      averageP += Number(q);
       averagePN++;
       if (Number(q) < minZ) { minZ = q; minTM = tm; }
       if (Number(q) > maxZ) { maxZ = q; maxTM = tm; }
     }
-    result.push({ num: num + 1, tm: tm, q: q, v: v });
+    if (isMinute) {
+      result.push({ num: num + 1, tm: tm, q: q, v: v });
+    } else {
+      result.push({ num: num + 1, tm: tm, q: q });
+    }
   }
-  if (averageP > 0) { averageP = Number(averageP / averagePN).toFixed(2); }
-  if (SetNull(averageP) != "") { if (Number(maxZ) < 0) { averageP = -averageP; } }
+  if (averagePN > 0) { averageP = Number(averageP / averagePN).toFixed(2); }
   var strMsg = "最低流量：<span style='color:#0cdc0c;font-size: 18px;'>" + minZ + "</span>m³/s（" + minTM + "）"
     + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
     + "最高流量：<span style='color:#0cdc0c;font-size: 18px;'>" + maxZ + "</span>m³/s（" + maxTM + "）"
@@ -275,7 +342,11 @@ function handleDataZoom(params) {
 }
 function loadMorePrev() {
   var currentStime = dayjs(queryStime);
-  var newStime = currentStime.add(-1, 'day').format('YYYY-MM-DD HH:mm') + ':00';
+  var isMinute = pathname.value == "Minute";
+  // 分钟每次向前加载1天，日均每次向前加载30天
+  var offset = isMinute ? -1 : -30;
+  var offsetUnit = 'day';
+  var newStime = currentStime.add(offset, offsetUnit).format('YYYY-MM-DD HH:mm') + ':00';
   var newEtime = currentStime.format('YYYY-MM-DD HH:mm') + ':00';
   window.loadingShow();
   var strParam = {};
@@ -284,7 +355,9 @@ function loadMorePrev() {
   strParam["datasource"] = mtype.value;
   strParam["stime"] = newStime;
   strParam["etime"] = newEtime;
-  api.stFlowVelLine(strParam).then(function (res) {
+
+  var apiCall = isMinute ? api.stFlowVelLine(strParam) : api.stFlowDay(strParam);
+  apiCall.then(function (res) {
     queryStime = newStime;
     var newData = res.data || [];
     for (var n = 0; n < newData.length; n++) {
@@ -303,7 +376,8 @@ function loadMorePrev() {
     var chartDom = document.getElementById('LLLine');
     var myChart = echarts.getInstanceByDom(chartDom);
     if (myChart && merged.length > 0 && currentStrNote.length > 0) {
-      var chartTM = merged.map(function (d) { return dayjs(d.tm).format("MM-DD HH:mm"); });
+      var tmFormat = isMinute ? "MM-DD HH:mm" : "MM-DD";
+      var chartTM = merged.map(function (d) { return dayjs(d.tm).format(tmFormat); });
       var seriesUpdates = [];
       for (var j = 0; j < currentStrNote.length; j++) {
         var note = currentStrNote[j];
@@ -357,10 +431,26 @@ function handleChange(value) {
 }
 function TypeeChange(e) {
   pathname.value = e;
+  if (e == "Minute") {
+    mini.get("STIME").setFormat("yyyy-MM-dd HH:mm");
+    mini.get("STIME").setShowTime(true);
+    mini.get("ETIME").setFormat("yyyy-MM-dd HH:mm");
+    mini.get("ETIME").setShowTime(true);
+  } else if (e == "DAY") {
+    mini.get("STIME").setFormat("yyyy-MM-dd");
+    mini.get("STIME").setShowTime(false);
+    mini.get("ETIME").setFormat("yyyy-MM-dd");
+    mini.get("ETIME").setShowTime(false);
+  }
   Weacontent();
 }
 function BtnSearch() {
   Weacontent();
+}
+function DuoSearch() {
+  duoStime.value = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  duoEtime.value = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  showDialog.value = true;
 }
 function OnBoot(e) {
   tabName.value = e;

@@ -57,6 +57,24 @@
     
   </div>
 
+  <!-- 水位图例 -->
+  <div id="SSTTL" :style="{ background:'rgba(0,0,0,0.2) 30%', position:'absolute', left: fsLeft, top:'250px', height:'275px', width:'75px', borderRadius:'5px', display:'block' }">
+    <div id="swTuli" class="colorL">
+      <p><span class="colorSpan" style="background-color:#000049"></span><span class="colorSpanValue">4.00</span></p>
+      <p><span class="colorSpan" style="background-color:#000087"></span><span class="colorSpanValue">3.80</span></p>
+      <p><span class="colorSpan" style="background-color:#0000D0"></span><span class="colorSpanValue">3.60</span></p>
+      <p><span class="colorSpan" style="background-color:#2424FF"></span><span class="colorSpanValue">3.40</span></p>
+      <p><span class="colorSpan" style="background-color:#4444FF"></span><span class="colorSpanValue">3.20</span></p>
+      <p><span class="colorSpan" style="background-color:#6363FF"></span><span class="colorSpanValue">3.00</span></p>
+      <p><span class="colorSpan" style="background-color:#9797FF"></span><span class="colorSpanValue">2.80</span></p>
+      <p><span class="colorSpan" style="background-color:#0098C6"></span><span class="colorSpanValue">2.60</span></p>
+      <p><span class="colorSpan" style="background-color:#00B8EF"></span><span class="colorSpanValue">2.40</span></p>
+      <p><span class="colorSpan" style="background-color:#2FCFFF"></span><span class="colorSpanValue">2.20</span></p>
+      <p><span class="colorSpan" style="background-color:#82E2FF"></span><span class="colorSpanValue">2.00</span></p>
+      <p><span class="colorSpan" style="background-color:#C1F1FF"></span><span class="colorSpanValue">0.00</span></p>
+    </div>
+  </div>
+
   <!-- 全屏按钮 -->
   <div :style="{ position:'absolute', top:'6rem', right: fsRight, zIndex:2 }">
     <FullscreenBtn ref="fsBtn" />
@@ -142,10 +160,12 @@ import { destroy,removeEntityByName,addAreaLineQS,dyCenter } from "@/utils/ArcGi
 import dayjs from "dayjs";
 import api from "@/api/mode/index.js";
 import apizonglan from "@/api/zonglan/index.js";
+import apiHuishui from "@/api/mode/indexHuishui.js";
 import { getDateDiff } from "@/api/dateUtil";
 
 
 import { getGeojson } from '@/api/Common/api';
+import SHSWZZModeRiver2000 from "@/assets/json/SHSWZZModeRiver2000.json";
 import Dialog from "@/api/utils/Dialog.js";
 import { ElButton, ElMessage, } from "element-plus";
 import { convertToDate } from "@/api/dateUtil.js";
@@ -182,6 +202,7 @@ const heatMapFlag = ref(false);
 const diaoduList=ref([]);
 const fsBtn = ref(null);
 const fsRight = computed(() => fsBtn.value?.fullscreen ? '1rem' : '29rem');
+const fsLeft = computed(() => fsBtn.value?.fullscreen ? '1rem' : '29rem');
 
 onUnmounted(() => {
   clearALL();
@@ -276,6 +297,16 @@ function loadYBList(time) {
      JosnSel(res, "SelAll");
   }).catch(err => { });
 }
+function SetSDEGC(time) {
+    var strParam = { taskID: $.data(myData, "taskID"), time: time };
+    apiHuishui.modeGetResultAllModelByTime(strParam).then(res => {
+       JosnSel(res, "GetResultAllModelByTime");
+    }).catch(err => { });
+}
+function queryComplete() {
+    var features = SHSWZZModeRiver2000.features;
+    PointMark.queryCompleteSWLL($.data(myData, "AllModelByTimeData"), features, "水位");
+}
 function JosnSel(data, typeID) {
   if (typeID == "MODE_DD_SOLUTIONSel") {
     if (data.data.length > 0) {
@@ -297,6 +328,7 @@ function JosnSel(data, typeID) {
           var DD_STANA = Number(item.dd_STANA);
           var DD_CARRYBY = item.dd_CARRYBY;
           DD_ID.value = item.dd_ID;
+          $.data(myData, "taskID", item.dd_FOR);
           var itemDD = {
             gcTime: ETIME,
             DD_ID: item.dd_ID,
@@ -353,6 +385,10 @@ function JosnSel(data, typeID) {
   else if (typeID == "SLSel") {
     rainListSL.value = data.data;
     datekeySL.value = new Date();
+  }
+  else if (typeID == "GetResultAllModelByTime") {
+     $.data(myData, "AllModelByTimeData", data.results);
+     queryComplete();
   }
 }
 function loadSW() {
@@ -414,6 +450,7 @@ function reviceProgessTime(msg) {
   hoursNumber.value = hours;
   $.data(myData, "time", time);
   loadYBList(time);
+  SetSDEGC(time);
 }
 
 
@@ -453,6 +490,7 @@ function liClick(item){
       // $(this).addClass("liSelected");
       $("#FANGANLIST").css("display", "none");
       DD_ID.value = item.dd_ID;
+        $.data(myData, "taskID", item.dd_FOR);
         var STIME = item.dd_TM;
         var ETIME = item.dd_CHECKBY;
         var DD_STANA = Number(item.dd_STANA);
@@ -609,24 +647,34 @@ provide("tabWQnameArr", ybdrplist);
   margin-right: 10px;
 }
 
-.colorSpan {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin: 0px 5px;
-  line-height: 12px;
-  vertical-align: -2px;
+.colork {
+  width: 70%;
+  height: 80%;
+  margin: auto;
+}
+
+.colorL {
+  padding: 10px 0px 10px 0px;
 }
 
 .colorL p {
-  line-height: 16px;
-  margin-bottom: 5px;
+  width: 55px;
+  margin: 0px auto;
+  margin-top: -7px;
+}
+
+.colorSpan {
+  display: inline-block;
+  width: 20px;
+  height: 30px;
+  margin: 0px;
+  margin-right: 5px;
 }
 
 .colorSpanValue {
   margin-top: 7px;
   font-size: 13px;
-  vertical-align: 2px;
+  color: white;
 }
 
 /* 自定义滚动条样式 */

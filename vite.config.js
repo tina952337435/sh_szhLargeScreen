@@ -39,8 +39,8 @@ export default defineConfig({
       /** 代理前缀为 /dev-api 的请求  */
       ['/api']: {
         //target: "http://10.91.5.63/swzz/", // 目标地址
-        target: "http://10.91.3.242:9090/api/v1/", // 目标地址
-        // target: "http://127.0.0.1:8808/", // 目标地址
+        // target: "http://10.91.3.242:9090/api/v1/", // 目标地址
+        target: "http://127.0.0.1:8808/", // 目标地址
 
         changeOrigin: true, // 是否换源， true 换源
         secure: false,

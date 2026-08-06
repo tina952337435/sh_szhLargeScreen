@@ -487,7 +487,7 @@ export default {
                             type: 'line',
                             // 光滑的折线
                             smooth: true,
-                            connectNulls: true,
+                            connectNulls: false,
                             symbol: 'none',
                             data: chartValue,
                         };
@@ -501,7 +501,7 @@ export default {
         // myChart.setOption(option);
         // window.addEventListener("resize", function () {
         //     myChart.resize();
-        // }); 
+        // });
         return option;
 
     },
@@ -974,7 +974,7 @@ export default {
                             type: 'line',
                             // 光滑的折线
                             smooth: true,
-                            connectNulls: true,
+                            connectNulls: false,
                             symbol: 'none',
                             data: chartValue,
                         };
@@ -12557,7 +12557,7 @@ export default {
                     },
                     {
                         lt: 13.9,
-                        color: "#0000FF",
+                        color: "#0cdc0c",
                         label: "＜13.9"
                     }
                     ],
@@ -12765,7 +12765,7 @@ export default {
                     },
                     {
                         lt: 13.9,
-                        color: "#0000FF",
+                        color: "#0cdc0c",
                         label: "＜13.9"
                     }
                     ],

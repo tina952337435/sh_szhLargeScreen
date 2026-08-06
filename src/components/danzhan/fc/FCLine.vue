@@ -410,9 +410,9 @@ function loadChart() {
     };
     seriesData.push(seriesItem);
   }
-  var startDate= dayjs(swresult[0].tm).format("M月D日H时");
-  var endDate= dayjs(swresult[swresult.length-1].tm).format("M月D日H时");
-  var title=startDate+"至"+endDate;
+//   var startDate= dayjs(swresult[0].tm).format("M月D日H时");
+//   var endDate= dayjs(swresult[swresult.length-1].tm).format("M月D日H时");
+  var title="";//startDate+"至"+endDate;
   var optionTide =ChartJs.chartFXMGTU(title, seriesData, maxValue + 20,legendName,dataFXNM);
   lineOptionMGT.value = optionTide;
   datekeyMGT.value = new Date();

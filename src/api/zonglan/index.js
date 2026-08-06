@@ -285,6 +285,14 @@ export default {
   DuoSel: (params) => {
     return request.post(`${serveName}/GetWaterViewNew/queryBySWDuoZhan`, params);
   },
+  //多站流量对比
+  DuoSelFlow: (params) => {
+    return request.post(`${serveName}/GetWaterViewNew/queryByLLDuoZhan`, params);
+  },
+  //单站流量日均
+  stFlowDay: (params) => {
+    return request.post(`${serveName}/GetWaterViewNew/queryByLL`, params);
+  },
   querySUMPSL: (params) => {
     return request.post(`${serveName}/GetWaterViewNew/querySUMPSL`, params)
   },

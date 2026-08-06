@@ -14,7 +14,7 @@
         <ul class="el-dropdown-menu"
           style="width:90px;height:120px;overflow-y:auto;margin-top:5px;font-family: var(--calcite-font-family);cursor: pointer;"
           id="SWDBZLIST">
-             <li v-for="(item, index) in props.ZhanDanSW" :id="item.stcd" :class="index==0?'liSelected':''">
+             <li v-for="(item, index) in props.ZhanDanSW" :id="item.stcd" :class="item.stcd==selectedStcd?'liSelected':''">
                   {{ item.name }}
              </li>             
         </ul>
@@ -68,6 +68,7 @@ const props = defineProps({
   }
 });
 const stcd = ref("63201999");
+const selectedStcd = ref("");
 var DD_ARR = props.DD_ARR; //调度方案编号
 watch(props.ZhanDanSW, () => {
   // Weacontent();
@@ -82,8 +83,10 @@ onMounted(() => {
 function loadZhan() {
   if (props.ZhanDanSW.length > 0) {
     var data = props.ZhanDanSW;
-    var item=data[0];
+    // 默认选中青浦南门
+    var item = data.find(function(e) { return e.name == "青浦南门"; }) || data[0];
     stcd.value = item["stcd"];
+    selectedStcd.value = item["stcd"];
     hedaoTitle.value = item["name"];
     Weacontent();
     
@@ -99,6 +102,7 @@ function loadZhan() {
       if (Temp.length > 0) {
         hedaoTitle.value = Temp[0].name;
         stcd.value = Temp[0].stcd;
+        selectedStcd.value = Temp[0].stcd;
         Weacontent();
       }
     });

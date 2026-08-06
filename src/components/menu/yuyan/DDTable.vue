@@ -4,6 +4,17 @@
             <div class="d1"></div>
             <div class="d2"></div>
             <p class="base-p" id="title2" @click="fangda()">调度方案库</p>
+            <div class="dd-date-wrap">
+                <el-date-picker
+                    v-model="selectedDate"
+                    type="date"
+                    placeholder=""
+                    value-format="YYYY-MM-DD"
+                    class="dd-date-picker-icon"
+                    :editable="false"
+                    popper-class="dd-date-popper"
+                />
+            </div>
         </div>
         <div class="txt" style="overflow-y: auto">
             <el-table :data="tableData" style="width: 100%;height:calc(100%);" ref="tableRef"
@@ -33,8 +44,8 @@ import api from "@/api/mode/index.js";
 import dayjs from "dayjs";
 import $ from "jquery";
 import { SetNull, sortObjectArray,groupBy } from "@/api/ComUnit.js";
-import { ElButton, ElMessage, ElTable, ElTableColumn } from "element-plus";
-import { onMounted, ref, shallowRef, defineAsyncComponent, nextTick, provide, inject, watch } from "vue";
+import { ElButton, ElMessage, ElTable, ElTableColumn, ElDatePicker } from "element-plus";
+import { onMounted, ref, shallowRef, defineAsyncComponent, nextTick, provide, inject, watch, computed } from "vue";
 import { getDateDiff, convertToDate } from "@/api/dateUtil";
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
@@ -44,9 +55,13 @@ const tableHeaders = ref([
     { name: "DATA", label: "昆山水位(m)" },
     { name: "avgDrp", label: "昆山市雨量(mm)" },
 ]);
-const emit = defineEmits(['DDValue']);
+const emit = defineEmits(['DDValue', 'dateChange']);
 const tableRef = ref(null); // 用于获取表格实例
 const showDialog = ref(false);
+const selectedDate = computed({
+    get: () => props.selectedDate,
+    set: (val) => { if (val) emit('dateChange', val); }
+});
 const titleName = ref("防汛风险点短信通知");
 const emergencyList = ref([]);
 const baseDataNew = ref([]);
@@ -55,6 +70,10 @@ const props = defineProps({
     DDData: {
         type: Array,
         default: []
+    },
+    selectedDate: {
+        type: String,
+        default: ""
     },
 });
 var strJson = props.DDData;
@@ -318,5 +337,61 @@ function fangda() {
 
 :deep(.el-table .clicked-row:not(.el-table--border) .el-table__cell) {
     color: var(--sel_wraplabelcolorSel) !important;
+}
+
+/* 日期选择器容器 - 固定最右侧 */
+.dd-date-wrap {
+    position: absolute;
+    right: -50px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* 日期选择器 - 仅显示日历图标 */
+.dd-date-picker-icon {
+    width: 22px;
+    height: 22px;
+}
+
+:deep(.dd-date-picker-icon .el-input__wrapper) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+:deep(.dd-date-picker-icon .el-input__inner) {
+    display: none;
+}
+
+:deep(.dd-date-picker-icon .el-input__prefix) {
+    color: var(--mtablecolor);
+    font-size: 16px;
+}
+
+:deep(.dd-date-picker-icon .el-input__suffix) {
+    display: none;
+}
+
+/* 弹出面板深色适配 */
+:deep(.dd-date-popper) {
+    background: var(--boxtitlebg);
+    border: 1px solid var(--popContentHeadbg);
+}
+:deep(.dd-date-popper .el-date-picker__header-label) {
+    color: var(--mtablecolor);
+}
+:deep(.dd-date-popper .el-date-table td.available) {
+    color: var(--mtablecolor);
+}
+:deep(.dd-date-popper .el-date-table td.current:not(.disabled)) {
+    background: var(--swDivSelectcolor);
+    color: var(--sel_wraplabelcolorSel);
+}
+:deep(.dd-date-popper .el-icon) {
+    color: var(--mtablecolor);
 }
 </style>
