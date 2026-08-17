@@ -76,7 +76,11 @@ function Weacontent() {
           })
           var gcOpen=false;
           if (bzdataALL.length > 0) {
-            zmdataALL=sortObjectArray(zmdataALL, ['exkey'], 'asc');
+            bzdataALL=sortObjectArray(bzdataALL, ['exkey'], 'asc');
+            
+          if(item.stnm=="彭越浦泵闸"){
+            console.error('bzdataALL',bzdataALL);  
+          }
             for (var i = 0; i < bzdataALL.length; i++) {
               if (Number(bzdataALL[i].gtq) > 0||Number(bzdataALL[i].gtophgt) > 0) {
                 gcOpen=true;

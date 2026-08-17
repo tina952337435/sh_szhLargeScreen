@@ -65,7 +65,8 @@ function Weacontent() {
     var strJson = [];
     strJson.push({ "title": "运行情况", "url": "danzhanGQVIEW", "showActive": true, "showCloseButton": false });
     strJson.push({ "title": "工情监测", "url": "danzhanGQJC", "showActive": false, "showCloseButton": false });
-    // strJson.push({ "title": "基础信息", "url": "GQVIEW", "showActive": false, "showCloseButton": false });
+    // strJson.push({ "title": "基础信息", "url": "GQVIEW", "showActive": false, "showCloseButton": false });    
+    strJson.push({ "title": "水位过程", "url": "danzhanSWGC", "showActive": false, "showCloseButton": false });
 
     if (strJson.length > 0) {
         for (var num = 0; num < strJson.length; num++) {
@@ -110,6 +111,17 @@ function getTab(index, title, url) {
 
         currentComponent.value = markRaw(customModal);
     }
+    else if (url == "danzhanSWGC") {
+        const customModal = defineAsyncComponent({
+            // 加载函数
+            loader: () => import('@/components/danzhan/sq/SQLine.vue'),
+            delay: 200,
+            timeout: 3000
+        })
+
+        currentComponent.value = markRaw(customModal);
+    }
+    
 }
 onMounted(() => {
     if (_theme == "BlueTheme") {

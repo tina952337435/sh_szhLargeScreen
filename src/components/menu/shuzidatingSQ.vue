@@ -1080,7 +1080,7 @@ function parentMethodshowDynamicLayer(item) {
   text-decoration: underline;
   transition: color 0.3s;
 }
-.clickable-count:hover {
+/* .clickable-count:hover {
   color: #ffd700 !important;
-}
+} */
 </style>

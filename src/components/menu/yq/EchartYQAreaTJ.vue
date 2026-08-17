@@ -22,7 +22,7 @@
           :class="currentMode == 'station' && 'swiper-slide swiper-slide-thumb-active'"
           @click="switchMode('station')"
         >
-          站点
+          最大站点
         </div>
       </div>
     </div>

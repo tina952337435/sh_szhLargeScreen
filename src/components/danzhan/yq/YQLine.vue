@@ -11,10 +11,10 @@
         <el-option v-for="item in Liststnm" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
       <span style="margin-left: 20px">开始时间：</span>
-      <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+      <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH" timeFormat="HH"
         showTime="true" showOkButton="true" showClearButton="false" />
       <span style="margin-left: 20px">结束时间：</span>
-      <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+      <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH" timeFormat="HH"
         showTime="true" showOkButton="true" showClearButton="false" />
 
       <el-radio-group style="margin-left: 20px" v-model="pathname">
@@ -140,8 +140,8 @@ function Weacontent() {
   window.loadingShow();
   var strParam = {};
   strParam["stcd"] = stcd.value;
-  strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
+  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":59:59";
   strParam["pathname"] = pathname.value;
   strParam["datasource"] ="BX";
   queryStime = strParam["stime"];
@@ -381,8 +381,8 @@ onMounted(() => {
       etime.value = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
     }
   }
-  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:mm"));
-  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:mm"));
+  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH"));
+  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH"));
   loadZhan();
   Weacontent();
 });

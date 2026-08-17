@@ -775,7 +775,7 @@ function getBYYJInfo() {
               chaoweiImg.value = "/images/warning/chaowei_blue.png";
               showChaoweiComponent.value=true;
             } else if (st_name.indexOf("黄色") > -1) {
-              chaoweiImg.value = "/images/warning/chaowei_yellw.png";
+              chaoweiImg.value = "/images/warning/chaowei_yellow.png";
               showChaoweiComponent.value=true;
             } else if (st_name.indexOf("橙色") > -1) {
               chaoweiImg.value = "/images/warning/chaowei_orange.png";

@@ -2,13 +2,13 @@
   <table>
     <thead>
       <tr>
-        <th v-for="header in headers" :style="{ flex: header.width ? '0 0 ' + header.width : '1' }" :key="header">{{ header.label }}</th>
+        <th v-for="header in headers" :style="{ flex: header.width ? '0 0 ' + header.width : '1' }" :key="header" @click.stop="handleSort(header.name)" class="sortable-th">{{ header.label }}<span v-if="sortKey === header.name" class="sort-arrow">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
       </tr>
     </thead>
     <tbody>
       <!-- 判断 rows 长度 -->
-      <template v-if="rows.length > 0">
-        <tr v-for="(row, rowIndex) in rows" :key="row.id">
+      <template v-if="sortedRows.length > 0">
+        <tr v-for="(row, rowIndex) in sortedRows" :key="row.id">
           <td v-for="(cell, cellIndex) in headers" :key="cellIndex"
             :style="{ color: '' + (SetNull(row.colorCss) == '' ? '' : row.colorCss) + '!important',flex: cell.width ? '0 0 ' + cell.width : '1' }">
             <!-- 如果单元格是图像URL，则显示图像 -->
@@ -34,7 +34,7 @@
 
 <script setup>
 import { SetNull } from "@/api/ComUnit";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 const tableWidth = ref(0);
 const tableHeight = ref(300); // 假设表格高度是300px
 const props = defineProps({
@@ -47,6 +47,53 @@ const props = defineProps({
     required: true,
   },
 });
+
+const sortKey = ref(null);
+const sortOrder = ref(null); // 'asc' | 'desc' | null
+
+const sortedRows = computed(() => {
+  if (!sortKey.value || !sortOrder.value) {
+    return props.rows;
+  }
+  const rows = [...props.rows];
+  rows.sort((a, b) => {
+    let valA = a[sortKey.value];
+    let valB = b[sortKey.value];
+
+    // "—" 缺失数据永远排到最后
+    const missA = valA === '—' || valA === null || valA === undefined;
+    const missB = valB === '—' || valB === null || valB === undefined;
+    if (missA && missB) return 0;
+    if (missA) return 1;
+    if (missB) return -1;
+
+    // 自动检测数字
+    const numA = Number(valA);
+    const numB = Number(valB);
+    if (!isNaN(numA) && !isNaN(numB) && valA !== '' && valB !== '') {
+      return sortOrder.value === 'asc' ? numA - numB : numB - numA;
+    }
+
+    // 字符串比较
+    const cmp = String(valA).localeCompare(String(valB), 'zh-CN');
+    return sortOrder.value === 'asc' ? cmp : -cmp;
+  });
+  return rows;
+});
+
+function handleSort(key) {
+  if (sortKey.value === key) {
+    if (sortOrder.value === 'asc') {
+      sortOrder.value = 'desc';
+    } else if (sortOrder.value === 'desc') {
+      sortOrder.value = null;
+      sortKey.value = null;
+    }
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
+  }
+}
 
 function isImageUrl(cell) {
   // 简单的检查，判断是否是图像URL
@@ -78,7 +125,19 @@ tr {
 }
 th, td {
   text-align: left;
-  /* padding: 8px; */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-arrow {
+  margin-left: 4px;
+  font-size: 0.7rem;
 }
 
 tbody {

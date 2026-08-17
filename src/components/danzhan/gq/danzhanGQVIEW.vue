@@ -107,8 +107,8 @@ function GQload(strJsonAll) {
     var temp1 = bzdata.filter(function (e) {
       return (
         e.exkey == num + 1 &&
-        ((Number(e.gtq) > 0 && e.eqptp == "泵站状态") ||
-          (Number(e.gtq) > 0))
+        (Number(e.gtq) > 0  ||
+          (Number(e.gtophgt) > 0))
       );
     });
     var FLAG = false;

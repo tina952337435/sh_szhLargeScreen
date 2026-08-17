@@ -1155,7 +1155,7 @@ p {
   left: 29rem; */
   bottom:10px;
   /* left: 28.5rem; */
-  left:calc(50% - 250px);
+  left:calc(50% - 300px);
   /* transform: translateX(-50%); */
   display: flex;
   height: 45px;
@@ -1200,6 +1200,19 @@ p {
   font-size: 1.8rem;
   font-family: "number";
   color: #ff0000;
+  /* background: -webkit-gradient(linear, left top, left bottom, from(#f59229), to(#fef886));
+  background: linear-gradient(180deg, #f59229, #fef886); */
+  -webkit-background-clip: text;
+  /* color: transparent; */
+  letter-spacing: 0;
+  font-weight: 800;
+  vertical-align: middle;
+  /* color: var(--titled1); */
+}
+.numCLS {
+  font-size: 1.8rem;
+  font-family: "number";
+  color: rgb(253, 0, 235);
   /* background: -webkit-gradient(linear, left top, left bottom, from(#f59229), to(#fef886));
   background: linear-gradient(180deg, #f59229, #fef886); */
   -webkit-background-clip: text;

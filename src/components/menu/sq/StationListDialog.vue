@@ -41,7 +41,8 @@ const tableHeaders = computed(() => {
       { name: "upz", label: "水位(m)" },
       { name: "wrz", label: "警戒水位(m)" },
       { name: "cjVal", label: "超警幅度(m)" },
-      { name: "tm", label: "时间" },
+      { name: "ivhz", label: "历史最高(m)" },
+      { name: "tm", label: "来数时间" },
     ];
   } else if (props.type === "cb") {
     return [
@@ -51,7 +52,22 @@ const tableHeaders = computed(() => {
       { name: "upz", label: "水位(m)" },
       { name: "grz", label: "保证水位(m)" },
       { name: "cbVal", label: "超保幅度(m)" },
-      { name: "tm", label: "时间" },
+      { name: "ivhz", label: "历史最高(m)" },
+      { name: "tm", label: "来数时间" },
+    ];
+  }else if (props.type === "cls") {
+    return [
+      { name: "index", label: "序号" },
+      { name: "stnm", label: "站名" },
+      // { name: "stcd", label: "站码" },
+      { name: "upz", label: "水位(m)" },
+      { name: "wrz", label: "警戒水位(m)" },
+      { name: "cjVal", label: "超警幅度(m)" },
+      { name: "grz", label: "保证水位(m)" },
+      { name: "cbVal", label: "超保幅度(m)" },
+      { name: "ivhz", label: "历史最高(m)" },
+      { name: "clsVal", label: "超历史幅度(m)" },
+      { name: "tm", label: "来数时间" },
     ];
   } else if (props.type === "qc") {
     return [
@@ -61,7 +77,8 @@ const tableHeaders = computed(() => {
       { name: "upz", label: "水位(m)" },
       { name: "wrz", label: "警戒水位(m)" },
       { name: "grz", label: "保证水位(m)" },
-      { name: "tm", label: "时间" },
+      { name: "ivhz", label: "历史最高(m)" },
+      { name: "tm", label: "来数时间" },
     ];
   } else {
     // zc 正常
@@ -72,7 +89,8 @@ const tableHeaders = computed(() => {
       { name: "upz", label: "水位(m)" },
       { name: "wrz", label: "警戒水位(m)" },
       { name: "grz", label: "保证水位(m)" },
-      { name: "tm", label: "时间" },
+      { name: "ivhz", label: "历史最高(m)" },
+      { name: "tm", label: "来数时间" },
     ];
   }
 });
@@ -115,16 +133,19 @@ function buildTableData() {
         ? "—"
         : Number(item.grz).toFixed(2);
     const tm =
-      item.tm != null ? dayjs(item.tm).format("YYYY-MM-DD HH:mm") : "—";
-
+      item.tm != null ? dayjs(item.tm).format("MM-DD HH:mm") : "—";
+    const ivhz =
+      Number(item.ivhz) === 0 || item.ivhz === "—"
+        ? "—"
+        : Number(item.ivhz).toFixed(2);
     let colorCss = "";
     if (props.type === "cj" && wrz !== "—" && upz !== "—") {
       const diff = Number(Number(upz) - Number(wrz)).toFixed(2);
-      if (Number(diff) > 0) colorCss = "#F9C33D";
+      if (Number(diff) >= 0) colorCss = "#F9C33D";
     }
     if (props.type === "cb" && grz !== "—" && upz !== "—") {
       const diff = Number(Number(upz) - Number(grz)).toFixed(2);
-      if (Number(diff) > 0) colorCss = "#F70019";
+      if (Number(diff) >= 0) colorCss = "#F70019";
     }
 
     return {
@@ -134,6 +155,7 @@ function buildTableData() {
       upz: upz,
       wrz: wrz,
       grz: grz,
+      ivhz:ivhz,
       cjVal:
         wrz !== "—" && upz !== "—"
           ? Number(Number(upz) - Number(wrz)).toFixed(2)
@@ -141,6 +163,10 @@ function buildTableData() {
       cbVal:
         grz !== "—" && upz !== "—"
           ? Number(Number(upz) - Number(grz)).toFixed(2)
+          : "—",
+      clsVal:
+        ivhz !== "—" && upz !== "—"
+          ? Number(Number(upz) - Number(ivhz)).toFixed(2)
           : "—",
       tm: tm,
       colorCss: colorCss,

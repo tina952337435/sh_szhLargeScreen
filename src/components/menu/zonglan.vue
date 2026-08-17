@@ -163,6 +163,18 @@
         <span class="numCB clickable-count" @click.stop="openStationList('cb')">{{ waterCBCount }}</span>
         <span class="warning-danwei">个</span>
       </span>
+      <span style="margin-right: 14px">
+        <span class="warning-title">
+          <!-- <img
+            alt=""
+            src="/images/hong.png"
+            style="width: 15px; height: 30px; vertical-align: -13px"
+          /> -->
+          超历史：
+        </span>
+        <span class="numCLS clickable-count" @click.stop="openStationList('cls')">{{ waterCLSCount }}</span>
+        <span class="warning-danwei">个</span>
+      </span>
     </div>
   </div>
   <Mapbiaozhu />
@@ -226,9 +238,11 @@ const cb_waterZC = ref(true),
 const waterZCCount = ref(0),
   waterCJCount = ref(0),
   waterCBCount = ref(0),
-  waterQCCount = ref(0);
+  waterQCCount = ref(0),
+  waterCLSCount= ref(0);
 const cjStationList = ref([]); // 超警站点列表
 const cbStationList = ref([]); // 超保站点列表
+const clsStationList = ref([]); // 超历史站点列表
 
 // 获取当前主题
 const _theme = localStorage.getItem("curTheme");
@@ -315,6 +329,7 @@ function SWload() {
   var zcCount = 0,
     cjCount = 0,
     cbCount = 0,
+    clsCount=0,
     qcCount = 0;  
   var strResult =[];
   // 清空分类数组
@@ -345,7 +360,7 @@ function SWload() {
       } 
       else if (z >= grz) {
         cbCount++;
-        cjStationList.value.push(item);
+        // cjStationList.value.push(item);
         cbStationList.value.push(item);
         if (cb_waterCB.value == true) {
           strResult.push(item);
@@ -364,12 +379,19 @@ function SWload() {
           strResult.push(item);
         }
       }
+      if(item.ivhz!=null&&item.ivhz!=undefined){
+        if(z>=item.ivhz){
+          clsCount++
+          clsStationList.value.push(item);
+        }      
+      }      
     }
   }
   waterZCCount.value = zcCount;
   waterCJCount.value = cjCount;
   waterCBCount.value = cbCount;
   waterQCCount.value = qcCount;
+  waterCLSCount.value=clsCount;
   PointMark.addSWMark(
     viewer,
     strResult,
@@ -587,8 +609,21 @@ function parentMethodshowDynamicLayer(item) {
 }
 // 点击超警/超保数量，弹窗查看站点清单
 function openStationList(type) {
-  const list = type === "cj" ? cjStationList.value : cbStationList.value;
-  const title = type === "cj" ? "超警" : "超保";
+  var list = type === "cj" ? cjStationList.value : cbStationList.value;
+  var title = type === "cj" ? "超警" : "超保";
+  if(type=="cj"){
+    list=cjStationList.value;
+    title="超警";
+  }
+  else if(type=='cb'){
+    list=cbStationList.value;
+    title="超保";
+  }
+  else if(type=='cls'){
+    list=clsStationList.value;
+    title="超历史";
+  }
+
   if (!list || list.length === 0) {
     return;
   }
@@ -801,9 +836,9 @@ provide("strJsonDataNew", strJsonData);
   text-decoration: underline;
   transition: color 0.3s;
 }
-.clickable-count:hover {
+/* .clickable-count:hover {
   color: #ffd700 !important;
-}
+} */
 .monitorSwitch_container .text-num {
   background-color: #c52821;
   width: 20px;

@@ -9,10 +9,10 @@
       <el-option v-for="item in Liststnm" :key="item.value" :label="item.label" :value="item.value" />
     </el-select>
     <span style="margin-left: 20px">开始时间：</span>
-    <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+    <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH" timeFormat="HH"
       showTime="true" showOkButton="true" showClearButton="false" />
     <span style="margin-left: 20px">结束时间：</span>
-    <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+    <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH" timeFormat="HH"
       showTime="true" showOkButton="true" showClearButton="false" />
 
     <el-radio-group style="margin-left: 20px">
@@ -164,8 +164,8 @@ function geTMtType(obj){
     stime.value = dayjs(etime.value).add(-1, "year").format("YYYY-MM-DD HH:mm:ss");
   }
   if (pathname.value == "Minute") {
-    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH"));
   } else {
     mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD"));
     mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD"));
@@ -181,8 +181,8 @@ function Weacontent() {
   strParam["pathname"] = pathname.value;
   strParam["datasource"] = mtype.value;
   if (pathname.value == "Minute") {
-    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
+    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":59:59";
   } else {
     strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD") + " 00:00:00";
     strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD") + " 23:59:59";
@@ -432,9 +432,9 @@ function handleChange(value) {
 function TypeeChange(e) {
   pathname.value = e;
   if (e == "Minute") {
-    mini.get("STIME").setFormat("yyyy-MM-dd HH:mm");
+    mini.get("STIME").setFormat("yyyy-MM-dd HH");
     mini.get("STIME").setShowTime(true);
-    mini.get("ETIME").setFormat("yyyy-MM-dd HH:mm");
+    mini.get("ETIME").setFormat("yyyy-MM-dd HH");
     mini.get("ETIME").setShowTime(true);
   } else if (e == "DAY") {
     mini.get("STIME").setFormat("yyyy-MM-dd");
@@ -448,8 +448,8 @@ function BtnSearch() {
   Weacontent();
 }
 function DuoSearch() {
-  duoStime.value = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  duoEtime.value = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  duoStime.value = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
+  duoEtime.value = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":59:59";
   showDialog.value = true;
 }
 function OnBoot(e) {
@@ -506,8 +506,8 @@ onMounted(() => {
        mtype.value = inject("mtype").value;
     }
   }
-  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH"));
+  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH"));
   loadZhan();
   Weacontent();
 });

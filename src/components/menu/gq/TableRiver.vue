@@ -34,9 +34,10 @@ import Table from "@/components/Table/Table.vue";
 import api from "@/api/zonglan/index.js";
 import dayjs from "dayjs";
 import $ from "jquery";
-import { ref, onMounted, watch } from "vue";
-import { SetNull, groupBy } from "@/api/ComUnit";
-import { convertToDate } from "@/api/dateUtil.js";
+import { ref, onMounted, onUnmounted, watch } from "vue";
+
+import { dyCenter,addAreaLineQS,setZOOM} from "@/utils/ArcGis/MapComm.js";
+import { addWaterDistrictMark, addRiverBufferMark, removeRiverDistrictLayers } from "@/utils/ArcGis/PointMark.js";
 const Typeswiper = ref('district')
 const datekey = ref(null);
 const emit = defineEmits(['passValue',"passValueTJ"]);
@@ -122,13 +123,24 @@ function handleclick(evt) {
         // 再次点击同一行，取消选中
         lastClickedRow.value = null;
         emit('passValue', Typeswiper.value, "", "");
+        addAreaLineQS();//回到初始状态
+        removeRiverDistrictLayers();//清除绘制的河道/水利片
     } else {
         // 给当前点击的 tr 元素添加 active 类名
         targetTr.classList.add('liSelected');
         if (Typeswiper.value == "river") {
             emit('passValue', Typeswiper.value, currentRow.stcd, currentRow.stnm, currentRow.stnm);
+            removeRiverDistrictLayers();//先清除，再画对应河道
+            addRiverBufferMark(currentRow.stnm);
         } else if (Typeswiper.value == "district") {
             emit('passValue', Typeswiper.value, currentRow.stcd, currentRow.stnm);
+            removeRiverDistrictLayers();//先清除，再画对应水利片
+            addWaterDistrictMark(currentRow.stnm);
+        }
+        var dwLgtd=currentRow.lgtd,dwLttd=currentRow.lttd;
+        if(dwLgtd!=null){
+            setZOOM(11);
+            dyCenter(dwLgtd,dwLttd);
         }
     }
     lastClickedRow.value = currentRow;       
@@ -148,6 +160,9 @@ function fangda() {
 }
 onMounted(() => {
     loadGCTJ();
+});
+onUnmounted(() => {
+    removeRiverDistrictLayers();//切路由时清空绘制的河道/水利片
 });
 </script>
 <style src="@/assets/styles/Table.css"></style>

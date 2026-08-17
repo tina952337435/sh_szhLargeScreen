@@ -312,7 +312,7 @@ function YQtable(e) {
   } else if (e == "count250") {
     if (count250.value > 0) {
       showDialog.value = true;
-      titleName.value = "雨情统计（100~250）";
+      titleName.value = "雨情统计（100~200）";
       typeValue.value = 4;
     } else {
       ElMessage.error("无数据");
@@ -320,7 +320,7 @@ function YQtable(e) {
   } else if (e == "countBig") {
     if (countBig.value > 0) {
       showDialog.value = true;
-      titleName.value = "雨情统计（> 250）";
+      titleName.value = "雨情统计（>=200";
       typeValue.value = 5;
     } else {
       ElMessage.error("无数据");

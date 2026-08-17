@@ -15,10 +15,10 @@
       </el-date-picker>
        
     </el-config-provider> -->
-        <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+        <input id="STIME" class="mini-datepicker" style="width:120px;" format="yyyy-MM-dd HH" timeFormat="HH:mm"
             showTime="true" showOkButton="true" showClearButton="false" />
         <span style="margin-left: 20px">结束时间：</span>
-        <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+        <input id="ETIME" class="mini-datepicker" style="width:120px;" format="yyyy-MM-dd HH" timeFormat="HH:mm"
             showTime="true" showOkButton="true" showClearButton="false" />
         <el-radio-group style="margin-left: 20px">
             <el-radio @click="TypeeChange('Minute')" v-model="pathname" label="Minute">分钟</el-radio>
@@ -128,6 +128,7 @@ const tableHeaders = ref([
     { name: "dwz", label: "下游水位(m)" },
     { name: "wrz", label: "警戒水位(m)" },
     { name: "grz", label: "保证水位(m)" },
+    { name: "ivhz", label: "历史最高(m)" },
 ]);
 const tableData = ref();
 // 获取雨型的类型：1:(小~中雨);2:(中雨);3:(暴雨);4:(大暴雨);5:(特大暴雨);
@@ -151,7 +152,7 @@ const props = defineProps({
 });
 function loadZhan() {
     value.value = stcd.value;
-    api.QuSelDuo({ "pid": "2026031114184492913-2,2026031114184492913-7,2026031114184492913-8" }).then((res) => {
+    api.QuSelDuo({ "pid": "2026031114184492913-2,2026031114184492913-7,2026031114184492913-8,2023060214563122171-1" }).then((res) => {
         // console.error("res", res.data)
         var strJson = [];
         if (res.data.length > 0) {
@@ -174,8 +175,8 @@ function Weacontent() {
     var strParam = {};
     strParam["stcd"] = stcd.value;
     strParam["pathname"] = pathname.value;
-    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+    strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
+    strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":59:59";
     strParam["datasource"] = mtype.value;
     queryStime = strParam["stime"];
     queryEtime = strParam["etime"];
@@ -226,6 +227,7 @@ function SQload() {
             { name: "dwz", label: "下游水位(m)" },
             { name: "wrz", label: "警戒水位(m)" },
             { name: "grz", label: "保证水位(m)" },
+            { name: "ivhz", label: "历史最高(m)" },
         ]
         strNote.push({ name: "上游水位", codename: "upz", tableV: "0", isShow: true });
         strNote.push({ name: "下游水位", codename: "dwz", tableV: "0", isShow: true });
@@ -237,6 +239,7 @@ function SQload() {
             { name: "upz", label: "实时(m)" },
             { name: "wrz", label: "警戒水位(m)" },
             { name: "grz", label: "保证水位(m)" },
+            { name: "ivhz", label: "历史最高(m)" },
         ]
         strNote.push({ name: "实时", codename: "upz", tableV: "0", isShow: true });
     }
@@ -251,6 +254,7 @@ function SQload() {
     }
     strNote.push({ name: "警戒", codename: "wrz", tableV: "0", isShow: false });
     strNote.push({ name: "保证", codename: "grz", tableV: "0", isShow: false });
+    strNote.push({ name: "历史最高", codename: "ivhz", tableV: "0", isShow: false });
     var LineColor = [
         "#4EFF4E",
         "#FF0000",
@@ -360,8 +364,8 @@ function geTMtType(obj) {
     } else if (obj == "year") {
         stime.value = dayjs(etime.value).add(-1, "year").format("YYYY-MM-DD HH:mm:ss");
     }
-    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH"));
     Weacontent();
 }
 function WarningInfo() {
@@ -557,10 +561,10 @@ onMounted(() => {
     //   mtype.value = inject("mtype").value;
     // }
     // 确保 MiniUI 资源加载完成后再操作
-    stime.value = dayjs(etime.value).add(-24, "hour").format("YYYY-MM-DD HH:00");
+    stime.value = dayjs(etime.value).add(-24, "hour").format("YYYY-MM-DD HH");
     // 尝试获取组件实例
-    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH"));
+    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH"));
     loadZhan();
     Weacontent();
     if (STCD.indexOf(stcd.value) > -1) {

@@ -11,9 +11,9 @@
 		<div class="txt">
 			<div style="width: 100%;height: calc(100%);">
 				<el-table :data="tableData" style="width: 96%;height:100%;--el-table-border-color:none;margin:auto;"
-					@row-click="handleclick">
+					@row-click="handleclick" @sort-change="handleSortChange">
 					<el-table-column fixed label="名称" prop="stnm" width="80" header-align="center" align="center"
-						:show-overflow-tooltip="true">
+						:show-overflow-tooltip="true" sortable="custom">
 						<template #header>
 							名称
 						</template>
@@ -21,18 +21,18 @@
 							<span style="cursor: pointer;" v-show="!scope.row.isEdit">{{ scope.row.stnm }}</span>
 						</template>
 					</el-table-column>
-					<el-table-column label="预测最高" header-align="center" align="center">
+					<el-table-column label="预测最高" prop="maxz" header-align="center" align="center" sortable="custom">
 						<template #default="scope">
 							<span :style="computedStyle(scope.row.maxz, scope.row.wrz, scope.row.grz)">{{ scope.row.maxz
 							}}</span>
 						</template>
 					</el-table-column>
-					<el-table-column label="发生时间" header-align="center" align="center">
+					<el-table-column label="发生时间" prop="TMStr" header-align="center" align="center" sortable="custom">
 						<template #default="scope">
 							<span>{{ scope.row.TMStr }}</span>
 						</template>
 					</el-table-column>
-					<el-table-column label="历史最高" header-align="center" align="center">
+					<el-table-column label="历史最高" prop="xzdz" header-align="center" align="center" sortable="custom">
 						<template #default="scope">
 							<span style="color:rgb(253 0 235);font-weight:600;">{{ scope.row.xzdz }}</span>
 						</template>
@@ -72,6 +72,7 @@ const datekey = ref(null);
 const dateid = ref('yubaozhandian');
 const lineOption = ref({});
 const tableData = ref([]);
+const tableDataAll = ref([]);
 // 判断弹窗是否显示,默认隐藏
 const showDialog = ref(false);
 function Weacontent() {
@@ -150,6 +151,7 @@ function Weacontent() {
 		// tableData.value = dataResult;
 		// console.error(dataResult);
 		tableData.value = sortObjectArray(dataResult, ["groupCls"], "asc");;  //超警幅度最大靠前
+		tableDataAll.value = [...tableData.value];
 	  })
 	  .catch((err) => {
 	    console.error(err);
@@ -192,6 +194,39 @@ function handleclick(evt) {
   props["stime"] = item["dd_TM"];
   props["etime"] = item["dd_CHECKBY"];
   Dialog.open({ title: item["stnm"] + "预报水位过程线", widh: 1400, heig: 800 }, h(ChildVue, props)).then(() => { console.log('弹窗关闭了') })
+}
+
+function handleSortChange({ prop, order }) {
+  if (!prop || !order) {
+    tableData.value = [...tableDataAll.value];
+    return;
+  }
+  const rows = [...tableDataAll.value];
+  rows.sort((a, b) => {
+    let valA = a[prop];
+    let valB = b[prop];
+
+    const missA = valA === '—' || valA === null || valA === undefined;
+    const missB = valB === '—' || valB === null || valB === undefined;
+    if (missA && missB) return 0;
+    if (missA) return 1;
+    if (missB) return -1;
+
+    let cmp;
+    if (prop === 'TMStr') {
+      cmp = new Date(valA) - new Date(valB);
+    } else {
+      const numA = Number(valA);
+      const numB = Number(valB);
+      if (!isNaN(numA) && !isNaN(numB) && valA !== '' && valB !== '') {
+        cmp = numA - numB;
+      } else {
+        cmp = String(valA).localeCompare(String(valB), 'zh-CN');
+      }
+    }
+    return order === 'ascending' ? cmp : -cmp;
+  });
+  tableData.value = rows;
 }
 </script>
 <style src="@/assets/styles/Table.css"></style>
@@ -456,6 +491,27 @@ function handleclick(evt) {
 
 :deep(.el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell) {
 	background-color: transparent;
+}
+
+/* 排序箭头：绝对定位脱离文档流，不影响表头对齐；hover/激活时才显示 */
+:deep(.el-table .cell) {
+  position: relative;
+}
+:deep(.el-table .caret-wrapper) {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+:deep(.el-table th.el-table__cell.is-sortable:hover .caret-wrapper) {
+  opacity: 0.6;
+}
+:deep(.el-table .ascending .caret-wrapper),
+:deep(.el-table .descending .caret-wrapper) {
+  opacity: 1;
+  color: var(--mtablethcolor);
 }
 
 :deep(.el-input) {

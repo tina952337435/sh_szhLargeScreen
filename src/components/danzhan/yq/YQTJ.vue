@@ -69,11 +69,11 @@ function YLload() {
     });
   } else if (typeValue.value == 4) {
     strJson = strJson.filter(function (res) {
-      return Number(res.drp) >= 100 && Number(res.drp) < 250;
+      return Number(res.drp) >= 100 && Number(res.drp) < 200;
     });
   } else if (typeValue.value == 5) {
     strJson = strJson.filter(function (res) {
-      return Number(res.drp) >= 250;
+      return Number(res.drp) >= 200;
     });
   }
   var result = [];

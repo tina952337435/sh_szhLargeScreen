@@ -1,4 +1,4 @@
-import { CreateLayer, destroy, globallevel, globalalign, map, labels, setLayerToolTip,RemoveLayer, setMapZoom, mapZoomEnd} from "@/utils/ArcGis/MapComm.js";
+import { CreateLayer, destroy, globallevel, globalalign, map, labels, layers, setLayerToolTip,RemoveLayer, setMapZoom, mapZoomEnd} from "@/utils/ArcGis/MapComm.js";
 import { groupBy, SetNull,validateAndClean,formatFlow } from "@/api/ComUnit.js";
 import { ref, reactive, createVNode, defineAsyncComponent, h } from 'vue'
 import Dialog from "@/api/utils/Dialog.js";
@@ -12,6 +12,9 @@ import SHBJArea from "@/assets/json/SHBJArea.json";
 import weiquURL from "@/assets/json/四片圩区2000.json"; //圩区
 
 import xingzhengArea from "@/assets/json/上海市2000.json";
+
+import WaterDistrict from "@/assets/json/上海市水利片区2000.json"; //水利片区(投影坐标)
+import RiverBuffer from "@/assets/json/黄浦江苏州河2000.json"; //黄浦江+苏州河(吴淞江) buffer,投影坐标
 
 var myData = [];
 
@@ -86,7 +89,7 @@ function addSWMark(viw, strJson, stime, etime, switchChecked, layerId = "addSWMa
                                 breakSymbol = new PictureMarkerSymbol("/images/water/共享水位(超警).png", 18, 18);
                             }
                          }else{  
-                            breakSymbol = new PictureMarkerSymbol("/images/hong.png", 15, 30);
+                            breakSymbol = new PictureMarkerSymbol("/images/cheng2.png", 15, 30);
                          }
                         // cls = " level_wrz";
                     }
@@ -360,7 +363,7 @@ function addGQMark(strJson, switchChecked) {
 
         }
         pondLayerGraphicLayer.on("click", onaddGQMark);
-        setLayerToolTip(pondLayerGraphicLayer, "stnm", "shikuang,tms", "实况,时间");
+        setLayerToolTip(pondLayerGraphicLayer, "stnm", "shikuang,upzdwz,tms", "实况,闸上/闸下水位,时间");
     }
 
 
@@ -390,6 +393,7 @@ function addGQMark(strJson, switchChecked) {
                         continue;
                     }
                     item.tms = dayjs(item.tm).format("YYYY-MM-DD HH:mm:ss");
+                    item.upzdwz=item.upz+"/"+item.dwz;
                     var point = new Point({ "x": item.lgtd, "y": item.lttd, "spatialReference": { "wkid": 4326 } });
                     var imgUrl = "";
                     if (item.omcn == 1) {
@@ -2346,7 +2350,140 @@ function MapRainfallSing(myMapFill1,Filldzm) {
                 DZMRainLayerGraphicLayer.add(gra);
     });
 }
+// ============ 水利片/河道 绘制(TableRiver.vue 使用) ============
+// 归一化 GeoJSON coordinates 为 ArcGIS Polygon rings 结构
+// 水利片区(MultiPolygon 扁平化): coordinates = [[lng,lat], ...] 单环
+// 一级河流(Polygon): coordinates = [[[lng,lat],...], ...] 多环
+function normalizeRings(coordinates) {
+    if (!Array.isArray(coordinates) || coordinates.length == 0) return [];
+    var first = coordinates[0];
+    if (Array.isArray(first) && first.length > 0 && !Array.isArray(first[0])) {
+        return [coordinates]; // 单环，包一层
+    }
+    return coordinates;
+}
+
+// 创建/复用图形图层(不注册进 MapComm 的 layers 数组，避免被 addGQMark 里的 destroy() 清掉)
+function createGraphicsLayer(layerId) {
+    var m = window.myMap;
+    var layer = null;
+    if (m != null) {
+        layer = m.getLayer(layerId);
+        if (layer != null) {
+            layer.clear();
+        } else {
+            layer = m.addLayer(new esri.layers.GraphicsLayer({ id: layerId }));
+        }
+        // 从 MapComm 的 layers 数组里剔除，防止 addGQMark 里的 destroy() 清掉；
+        // 切路由时的清空由 TableRiver 的 onUnmounted 显式调用 removeRiverDistrictLayers() 处理
+        var idx = layers.indexOf(layer);
+        while (idx > -1) {
+            layers.splice(idx, 1);
+            idx = layers.indexOf(layer);
+        }
+    }
+    return layer;
+}
+
+// 清除水利片/河道图层
+function removeRiverDistrictLayers() {
+    var m = window.myMap;
+    if (m != null) {
+        ["waterDistrictLayer", "riverBufferLayer"].forEach(function (id) {
+            var layer = m.getLayer(id);
+            if (layer != null) { layer.clear(); }
+        });
+    }
+}
+
+// 根据名称绘制水利片区(上海市水利片区.json)
+function addWaterDistrictMark(strName) {
+    var layerId = "waterDistrictLayer";
+    var layer = createGraphicsLayer(layerId);
+    if (SetNull(layer) != "") { layer.clear(); }
+    setTimeout(function () {
+        require([
+            "esri/geometry/Polygon",
+            "esri/graphic",
+            "esri/Color",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "dojo/domReady!"
+        ], function (Polygon, Graphic, Color, SimpleFillSymbol, SimpleLineSymbol) {
+            var features = WaterDistrict.features || [];
+            var matched = false;
+            features.forEach(function (feature) {
+                try {
+                    var name = feature.properties.NAME;
+                    if (SetNull(strName) != "" && name != strName) { return; }
+                    matched = true;
+                    var rings = normalizeRings(feature.geometry.coordinates);
+                    if (rings.length == 0) { return; }
+                    var polygon = new Polygon(rings);
+                    var fillSymbol = new SimpleFillSymbol(
+                        SimpleFillSymbol.STYLE_SOLID,
+                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 255, 255]), 2),
+                        new Color([0, 180, 255, 0.35])
+                    );
+                    layer.add(new Graphic(polygon, fillSymbol, feature.properties, null));
+                } catch (e) {
+                    console.error("水利片绘制异常", name, e);
+                }
+            });
+            console.log("水利片绘制完成, 入参:", strName, "匹配数:", matched, "图层graphics数:", layer.graphics.length);
+            if (SetNull(strName) != "" && !matched) {
+                console.warn("水利片区未匹配到:" + strName + "，请核对表格 stnm 与 json 的 NAME");
+            }
+        });
+    }, 100);
+}
+
+// 根据名称绘制河道(黄浦江/苏州河,黄浦江苏州河2000.json)
+function addRiverBufferMark(strName) {
+    var layerId = "riverBufferLayer";
+    var layer = createGraphicsLayer(layerId);
+    if (SetNull(layer) != "") { layer.clear(); }
+    setTimeout(function () {
+        require([
+            "esri/geometry/Polygon",
+            "esri/graphic",
+            "esri/Color",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "dojo/domReady!"
+        ], function (Polygon, Graphic, Color, SimpleFillSymbol, SimpleLineSymbol) {
+            var features = RiverBuffer.features || [];
+            var matched = false;
+            features.forEach(function (feature) {
+                try {
+                    var name = feature.properties.ENNM;
+                    if (SetNull(strName) != "" && name != strName) { return; }
+                    matched = true;
+                    var rings = normalizeRings(feature.geometry.coordinates);
+                    if (rings.length == 0) { return; }
+                    var polygon = new Polygon(rings);
+                    var fillSymbol = new SimpleFillSymbol(
+                        SimpleFillSymbol.STYLE_SOLID,
+                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 255, 255]), 2),
+                        new Color([0, 255, 255, 0.35])
+                    );
+                    layer.add(new Graphic(polygon, fillSymbol, feature.properties, null));
+                } catch (e) {
+                    console.error("河道绘制异常", name, e);
+                }
+            });
+            console.log("河道绘制完成, 入参:", strName, "匹配数:", matched, "图层graphics数:", layer.graphics.length);
+            if (SetNull(strName) != "" && !matched) {
+                console.warn("河道未匹配到:" + strName + "，请核对表格 stnm 与 json 的 ENNM");
+            }
+        });
+    }, 100);
+}
+
 export {
+    addWaterDistrictMark,
+    addRiverBufferMark,
+    removeRiverDistrictLayers,
     addSWMark,
     addYLMark,
     addGQMark,

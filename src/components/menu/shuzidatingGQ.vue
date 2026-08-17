@@ -115,7 +115,7 @@ import TableGQJC from "@/components/menu/gq/TableGQJC.vue";
 import Mapbiaozhu from "@/components/untils/Mapbiaozhu.vue";
 import tabToggleSQ from "@/components/tab/tabToggleSQ.vue";
 import { onMounted, ref, nextTick, reactive, provide, defineAsyncComponent, onUnmounted, h } from "vue";
-import { SetNull, groupBy } from "@/api/ComUnit.js";
+import { SetNull, groupBy ,sortObjectArray} from "@/api/ComUnit.js";
 import { useStore } from "vuex";
 import * as PointMark from "@/utils/ArcGis/PointMark.js";
 import apizonglan from "@/api/zonglan/index.js";
@@ -237,20 +237,21 @@ function addGCMarker() {
         });
         var gcOpen=false;
         if (bzdataALL.length > 0) {
+          bzdataALL=sortObjectArray(bzdataALL, ["exkey"], "asc");
           for (var i = 0; i < bzdataALL.length; i++) {
             if (Number(bzdataALL[i].gtq) > 0||Number(bzdataALL[i].gtophgt) > 0) {
               imgUrl = "/images/gqgc/bz_open.png";
-              NumCountKQ += NumCountKQ + 1;
+              NumCountKQ = NumCountKQ + 1;
               totalQ += SetNull(bzdataALL[i].gtq)!=""?Number(bzdataALL[i].gtq):0;
               gcOpen=true;
             } else {
-              NumCountGQ += NumCountGQ + 1;
               imgUrl = "/images/gqgc/bz_close.png";
             }
             stateHtml.push(imgUrl);
           }
         }
-        if (zmdataALL.length > 0) {
+        if (zmdataALL.length > 0) {        
+          zmdataALL=sortObjectArray(zmdataALL, ["exkey"], "asc");
           for (var i = 0; i < zmdataALL.length; i++) {
             if (Number(zmdataALL[i].gtophgt) >=0.1) {
               imgUrl = "/images/gqgc/sz_open.png";
@@ -280,6 +281,10 @@ function addGCMarker() {
           }
         }
       }
+      // if(item.stnm=="北蟠龙泵闸"){
+      //   alert(NumCountKQ);
+      //   alert(bzdataALL.length);
+      // }
       var shikuang="";
       if(omcnum==0&&gtopnum>0){
          shikuang="闸【" + NumCountzm + "/" + gtopnum + "】"

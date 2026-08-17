@@ -14,10 +14,10 @@
           @change="handleStationChange"
         />
         <span style="margin-left: 20px">开始时间：</span>
-        <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+        <input id="STIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH" timeFormat="HH"
           showTime="true" showOkButton="true" showClearButton="false" />
         <span style="margin-left: 20px">结束时间：</span>
-        <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH:mm" timeFormat="HH:mm"
+        <input id="ETIME" class="mini-datepicker" style="width:135px;" format="yyyy-MM-dd HH" timeFormat="HH"
           showTime="true" showOkButton="true" showClearButton="false" />
         <!-- <span style="margin-left: 20px">类型：</span>
         <el-radio-group style="vertical-align: -2px;">
@@ -106,8 +106,8 @@ function Weacontent() {
   window.loadingShow();
   var strParam = {};
   strParam["pathname"] = pathname.value;
-  strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
+  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":59:59";
   strParam["datasource"] = mtype.value;
   strParam["stcd"] = $.data(myData, "WD_XUHAO");
 
@@ -142,8 +142,8 @@ onMounted(() => {
     etime.value = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
   }
 
-  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
+  mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH"));
+  mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH"));
 
   // 加载流量站点选择数据
   api.QuSelDuo({ "pid": "2026031114184492913-4,2019011015353464106" })
