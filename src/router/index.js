@@ -104,6 +104,12 @@ const router = createRouter({
       name: 'qixiang',
       component: () => import('../components/menu/qixiang.vue')
     },
+    // 视频监控
+    {
+      path: '/videoMonitor',
+      name: 'videoMonitor',
+      component: () => import('../components/menu/videoMonitor.vue')
+    },
   ]
 })
 

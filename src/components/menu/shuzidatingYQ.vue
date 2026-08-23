@@ -306,27 +306,49 @@
   <div class="top-left-icon-menu">
     <div style="width: 100%; height: 40px">
       &nbsp;&nbsp; 时间：&nbsp;
-      <input
-        id="STIME"
-        class="mini-datepicker"
-        style="width: 135px"
-        format="yyyy-MM-dd HH:mm"
-        timeFormat="HH:mm"
-        showTime="true"
-        showOkButton="true"
-        showClearButton="false"
-        onvaluechanged="onSTimeChanged"
+      <el-date-picker
+        v-model="stimeDate"
+        type="date"
+        size="small"
+        popper-class="yqTimePopper"
+        value-format="YYYY-MM-DD"
+        placeholder="开始日期"
+        :clearable="false"
+        :style="{ width: '90px', '--el-date-editor-width': '90px' }"
+        @change="onStimeChange"
+      />
+      <el-time-select
+        v-model="stimeTime"
+        size="small"
+        start="00:00"
+        step="01:00"
+        end="23:00"
+        placeholder="开始时间"
+        :clearable="false"
+        style="width: 60px;margin-left:5px;"
+        @change="onStimeChange"
       />&nbsp;&nbsp; -&nbsp;
-      <input
-        id="ETIME"
-        class="mini-datepicker"
-        style="width: 135px"
-        format="yyyy-MM-dd HH:mm"
-        timeFormat="HH:mm"
-        showTime="true"
-        showOkButton="true"
-        showClearButton="false"
-        onvaluechanged="onETimeChanged"
+      <el-date-picker
+        v-model="etimeDate"
+        type="date"
+        size="small"
+        popper-class="yqTimePopper"
+        value-format="YYYY-MM-DD"
+        placeholder="结束日期"
+        :clearable="false"
+        :style="{ width: '90px', '--el-date-editor-width': '90px' }"
+        @change="onEtimeChange"
+      />
+      <el-time-select
+        v-model="etimeTime"
+        size="small"
+        start="00:00"
+        step="01:00"
+        end="23:00"
+        placeholder="结束时间"
+        :clearable="false"
+        style="width: 60px;margin-left:5px;"
+        @change="onEtimeChange"
       />&nbsp;&nbsp;
       <img
         :src="popupCloseImg"
@@ -495,6 +517,7 @@ import { onMounted, ref, nextTick, reactive, onUnmounted } from "vue";
 // ElConfigProvider：时间选择框汉化
 import {
   ElDatePicker,
+  ElTimeSelect,
   ElRadio,
   ElButton,
   ElConfigProvider,
@@ -520,8 +543,12 @@ import {
 } from "@/utils/ArcGis/MapComm.js";
 
 // 开始时间、结束时间
-const stime = ref({});
-const etime = ref({});
+const stime = ref("");
+const etime = ref("");
+const stimeDate = ref("");
+const stimeTime = ref("");
+const etimeDate = ref("");
+const etimeTime = ref("");
 const pid = ref("201901101419326076-1-1,201901101419326076-5");
 // 默认选择当日
 const pathName = ref("mapday0");
@@ -731,9 +758,7 @@ onUnmounted(() => {
 });
 function Weacontent() {
   window.loadingShow();
-  stime.value = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  etime.value = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  
+
   setTimeout(() => {
     console.error("stime",stime.value,"etime",etime.value);
     var strParam = {};
@@ -956,27 +981,22 @@ function closecz() {
   $(".top-left-icon-menu").hide();
 }
 
-var _isChangeDay = false; // 标记是否由 changeDay 触发的 setValue
 function changeDay(e) {
-  _isChangeDay = true;
   pathName.value = e;
   var day = e.replace("mapday", "");
   var now = new Date();
 
-  etime.value = dayjs(now).format("YYYY-MM-DD HH:00:00");
+  setEtime(dayjs(now).format("YYYY-MM-DD HH:00:00"));
   var hour = Number(day);
-  stime.value = dayjs(dayjs(etime.value).format("YYYY-MM-DD HH:00:00"))
-    .add(-hour, "hour")
-    .format("YYYY-MM-DD HH:00:00");
+  setStime(
+    dayjs(dayjs(etime.value).format("YYYY-MM-DD HH:00:00"))
+      .add(-hour, "hour")
+      .format("YYYY-MM-DD HH:00:00")
+  );
 
   datekeyAllname.value = false;
-  
-  setTimeout(() => {
-    mini.get("STIME").setValue(dayjs(stime.value).format("YYYY-MM-DD HH:00"));
-    mini.get("ETIME").setValue(dayjs(etime.value).format("YYYY-MM-DD HH:00"));
-    _isChangeDay = false;
-    Weacontent();
-  }, 100);  
+
+  Weacontent();
 }
 // 行政分区
 function bjLayers(obj) {
@@ -999,11 +1019,6 @@ function bjLayers(obj) {
 }
 // 查询
 function BtnSearch() {
-  stime.value =
-    dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  etime.value =
-    dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-    // alert(stime.value);
   Weacontent();
 }
 // 站点
@@ -1069,8 +1084,6 @@ onMounted(() => {
   } else {
     popupCloseImg.value = "/images/missBlack.png";
   }
-  mini.parse();
-  _isChangeDay = true; // 防止 mini.setValue 触发回调导致 Vue 重渲染破坏控件
   var now = new Date();
   var endTime = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
   var startTime = dayjs(now).format("YYYY-MM-DD 08:00:00");
@@ -1079,13 +1092,8 @@ onMounted(() => {
       .add(-24, "hour")
       .format("YYYY-MM-DD HH:mm:ss");
   }
-  mini.get("STIME").setValue(dayjs(startTime).format("YYYY-MM-DD HH:00"));
-  mini.get("ETIME").setValue(dayjs(endTime).format("YYYY-MM-DD HH:00"));
-  _isChangeDay = false;
-  stime.value =
-    dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
-  etime.value =
-    dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00";
+  setStime(dayjs(startTime).format("YYYY-MM-DD HH:00:00"));
+  setEtime(dayjs(endTime).format("YYYY-MM-DD HH:00:00"));
   setTimeout(function () {
     clearALL();
     addAreaLineQS();
@@ -1102,15 +1110,28 @@ function parentMethodshowDynamicLayer(item) {
   setZOOM(13);
   dyCenter (item[0],item[1]);
 }
-window.onSTimeChanged = function (e) {
-  // 程序触发时直接返回，避免触发 Vue 重渲染破坏 MiniUI 控件
-  if (_isChangeDay) return;
-  $(".swDivSelect").removeClass("swDivSelect");
-};
-window.onETimeChanged = function (e) {
-  if (_isChangeDay) return;
-  $(".swDivSelect").removeClass("swDivSelect");
-};
+function setStime(val) {
+  stime.value = val || "";
+  stimeDate.value = val ? val.substring(0, 10) : "";
+  stimeTime.value = val ? val.substring(11, 16) : "";
+}
+function setEtime(val) {
+  etime.value = val || "";
+  etimeDate.value = val ? val.substring(0, 10) : "";
+  etimeTime.value = val ? val.substring(11, 16) : "";
+}
+function onStimeChange() {
+  pathName.value = "";
+  if (stimeDate.value && stimeTime.value) {
+    stime.value = stimeDate.value + " " + stimeTime.value + ":00";
+  }
+}
+function onEtimeChange() {
+  pathName.value = "";
+  if (etimeDate.value && etimeTime.value) {
+    etime.value = etimeDate.value + " " + etimeTime.value + ":00";
+  }
+}
 </script>
 <style src="@/assets/styles/style.css"></style>
 
@@ -1324,8 +1345,9 @@ window.onETimeChanged = function (e) {
   color: var(--widgetcolor);
 }
 
-:deep(.el-date-editor.el-input, .el-date-editor.el-input__wrapper) {
-  width: 160px;
+/* 日期输入框宽度由模板内联 :style 控制 */
+:deep(.el-date-editor) {
+  --el-input-height: 26px;
 }
 
 :deep(.el-input__prefix-inner) {
@@ -1339,6 +1361,24 @@ window.onETimeChanged = function (e) {
 :deep(.el-input__wrapper) {
   background-color: #d5141400;
   box-shadow: 0 0 0 1.5px var(--popContentHeadbg);
+}
+
+:deep(.el-select) {
+  height: 26px;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+:deep(.el-select__wrapper) {
+  background-color: #d5141400;
+  box-shadow: 0 0 0 1.5px var(--popContentHeadbg);
+  height: 26px;
+  min-height: 26px;
+  padding: 1px 4px;
+}
+
+:deep(.el-select__prefix) {
+  display: none;
 }
 
 :deep(.el-input__inner) {
@@ -1377,5 +1417,50 @@ window.onETimeChanged = function (e) {
 .colorL p {
   line-height: 16px;
   margin-bottom: -4px;
+}
+</style>
+
+<style>
+/* 雨情页日期选择弹层：压缩成紧凑尺寸。
+   弹层会 teleport 到 body，所以这里用全局样式 + popper-class 定位 */
+.yqTimePopper {
+  width: 240px !important;
+}
+.yqTimePopper .el-date-picker {
+  width: 240px;
+}
+.yqTimePopper .el-picker-panel__body {
+  min-width: 0;
+  margin-left: 0;
+}
+.yqTimePopper .el-picker-panel__content {
+  width: auto;
+  margin: 4px;
+}
+.yqTimePopper .el-date-picker__header {
+  padding: 6px 8px 0;
+  margin: 0;
+}
+.yqTimePopper .el-date-table td {
+  width: 26px;
+  height: 26px;
+  padding: 2px 0;
+}
+.yqTimePopper .el-date-table td .el-date-table-cell {
+  height: 26px;
+  padding: 2px 0;
+}
+.yqTimePopper .el-date-table td .el-date-table-cell__text {
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  font-size: 12px;
+}
+.yqTimePopper .el-date-table th {
+  padding: 3px;
+  font-size: 12px;
+}
+.yqTimePopper .el-picker-panel__footer {
+  padding: 2px 6px;
 }
 </style>

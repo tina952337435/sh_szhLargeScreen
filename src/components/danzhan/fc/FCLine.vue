@@ -487,13 +487,17 @@ onMounted(() => {
     }
     if (props.stime != "") {
         stime.value = props.stime
-    } else {
+    } else if (inject("stime") && inject("stime").value != "") {
         stime.value = inject("stime").value;
+    } else {
+        stime.value = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
     }
     if (props.etime != "") {
         etime.value = props.etime
-    } else {
+    } else if (inject("etime") && inject("etime").value != "") {
         etime.value = inject("etime").value;
+    } else {
+        etime.value = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
     }
     // if (props.mtype != "") {
     //   mtype.value = props.mtype;

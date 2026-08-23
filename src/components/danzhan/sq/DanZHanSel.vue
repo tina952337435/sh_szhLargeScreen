@@ -216,6 +216,17 @@ provide("typeValuePDF", typeValue)
      padding: 6px 10px 6px 10px;
  }
 
+ /* 让 tab 内容区撑满剩余高度，视频等 tab 自适应高度 */
+ #mainTabs {
+     display: flex;
+     flex-direction: column;
+ }
+ .componentdiv {
+     flex: 1;
+     min-height: 0;
+     overflow: auto;
+ }
+
 
  /* 自定义滚动条样式 */
  .componentdiv::-webkit-scrollbar {

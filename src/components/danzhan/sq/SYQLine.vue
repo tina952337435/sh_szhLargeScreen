@@ -97,6 +97,7 @@ const valueYL=ref([]);
 const tableHeaders = ref([
   { name: "num", label: "序号" },
   { name: "tm", label: "日期" },
+  { name: "upz", label: "水位(m)" },
   { name: "drp", label: "雨量(mm)" },
 ]);
 const tableData = ref();
@@ -238,7 +239,7 @@ function buildTableData(strJson) {
       maxDrp = 0;
       maxTM = dayjs(new Date(strJson.reverse()[strJson.reverse().length - 1].tm)).format("YYYY-MM-DD HH:mm");
     }
-    result.push({ num: num + 1, tm: tm, drp: drp });
+    result.push({ num: num + 1, tm: tm, drp: drp,upz:item.upz });
   }
   if (Number(drpTotal) > 0) { drpTotal = Number(drpTotal).toFixed(1); }
   var strMsg = "最大雨量：<span style='color:#0cdc0c;font-size: 18px;'>" + maxDrp + "</span>mm（" + maxTM + "）"
@@ -329,7 +330,7 @@ function ExportData() {
   }
 
   var strParam = {};
-  strParam["title"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00" + "至" + dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00" + "小时雨强排名前10";
+  strParam["title"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00" + "至" + dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH:mm") + ":00" + "水位雨量数据";
   strParam["pathname"] = "temp";
   strParam["columnname"] = listcolumnname;
   strParam["maplist"] = tableData.value;

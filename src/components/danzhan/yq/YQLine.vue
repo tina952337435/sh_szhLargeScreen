@@ -141,7 +141,7 @@ function Weacontent() {
   var strParam = {};
   strParam["stcd"] = stcd.value;
   strParam["stime"] = dayjs(mini.get("STIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
-  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":59:59";
+  strParam["etime"] = dayjs(mini.get("ETIME").getFormValue()).format("YYYY-MM-DD HH") + ":00:00";
   strParam["pathname"] = pathname.value;
   strParam["datasource"] ="BX";
   queryStime = strParam["stime"];
@@ -150,10 +150,10 @@ function Weacontent() {
     .queryDRPDANZHANList(strParam)
     .then((res) => {    
       const strJson = sortObjectArray(res.data, ["tm"], "asc");
-      var jsondata = strJson.sort(function (a, b) {
-        return dayjs(a.tm).format("YYYY-MM-DD HH:mm:ss") - dayjs(b.tm).format("YYYY-MM-DD HH:mm:ss"); //时间正序
-      });
-      YLdata.value = jsondata;
+      // var jsondata = strJson.sort(function (a, b) {
+      //   return dayjs(a.tm).format("YYYY-MM-DD HH:mm:ss") - dayjs(b.tm).format("YYYY-MM-DD HH:mm:ss"); //时间正序
+      // });
+      YLdata.value = strJson;
       YLload();
       window.loadingHide();
     })
@@ -203,8 +203,9 @@ function buildTableData(strJson) {
   var result = [];
   var maxDrp = 0, maxTM = "--";
   var drpTotal = 0;
-  for (var num = 0; num < strJson.reverse().length; num++) {
-    var item = strJson.reverse()[num];
+  var list = strJson.slice();
+  for (var num = 0; num < list.length; num++) {
+    var item = list[num];
     var drp = item.drp != undefined ? Number(item.drp).toFixed(1) : "--";
     var tm = dayjs(new Date(item.tm)).format("YYYY-MM-DD HH:mm");
     if (Number(drp) > 0) {
@@ -213,7 +214,7 @@ function buildTableData(strJson) {
     }
     if (drpTotal == 0) {
       maxDrp = 0;
-      maxTM = dayjs(new Date(strJson.reverse()[strJson.reverse().length - 1].tm)).format("YYYY-MM-DD HH:mm");
+      maxTM = dayjs(new Date(list[list.length - 1].tm)).format("YYYY-MM-DD HH:mm");
     }
     result.push({ num: num + 1, tm: tm, drp: drp });
   }

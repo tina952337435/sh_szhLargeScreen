@@ -69,15 +69,17 @@ define(["dojo/_base/declare",
                                 html += "<p class='TipClass'>" + temp1 + "：<span>" + value + temp2+ "</span></p>";
                             }                            
                         });
-                    } else {
-                        fdarr.forEach(function (val, index, arr) {
-                            var tempDdnarr = fdnarr[index].split("@");
-                            var temp1 = tempDdnarr[0], temp2 = "";
-                            if (tempDdnarr.length > 1) {
-                                temp2 = tempDdnarr[1];
-                            }
-                            html += "<p class='TipClass'>" + temp1 + "：-</p>";
-                        });
+                    } 
+                    else {
+                        // fdarr.forEach(function (val, index, arr) {
+                        //     var tempDdnarr = fdnarr[index].split("@");
+                        //     var temp1 = tempDdnarr[0], temp2 = "";
+                        //     if (tempDdnarr.length > 1) {
+                        //         temp2 = tempDdnarr[1];
+                        //     }
+                        //     html += "<p class='TipClass'>" + temp1 + "：-</p>";
+                        // });
+                        html += "<div style='height:5px;'></div>";
                     }
                     this._node = domConstruct.toDom("<div class='TipBox'>" + html + "</div>");
                 },

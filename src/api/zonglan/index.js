@@ -474,5 +474,9 @@ export default {
   stFlowVelLine: (params) => {
     return request.post(`${serveName}SWZZ_RTSQ_ST_FLOW_R/selectHisQV`, params)
   },
+  // 视频监控：查询视频点位
+  myVideoFindResult: (params) => {
+    return request.post(`${serveName}/SWZZ_RTSQ_myvideo/findResult`, params)
+  },
 }
 

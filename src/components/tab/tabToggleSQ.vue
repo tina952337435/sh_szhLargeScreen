@@ -44,6 +44,13 @@
       </div>
     </div>
   </div>
+  <div class="shdswDiv">
+    <div id="tabvideo" @click="changeTab('tabvideo')" class="swDiv">
+      <div class="sel_wrap">
+        <label>视频</label>
+      </div>
+    </div>
+  </div>
 </template>
 <script setup>
 import { onMounted, ref, inject, nextTick } from "vue";
@@ -101,11 +108,12 @@ function changeTab(m) {
 
   const routeConfig = {
     tabzl:"/zonglan",
-    tabsq: "/shuzidatingSQ",    
+    tabsq: "/shuzidatingSQ",
     tabyq: "/shuzidatingYQ",
     tabgq: "/shuzidatingGQ",
     tabll: "/shuzidatingLL",
     tabqx: "/qixiang",
+    tabvideo: "/videoMonitor",
   };
 
   if (routeConfig[m]) {
