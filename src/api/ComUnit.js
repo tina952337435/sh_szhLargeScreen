@@ -52,6 +52,14 @@ function SetNull(strVal) {
     }
     return strVal;
 }
+// 水利片名称归一化：处理异体字（蕴/蕰）与"吴淞江-"前缀差异，用于前后端片区名匹配
+function normalizeSlpName(name) {
+    if (name == null) return "";
+    return String(name)
+        .replace("吴淞江-", "")
+        .replace("蕴", "蕰")
+        .trim();
+}
 const validateAndClean = (val,valF=2) => {
     // 1. 先处理空值/未定义情况
     if (!val) return ""; 
@@ -1377,5 +1385,6 @@ export {
     getPie3D,
     validateAndClean,
     getWindDirectionName,
-    formatFlow
+    formatFlow,
+    normalizeSlpName
 }

@@ -1881,6 +1881,11 @@ function addXSLMarkNew(strJson, switchChecked) {
     if (SetNull(xslLayerGraphicLayer) != "") {
         xslLayerGraphicLayer.clear();
     }
+    // 清除上一次的蓄量标注（MapText DOM 标签），避免切换模型/实测时重复叠加
+    document.querySelectorAll('.MapText.xsl-marker-container').forEach(function (el) {
+        el.remove();
+    });
+    xslAreaNames.length = 0;
     require(["esri/geometry/Point",
         "esri/graphic",
         "myJs/MapText",
@@ -1895,8 +1900,8 @@ function addXSLMarkNew(strJson, switchChecked) {
                 });
 
                 var _align = "bottom";
-                if (properties.MC == "嘉宝北片") { _align = "top"; }
-                if (properties.MC == "蕴南片") { _align = "right"; }
+                if (properties.MC == "嘉宝北片") { _align = "left"; }
+                if (properties.MC == "蕰南片"||properties.MC == "淀南片"||properties.MC == "太南片") { _align = "right"; }
                 if (properties.MC == "青松片" || properties.MC == "淀北片") { _align = "left"; }
 
                 var isV = (_align == "top" || _align == "bottom");
@@ -1922,7 +1927,7 @@ function addXSLMarkNew(strJson, switchChecked) {
                 h += '<div id="' + cardId + '" style="';
                 h += 'background:linear-gradient(180deg,rgba(5,25,45,0.94),rgba(2,12,25,0.97));';
                 h += 'border:1px solid rgba(0,180,210,0.35);border-radius:6px;';
-                h += 'padding:10px 14px;min-width:150px;';
+                h += 'padding:10px 14px;min-width:150px;position:relative;z-index:1;';
                 h += 'box-shadow:0 0 20px rgba(0,160,180,0.12),inset 0 1px 0 rgba(255,255,255,0.03);';
                 h += 'font-family:Microsoft YaHei,sans-serif;font-size:13px;line-height:1.7;';
                 h += '">';
@@ -1939,6 +1944,7 @@ function addXSLMarkNew(strJson, switchChecked) {
                 var dotBlue = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#78909c"/></svg>';
                 var dotCyan = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#4fc3f7"/></svg>';
                 var dotGreen = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#69f0ae"/></svg>';
+                var dotOrange = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#ffb74d"/></svg>';
 
                 // 数据行：水位
                 h += '<div style="display:flex;align-items:center;">';
@@ -1949,7 +1955,7 @@ function addXSLMarkNew(strJson, switchChecked) {
                 // 数据行：蓄量
                 h += '<div style="display:flex;align-items:center;">';
                 h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotCyan + '蓄量</span>';
-                h += '<span style="color:#4fc3f7;font-weight:600;flex:1;text-align:right;">' + (properties.sl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">万方</small></span>';
+                h += '<span style="color:#4fc3f7;font-weight:600;flex:1;text-align:right;">' + (properties.sl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">百万m³</small></span>';
                 h += '</div>';
 
                 // 数据行：余量（高亮）
@@ -1957,7 +1963,13 @@ function addXSLMarkNew(strJson, switchChecked) {
                 h += 'padding:2px 6px;margin:1px -6px 0;';
                 h += 'background:rgba(105,240,174,0.08);border-radius:3px;">';
                 h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotGreen + '余量</span>';
-                h += '<span style="color:#69f0ae;font-weight:600;flex:1;text-align:right;">' + (properties.ssl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">万方</small></span>';
+                h += '<span style="color:#69f0ae;font-weight:600;flex:1;text-align:right;">' + (properties.ssl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">百万m³</small></span>';
+                h += '</div>';
+
+                // 数据行：纳雨量（保证水位）
+                h += '<div style="display:flex;align-items:center;">';
+                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotOrange + '纳雨量</span>';
+                h += '<span style="color:#ffb74d;font-weight:600;flex:1;text-align:right;">' + (properties.drp != null ? properties.drp : "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">mm</small></span>';
                 h += '</div>';
 
                 h += '</div>'; // 卡片结束
@@ -2408,8 +2420,10 @@ function addWaterDistrictMark(strName) {
             "esri/Color",
             "esri/symbols/SimpleFillSymbol",
             "esri/symbols/SimpleLineSymbol",
+            "esri/symbols/TextSymbol",
+            "esri/symbols/Font",
             "dojo/domReady!"
-        ], function (Polygon, Graphic, Color, SimpleFillSymbol, SimpleLineSymbol) {
+        ], function (Polygon, Graphic, Color, SimpleFillSymbol, SimpleLineSymbol, TextSymbol, Font) {
             var features = WaterDistrict.features || [];
             var matched = false;
             features.forEach(function (feature) {
@@ -2420,12 +2434,34 @@ function addWaterDistrictMark(strName) {
                     var rings = normalizeRings(feature.geometry.coordinates);
                     if (rings.length == 0) { return; }
                     var polygon = new Polygon(rings);
+
+                    // 外圈光晕（宽、淡）
+                    var glowSymbol = new SimpleFillSymbol(
+                        SimpleFillSymbol.STYLE_SOLID,
+                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 160, 200, 0.35]), 4),
+                        new Color([0, 0, 0, 0])
+                    );
+                    layer.add(new Graphic(polygon, glowSymbol, null, null));
+
+                    // 主边框（细、亮）+ 淡填充
                     var fillSymbol = new SimpleFillSymbol(
                         SimpleFillSymbol.STYLE_SOLID,
-                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 255, 255]), 2),
-                        new Color([0, 180, 255, 0.35])
+                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 229, 255, 0.85]), 1.5),
+                        new Color([0, 180, 210, 0.10])
                     );
                     layer.add(new Graphic(polygon, fillSymbol, feature.properties, null));
+
+                    // 中心点标注片区名称
+                    var centroid = polygon.getCentroid();
+                    if (centroid != null) {
+                        console.error(name, centroid.x, centroid.y);
+                        var font = new Font("14px", Font.STYLE_NORMAL, Font.VARIANT_NORMAL, "bold");
+                        var textSymbol = new TextSymbol(name, font, new Color([255, 255, 255]));
+                        textSymbol.setAlign(TextSymbol.ALIGN_MIDDLE);
+                        textSymbol.setHaloColor(new Color([0, 0, 0]));
+                        textSymbol.setHaloSize(1);
+                        layer.add(new Graphic(centroid, textSymbol, null, null));
+                    }
                 } catch (e) {
                     console.error("水利片绘制异常", name, e);
                 }

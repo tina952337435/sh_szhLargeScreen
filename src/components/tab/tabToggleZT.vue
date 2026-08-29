@@ -3,12 +3,6 @@
   <FullscreenBtn />
 
  <div class="shdswDiv">
-    <div id="tabtf" @click="changeTab('tabtf')" class="swDiv">
-      <div class="sel_wrap">
-        <label>历史台风</label>
-      </div>
-    </div>
-  </div>
   <div class="shdswDiv">
     <div id="tabcxl" @click="changeTab('tabcxl')" class="swDiv">
       <div class="sel_wrap">
@@ -16,6 +10,12 @@
       </div>
     </div>
   </div>
+    <div id="tabtf" @click="changeTab('tabtf')" class="swDiv">
+      <div class="sel_wrap">
+        <label>历史台风</label>
+      </div>
+    </div>
+  </div>  
   <div class="shdswDiv">
     <div id="tabwq" @click="changeTab('tabwq')" class="swDiv">
       <div class="sel_wrap">

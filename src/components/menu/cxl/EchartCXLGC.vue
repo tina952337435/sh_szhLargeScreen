@@ -3,7 +3,7 @@
         <div class="title display_flex justify-content_flex-start align-items_center leftTop-radius layout_title px-2">
             <div class="d1"></div>
             <div class="d2"></div>
-            <p class="base-p" id="title2" @click="fangda()">槽蓄量和平均水位过程</p>
+            <p class="base-p" id="title2" @click="fangda()">{{ props.areaName }}槽蓄量和平均水位过程</p>
         </div>
         <div class="txt">
            <Echarts :width="'100%'" :height="'100%'" :option="lineOption" :key="datekey" :id="dateid" />
@@ -15,10 +15,12 @@
 import { ref,onMounted } from 'vue';
 import Echarts from "@/components/MyEcharts/echartsLine.vue";
 import dayjs from "dayjs";
+import { normalizeSlpName } from "@/api/ComUnit.js";
 
 const props = defineProps({
   strJsonData: { type: Array,default:()=>[] },
   sid: { type: String,default:'' },
+  areaName: { type: String, default: "" },
 });
 
 const datekey = ref(null);
@@ -29,15 +31,15 @@ var maxArr = [], wrzDataS = [], grzDataS = [];
 onMounted(() => {    
     if(props.strJsonData.length>0){  
         // console.error(JSON.stringify( props.strJsonData));
-        var data=props.strJsonData
-        .filter(function (item) {
-            return item.id == props.sid;
+        var item = props.strJsonData.find(function (it) {
+            return normalizeSlpName(it.slpName) == normalizeSlpName(props.areaName);
         });
+        var data = (item && item.process) ? item.process : [];
         data = data.filter(function (item) {
             // 假设格式为 "YYYY-MM-DD HH:mm:ss"，截取第14和15位即为分钟
-            let minutes = item.tm.substring(14, 16); 
+            let minutes = item.tm.substring(14, 16);
             return minutes === "00";
-        });        
+        });
         // 从索引 0 开始，删除 12 个元素
         // data.splice(0, 40); 
         for (var num = 0; num < data.length; num++) {
@@ -292,7 +294,7 @@ function chartSW( data, strNote, LineColor, max_min_Name, maxArr, wrzDataS, grzD
                                     }
                                 },
                                 label: {
-                                    show: true,
+                                    show: false,
                                     position: 'top',
                                     // offset: [-70, -5],
                                     color: '#000000',

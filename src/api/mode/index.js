@@ -59,6 +59,14 @@ export default {
   findResultModeXSL: (params) => {
     return request.post(`${serveName}/SWZZ_MODE_DD_SOLUTION/findResultModeXSL`, params)
   },
+  //水利片水位/库容查询
+  findResultCxl: (params) => {
+    return request.post(`${serveName}/SWZZ_CSXSL/query`, params)
+  },
+  //水利片水位预测（实测）
+  findResultSlpForecast: (params) => {
+    return request.post(`${serveName}/SWZZ_SLP_FORECAST/query`, params)
+  },
   findResultBDMSPREDICT: (params) => {
     return request.post(`${serveName}/SWZZ_MODE_BDMS_PREDICT/findResult`, params)
   },

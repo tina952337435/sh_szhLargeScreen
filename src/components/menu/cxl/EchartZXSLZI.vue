@@ -14,7 +14,7 @@
         <div class="sub-stats">
           <div class="stat-item up">
             <span class="label">较昨日</span>
-            <span class="val">+{{ delta }}%</span>
+            <span class="val">{{ delta }}%</span>
           </div>
           <!-- <div class="stat-item">
             <span class="label">库容占比</span>
@@ -24,6 +24,9 @@
         
         <div class="trend-text">
           距警戒水位还有 <span class="highlight">{{ remaining }}</span> 百万m³
+        </div>
+        <div class="trend-text">
+          距保证水位还有 <span class="highlight">{{ remainingGrz }}</span> 百万m³
         </div>
       </div>
     </div>
@@ -51,8 +54,11 @@ let myChart = null;
 const percentage = computed(() => ((props.currentValue / props.totalCapacity) * 100).toFixed(1));
 const delta = computed(() => (((props.currentValue - props.yesterdayValue) / props.yesterdayValue) * 100).toFixed(1));
 // const remaining = computed(() => (props.totalCapacity - props.currentValue).toFixed(1));
-const remaining = computed(() => (props.grzValue).toFixed(1));
-const formattedValue =props.currentValue.toFixed(1); 
+// 距警戒水位剩余库容
+const remaining = computed(() => (props.wrzValue).toFixed(1));
+// 距保证水位剩余库容
+const remainingGrz = computed(() => (props.grzValue).toFixed(1));
+const formattedValue =props.currentValue.toFixed(1);
 
 const initChart = () => {
   if (!chartRef.value) return;

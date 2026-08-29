@@ -8,7 +8,7 @@
                     <div class="wqtitle title layout_title px-2  leftTop-radius" style="background: none;margin-top:0px;position:relative;">
                         <div class="d1"></div>
                         <div class="d2"></div>
-                            <p class="base-p1" id="title2" style="vertical-align: 4px;">预测蓄量</p>
+                            <p class="base-p1" id="title2" style="vertical-align: 4px;">{{ props.areaName }}预测蓄量</p>
                         <!-- 方案切换下拉 -->
                         <div class="fangan-sel" style="position:absolute;right:10px;top:0px;display:flex;align-items:center;cursor:pointer;">
                             <label @click.stop="showItem('fanganListCXL')" style="font-size:14px;color:var(--mtablecolor);cursor:pointer;margin-right:4px;font-family: arial,'Hiragino Sans GB' !important;">{{selectedSchemeName||'方案切换'}}</label>
@@ -84,6 +84,7 @@
 
     const props = defineProps({
         sid: { type: String,default:"" },
+        areaName: { type: String,default:"" },
     });
 
     const tableHeaders = ref(null);
@@ -166,12 +167,14 @@
     }
     function loadZhanDianData(){
         var strParam = {
-            stcd:idStr.value,
+            //stcd:idStr.value,
             pid:selectedSchemeId.value
         };
         apimode.findResultBDMSPREDICT(strParam)
             .then((res) => {
-                zhanDianData.value=res.data;
+                zhanDianData.value=res.data.filter(function(res){
+                    return idStr.value.indexOf( res.stcd)>-1;
+                });                
                 bindData();
             })
             .catch((err) => {

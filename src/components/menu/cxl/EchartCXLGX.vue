@@ -5,7 +5,7 @@
     >
       <div class="d1"></div>
       <div class="d2"></div>
-      <p class="base-p" id="title2" @click="fangda()">水位～面积～蓄量关系</p>
+      <p class="base-p" id="title2" @click="fangda()">{{ props.areaName }}水位～面积～蓄量关系</p>
 
       <!-- <div
         class="xiala"
@@ -77,7 +77,7 @@ import { ref, onMounted } from "vue";
 import Echarts from "@/components/MyEcharts/echartsLine.vue";
 
 import apimode from "@/api/mode/index.js";
-import { SetNull, sortObjectArray,getWindDirectionName,groupBy } from "@/api/ComUnit.js";
+import { SetNull, sortObjectArray,getWindDirectionName,groupBy,normalizeSlpName } from "@/api/ComUnit.js";
 
 import * as echarts from "echarts";
 import dayjs from "dayjs";
@@ -90,25 +90,16 @@ const labelName = ref("");
 const props = defineProps({
   strJsonData: { type: Array,default:()=>[] },
   sid: { type: String,default:"" },
+  areaName: { type: String, default: "" },
 });
 
 const xslData = ref([]);
 
 onMounted(() => {
- if(SetNull(props.sid) !=""){
-   if( props.sid=="81650"){
-      labelName.value = "苏州河";
-   }else if(props.sid=="81651"){
-      labelName.value = "淀北片";
-   }else if(props.sid=="81652"){
-      labelName.value = "蕰南片";
-   }else if(props.sid=="81653"){
-      labelName.value = "嘉宝北片";
-   }else if(props.sid=="81654"){
-      labelName.value = "青松片";
-   }
+ if(SetNull(props.areaName) !=""){
+   labelName.value = props.areaName;
    xslData.value=props.strJsonData.filter(function (item) {
-    return item.id == props.sid;
+    return normalizeSlpName(item.slpName) == normalizeSlpName(props.areaName);
    });
     Weacontent();
  }
@@ -143,15 +134,6 @@ function loadChart(data) {
   datekey.value = Date.now();
 }
 
-function getCXL() {
-  var keyValue = 2.85;
-  var cxlValue = "";
-  if (keyValue != "") {
-    cxlValue = getStorageValue(keyValue);
-    //$("#jisuanCXL").html(cxlValue + "百万方");
-  }
-  return cxlValue;
-}
 function getStorageValue(upz) {
   upz = parseFloat(upz);
   var dataTempMax = gxData.value.filter(function (res) {
@@ -172,9 +154,9 @@ function getStorageValue(upz) {
     var maxS = dataTempMax[0].s;
     var chaS = maxS - minS; //蓄量总差值
     var sscha = chaS * upzBili;
-    S = (minS + sscha).toFixed(2);
+    S = (minS + sscha).toFixed(1);
   }
-  return S;
+  return Number(S).toFixed(1);
 }
 
 function chartNHXNew(dataX, dataXL, dataMJ) {
@@ -182,13 +164,19 @@ function chartNHXNew(dataX, dataXL, dataMJ) {
   // echarts.registerTransform(ecStat.transform.regression);
 
   var xAxisVal = 0,
-    formatterVal = 0;
-  formatterVal = getCXL();
-  if (formatterVal != "") {
-    var startUpz = Number(gxData.value[0].upz);
-    var endUpz = gxData.value[gxData.value.length - 1].upz;
-    var curUpz = xslData.value[xslData.value.length-1].upz;//Number(2.85);
-    xAxisVal = (curUpz - startUpz) * 10;
+    formatterVal = "";
+  // 当前水位对应的蓄量（作为红线标注的数值）
+  var curUpz = Number(xslData.value[xslData.value.length - 1].sw);
+  formatterVal = getStorageValue(curUpz);
+  if (formatterVal != null && formatterVal != "") {
+    // 找当前水位在关系曲线 x 轴中最接近的下标，用于定位红色竖线
+    var closestIdx = 0;
+    var minDiff = Number.MAX_VALUE;
+    for (var i = 0; i < dataX.length; i++) {
+      var diff = Math.abs(Number(dataX[i]) - curUpz);
+      if (diff < minDiff) { minDiff = diff; closestIdx = i; }
+    }
+    xAxisVal = closestIdx;
   }
   var option = {
     title: {

@@ -111,7 +111,8 @@ function changeTab(m) {
   else if (m == "m_shikZT") {
     ToggleShowHide(false);
     $("#m_shikZT").addClass("z-crt");
-    router.push({ path: "/shuzidatingTFZT" });
+    // router.push({ path: "/shuzidatingTFZT" });
+    router.push({ path: "/shuzidatingCXL" });
   }
   else if(m=="m_shikSL"){
     ToggleShowHide(false);

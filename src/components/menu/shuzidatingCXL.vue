@@ -3,17 +3,40 @@
     <aside class="aside">
         <tabToggleZT />
     </aside>
+
+    <!-- 全市汇总（参考GQ运行情况：地图左上悬浮列表） -->
+    <div class="city-summary">
+        <div class="summary-box">
+            <div class="summary-title">
+                <!-- <span class="summary-num">1</span> -->
+                全市
+                <span class="summary-info">
+                    <svg viewBox="0 0 16 16" class="info-icon"><circle cx="8" cy="8" r="7" fill="none" stroke="#14a3a8" stroke-width="1.3"/><rect x="7.2" y="4" width="1.6" height="5" rx="0.8" fill="#14a3a8"/><rect x="7.2" y="10.6" width="1.6" height="1.6" rx="0.8" fill="#14a3a8"/></svg>
+                    <div class="info-tooltip">
+                        <div class="info-item"><b>蓄量</b>：当前蓄量</div>
+                        <div class="info-item"><b>余量</b>：当前水位距保证水位可调蓄量</div>
+                        <div class="info-item"><b>纳雨量</b>：24h最大纳雨能力</div>
+                        <div class="info-formula">纳雨量 = (总余量 + 排涝能力÷100) ÷ (总面积 × 径流系数) × 1000</div>
+                    </div>
+                </span>
+            </div>
+            <div class="summary-row">蓄量<span class="summary-val">{{ citySummary.xsl }}<span class="summary-unit">百万m³</span></span></div>
+            <div class="summary-row">余量<span class="summary-val">{{ citySummary.bxsl }}<span class="summary-unit">百万m³</span></span></div>
+            <div class="summary-row">纳雨量<span class="summary-val">{{ citySummary.bzNyl }}<span class="summary-unit">mm</span></span></div>
+        </div>
+    </div>
+
     <div class="g-lside">
         <div style="width: 100%">
-            <EchartZXSL :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAllZXSL" />
+            <EchartZXSL :strJsonData="tableData" :sid="Drpswiper" :areaName="currentAreaName" :key="datekeyAllZXSL" />
         </div>
 
         <div style="width: 100%">
-            <EchartCXLGC :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAll"/>
+            <EchartCXLGC :strJsonData="modelTableData" :sid="Drpswiper" :areaName="currentAreaName" :key="datekeyModel"/>
         </div>
 
         <div style="width: 100%">
-            <EchartCXLGX :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAll"/>
+            <EchartCXLGX :strJsonData="tableData" :sid="Drpswiper" :areaName="currentAreaName" :key="datekeyAll"/>
         </div>
         
     </div>
@@ -24,8 +47,8 @@
             <TableSPXSL :strJsonData="tableData" :key="datekeyAll" />
         </div>
         <div style="width: 100%">
-            <TableCXL :strJsonData="tableData" :sid="Drpswiper" :key="datekeyAll"/>
-        </div>        
+            <TableCXL :strJsonData="tableData" :sid="currentSid" :areaName="currentAreaName" :key="datekeyModel"/>
+        </div>
     </div>
 
     <!-- 片区选择面板（底部居中） -->
@@ -51,6 +74,13 @@
     </div>
     <!-- 点击外部关闭 -->
     <div v-if="panelOpen" class="area-overlay" @click="panelOpen = false"></div>
+
+    <!-- 模型/实测 切换（时间条上方居中） -->
+    <div class="tm-mode-toggle">
+        <span :class="['tm-mode-item', { 'is-active': tmMode === 'model' }]" @click="switchTmMode('model')">模型</span>
+        <span :class="['tm-mode-item', { 'is-active': tmMode === 'shice' }]" @click="switchTmMode('shice')">实测</span>
+    </div>
+    <div id="tmCenter" class="tmCenter">{{ tmCenter }}</div>
 </template>
 
 <script setup>
@@ -65,19 +95,27 @@
     import EchartCXLGX from "@/components/menu/cxl/EchartCXLGX.vue";
 
     import { ref, reactive, computed, onMounted, provide, inject, defineAsyncComponent, onUnmounted, h } from "vue";
-    import { dyCenter, destroy, globallevel, globalalign, map, labels, setLayerToolTip, addAreaLineQS, removeEntityByName } from "@/utils/ArcGis/MapComm.js";
+    import { setZOOM, dyCenter, destroy, globallevel, globalalign, map, labels, setLayerToolTip, addAreaLineQS, removeEntityByName } from "@/utils/ArcGis/MapComm.js";
 
     import * as PointMark from "@/utils/ArcGis/PointMark.js";
     import { SetNull, groupBy, sortObjectArray } from "@/api/ComUnit.js";
     import apimode from "@/api/mode/index.js";
     import dayjs from "dayjs";
 
-    import SHSLPArea from "@/assets/json/四片2000.json";
-
     const datekeyAll = ref(null);
     const datekeyAllZXSL=ref(null);
+    const datekeyModel = ref(null);   // 模型数据专用 key（切换实测时不变化）
 
     const Drpswiper = ref("81653");
+
+    
+    const tmCenter = ref(null);
+    const tmMode = ref('model'); // 'model' 模型（默认） / 'shice' 实测
+    function switchTmMode(mode) {
+        if (tmMode.value === mode) return;
+        tmMode.value = mode;
+        loadXsl(); // 切换后按对应接口重新拉取数据
+    }
 
     // 片区列表（未来扩展只需在此追加）
     const areaList = ref([
@@ -94,13 +132,33 @@
         return found ? found.name : "选择片区";
     });
 
+    // 片区名 -> 老接口片区站码（供出入水量/关系曲线等旧接口使用）
+    const sidMap = {
+        "嘉宝北片": "81653",
+        "淀北片": "81651",
+        "蕰南片": "81652",
+        "青松片": "81654",
+        "苏州河": "81650",
+        "吴淞江-苏州河": "81650"
+    };
+    const currentSid = computed(() => sidMap[Drpswiper.value] || Drpswiper.value);
+
     function selectArea(id) {
         Drpswiper.value = id;
         panelOpen.value = false;
         datekeyAll.value = new Date();
+        datekeyModel.value = new Date();
         var area = areaList.value.find(function (a) { return a.id === id; });
         if (area && area.mc) {
             PointMark.highlightXSLabel(area.mc);
+        }
+        // 定位到片区中心
+        var row = tableData.value.find(function (e) { return e.slpName === id; });
+        if (row && row.lgtd != null && row.lttd != null) {
+            setZOOM(11);
+            setTimeout(function () {
+                dyCenter(row.lgtd, row.lttd);
+            }, 200);
         }
     }
 
@@ -109,10 +167,14 @@
             addAreaLineQS();
             clearALL();
             loadXsl();
+            PointMark.addWaterDistrictMark(""); // 叠加全部水利片区边界
         }, 10)
         $("#tabcxl").addClass("swDivSelect swDiv");
         $("#swDivMoreUL ul #tabcxl").css("color", "var(--swDivSelectcolor)");
         $("#m_shikZT").addClass("z-crtitem z-crt wow slideInUp link-item");
+    });
+    onUnmounted(() => {
+        PointMark.removeRiverDistrictLayers(); // 切路由时清掉水利片区图层
     });
     function clearALL() {
         try {
@@ -123,26 +185,32 @@
     }
     //蓄水量
     function loadXsl(){
-        var idStr = areaList.value.map(function(a){ return a.id; }).join(",");
-        var now = new Date();
-        var etime = dayjs(now).add(0, "hour").format("YYYY-MM-DD HH:00:00");
-        var stime = dayjs(dayjs(now).format("YYYY-MM-DD HH:00:00"))
-            .add(-12, "hour")
-            .format("YYYY-MM-DD HH:00:00");
+        // 正式时间：结束=当前整点，开始=结束前24小时
+        var now = dayjs();
+        var etime = now.format("YYYY-MM-DD HH:00:00");
+        var stime = now.add(-24, "hour").format("YYYY-MM-DD HH:00:00");
         var strParam = {
-            startdate: stime,
-            enddate: etime,
-            pid: idStr
+            stime: stime,
+            etime: etime,
+            typhoonCode: "2613"
         };
 
-        // strParam.startdate = "2025-05-03 14:00:00";
-        // strParam.enddate = "2025-05-04 14:00:00";
-
         window.loadingShow();
-        apimode
-            .findResultModeXSL(strParam)
+        // 模型走 SWZZ_CSXSL/query，实测走 SWZZ_SLP_FORECAST/query（都带 stime/etime 时间参数）
+        var api = tmMode.value === 'shice' ? apimode.findResultSlpForecast : apimode.findResultCxl;
+        api(strParam)
             .then((res) => {
-                tableData.value = res.data;
+                allData.value = res.data || [];
+                // 没有水位、面积为空、或算不出纳雨量的片区先不展示
+                tableData.value = allData.value.filter(function (e) {
+                    return e.sw != null && e.area != null && e.bzNyl != null;
+                });
+                // 模型数据单独存一份供 EchartCXLGC 用；实测时不更新它，保证过程曲线/出入水量不刷新
+                if (tmMode.value === 'model') {
+                    modelTableData.value = tableData.value;
+                    datekeyModel.value = new Date();
+                }
+                buildAreaList();
                 addXSLMap();
                 setTimeout(function () {
                     PointMark.highlightXSLabel("嘉宝北片");
@@ -158,23 +226,58 @@
         });
     }
     const tableData = ref([]);
+    const allData = ref([]);
+    const modelTableData = ref([]);  // 模型数据（EchartCXLGC 始终用模型）
+    // 全市汇总：蓄量 / 余量 / 纳雨量（口径同 CaoXuLiang.html 的“全市合计”）
+    const citySummary = computed(() => {
+        var xsl = 0, bxsl = 0, area = 0, plnl = 0, jlxs2 = null;
+        allData.value.forEach(function (e) {
+            if (e.xsl != null) xsl += Number(e.xsl);
+            if (e.bxsl != null) bxsl += Number(e.bxsl);
+            if (e.area != null) area += Number(e.area);
+            if (e.plnl != null) plnl += Number(e.plnl);
+            if (jlxs2 == null && e.jlxs2 != null) jlxs2 = Number(e.jlxs2);
+        });
+        // 全市纳雨量(mm) = (Σ剩余库容 + Σ排涝能力/100) ÷ (Σ面积 × 径流系数) × 1000，径流系数取第一个非空片区
+        var bzNyl = 0;
+        if (area > 0 && jlxs2 != null && jlxs2 !== 0) {
+            bzNyl = (bxsl + plnl / 100) / (area * jlxs2) * 1000;
+        }
+        return {
+            xsl: xsl.toFixed(1),
+            bxsl: bxsl.toFixed(1),
+            bzNyl: bzNyl.toFixed(1)
+        };
+    });
+    // 用接口返回的片区重建选择面板（只保留有水位数据的片区）
+    function buildAreaList() {
+        var list = tableData.value.map(function (e) {
+            return { id: e.slpName, name: e.slpName, mc: e.slpName };
+        });
+        areaList.value = list;
+        var has = list.some(function (a) { return a.id === Drpswiper.value; });
+        if (!has) {
+            var jbb = list.find(function (a) { return a.id === "嘉宝北片"; });
+            Drpswiper.value = jbb ? "嘉宝北片" : (list.length ? list[0].id : "");
+        }
+    }
     const addXSLMap = () => {
         var resSualt=[];
-        var features = SHSLPArea.features;
-        features.forEach(function (feature) {
-            var properties = feature.properties;
-            var mc=properties.MC;
-            var temp=tableData.value.filter(function(e){
-                return e.name.replace("槽蓄容量", "")==mc;
-            });
-            // console.error('temp',temp);
-            if(temp.length>0){
-                properties.sl=temp[temp.length-1].xsl.toFixed(1);
-                properties.ssl=parseFloat(temp[temp.length-1].bxsl).toFixed(1);
-                properties.drp=temp[temp.length-1].yl;
-                properties.z=temp[temp.length-1].upz;
-                resSualt.push(properties);
+        tableData.value.forEach(function (e) {
+            if (e.lgtd == null || e.lttd == null) {
+                return;
             }
+            
+            tmCenter.value = dayjs(new Date(e.swTm)).format("YYYY-M-D HH:mm");
+            resSualt.push({
+                MC: e.slpName,
+                lgtd: e.lgtd,
+                lttd: e.lttd,
+                sl: (e.xsl != null) ? parseFloat(e.xsl).toFixed(1) : "—",
+                ssl: (e.bxsl != null) ? parseFloat(e.bxsl).toFixed(1) : "—",
+                drp: e.bzNyl,
+                z: (e.sw != null) ? e.sw : "—"
+            });
         });
         PointMark.addXSLMarkNew(resSualt, true);
     }
@@ -186,6 +289,140 @@
 </script>
 
 <style scoped>
+/* ===== 模型/实测 切换（时间条上方居中） ===== */
+.tm-mode-toggle {
+    position: fixed;
+    top: 150px;
+    left: 29rem;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    background: rgba(5, 28, 50, 0.92);
+    border: 1px solid rgba(0, 180, 210, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 0 16px rgba(0, 160, 180, 0.15);
+}
+.tm-mode-item {
+    padding: 6px 20px;
+    font-size: 18px;
+    color: #8899aa;
+    border-radius: 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+.tm-mode-item.is-active {
+    background: linear-gradient(180deg, rgba(0, 180, 210, 0.35), rgba(0, 140, 170, 0.35));
+    color: #b2ebf2;
+    box-shadow: 0 0 8px rgba(0, 200, 220, 0.4);
+}
+
+/* ===== 全市汇总（地图左上悬浮列表） ===== */
+.city-summary {
+    position: fixed;
+    top: calc(12.5rem);
+    left: 29rem;
+    z-index: 120;
+    pointer-events: none;
+}
+.summary-box {
+    width: 170px;
+    background: linear-gradient(180deg, rgba(5, 28, 50, 0.95), rgba(2, 12, 25, 0.97));
+    /* border: 1px solid rgba(0, 180, 210, 0.35); */
+    border-radius: 10px;
+    padding: 10px 14px 12px;
+    box-shadow: 0 0 20px rgba(0, 160, 180, 0.15);
+}
+.summary-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    color: #b2ebf2;
+    margin-bottom: 6px;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+.summary-info {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    pointer-events: auto;
+    margin-left: auto;
+}
+.info-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+.info-tooltip {
+    position: absolute;
+    top: 26px;
+    left: 0;
+    width: 320px;
+    background: rgba(2, 12, 25, 0.98);
+    border: 1px solid rgba(0, 180, 210, 0.35);
+    border-radius: 6px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    display: none;
+    z-index: 200;
+    color: #d5eef2;
+    font-size: 15px;
+    font-weight: normal;
+    line-height: 1.7;
+    text-align: left;
+}
+.summary-info:hover .info-tooltip {
+    display: block;
+}
+.info-item b {
+    color: #4fc3f7;
+    font-weight: 600;
+}
+.info-formula {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(0, 180, 210, 0.3);
+    color: #aab7c4;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+}
+.summary-num {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    background: rgba(0, 180, 210, 0.3);
+    color: #14a3a8;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
+    line-height: 32px;
+    font-size: 15px;
+    color: #8899aa;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+.summary-val {
+    color: #42F700;
+    font-family: 'Consolas', monospace;
+    font-size: 17px;
+}
+.summary-unit {
+    color: #546e7a;
+    font-size: 12px;
+    margin-left: 3px;
+    font-weight: 400;
+}
+
 /* ===== 片区选择面板（底部居中） ===== */
 .area-overlay {
     position: fixed;
