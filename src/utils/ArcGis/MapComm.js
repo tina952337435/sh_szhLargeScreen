@@ -6,6 +6,11 @@ var map = window.myMap;
 var globallevel = 7;//全局级别
 var globalalign = "center";//全局级别
 
+var textLevelOffset = 1;//文本标注比站点图标晚显示的级别数，即 mapsize + 1 时标出文本
+var textLevelDefault = 12;//未配置 mapsize 的标注沿用改造前的固定级别
+var zoomEndHandles = {};//已注册的 zoom-end 监听，按“类型|图层”登记，避免重复叠加
+
+
 function setZOOM(objNum) {
     if (SetNull(map) == "") {
         map = window.myMap;
@@ -276,96 +281,41 @@ function mapZoomEnd(myLayer, mapLevel, stType, field, switchChecked) {
     if (SetNull(map) == "") {
         map = window.map;
     }
-    map.on("zoom-end", function (zoom) {
+    //同一图层每次刷新都会重新调用，先解绑旧监听，否则监听器会一直累积
+    var handleKey = stType + "|" + (myLayer == null || myLayer == undefined ? "" : myLayer.id);
+    if (zoomEndHandles[handleKey] != undefined) {
+        zoomEndHandles[handleKey].remove();
+    }
+    zoomEndHandles[handleKey] = map.on("zoom-end", function (zoom) {
         mapLevel = zoom.level;
         setMapZoom(myLayer, mapLevel, stType, field, switchChecked);
-        // console.error("===================================", mapLevel)
     });
 }
 
 function setMapZoom(myLayer, mapLevel, stType, field, switchChecked) {
-    for (var num = 0; num < myLayer.graphics.length; num++) {
-        var item = myLayer.graphics[num];
-        if (item.attributes != undefined) {
-            var MAPSIZE = item.attributes.mapsize;
-            // console.error(item.attributes.stnm, 'mapLevel=' + mapLevel, 'MAPSIZE=' + MAPSIZE, stType, item)
-            if (MAPSIZE != undefined) {
-                // MAPSIZE =parseInt(MAPSIZE) + 1;
-                // console.error(item.attributes.stnm, stType + item.attributes[field])
-                if (mapLevel < globallevel) {
-                    addClassParam(stType + item.attributes[field], "none");
-                } else if (globallevel == MAPSIZE) { //当站点层级等于默认地图层级时，一直要显示
-                    //11级以下，隐藏 lable信息
-                    if (switchChecked == true) {
-                        removeClassParam(stType + item.attributes[field], "none");
-                    } else {
-                        addClassParam(stType + item.attributes[field], "none");
-                    }
-                } else {                    
-                    // console.error(item.attributes.stnm, 'mapLevel=' + mapLevel, 'MAPSIZE=' + MAPSIZE, stType, item)
-                    if (mapLevel >= MAPSIZE) {
-                        item.show();
-                        if (switchChecked == true) {
-                            removeClassParam(stType + item.attributes[field], "none");
-                        } else {
-                            addClassParam(stType + item.attributes[field], "none");
-                        }
-                    } else {
-                        item.hide();
-                        addClassParam(stType + item.attributes[field], "none");
-                    }
-                }
-            } else {
-                if (mapLevel < globallevel) {
-                    addClassParam(stType + item.attributes[field], "none");
+    // 站点图标：按各站 mapsize 显隐
+    if (myLayer && myLayer.graphics) {
+        for (var num = 0; num < myLayer.graphics.length; num++) {
+            var item = myLayer.graphics[num];
+            if (item.attributes && item.attributes.mapsize != undefined) {
+                if (globallevel == item.attributes.mapsize || mapLevel >= item.attributes.mapsize) {
+                    item.show();
                 } else {
-                    if (mapLevel > globallevel) {
-                        if ($("#riverMarker").hasClass("checked") == true) {
-                            removeClassParam(stType + item.attributes[field], "none");
-                        } else {
-                            addClassParam(stType + item.attributes[field], "none");
-                        }
-                    } else if (mapLevel == globallevel) {
-                        if ($("#riverMarker").hasClass("checked") == true) {
-                            removeClassParam(stType + item.attributes[field], "none");
-                        } else {
-                            addClassParam(stType + item.attributes[field], "none");
-                        }
-                    } else {
-                        addClassParam(stType + item.attributes[field], "none");
-                    }
+                    item.hide();
                 }
             }
-
         }
     }
 
-    if(mapLevel>=12){
-        removeClassParamByClass("level_all .amap-ui-district-cluster-marker-title", "none");
-    }
-    else{
-        addClassParamByClass("level_all .amap-ui-district-cluster-marker-title", "none");
-    }
+    // 文本标注（数值 + 站名一起）：mapsize + 1 显示
+    $("[data-mapsize]").each(function () {
+        var ms = this.getAttribute("data-mapsize");
+        var lv = (ms == null || ms === "") ? textLevelDefault : getTextLevel(ms);
+        $(this).toggleClass("zoomhide", mapLevel < lv);
+    });
 
-    if(mapLevel>=12){
-        removeClassParamByClass("rainText .amap-ui-district-cluster-marker-title", "none");
-    }
-    else{
-        addClassParamByClass("rainText .amap-ui-district-cluster-marker-title", "none");
-    }
-
-    if(mapLevel>=12){
-        removeClassParamByClass("gcText .amap-ui-district-cluster-marker-title", "none");
-    }
-    else{
-        addClassParamByClass("gcText .amap-ui-district-cluster-marker-title", "none");
-    } 
-    
-    if(mapLevel>=13){       
-       removeClassParamByClass("lightGQ", "none");
-    }else{
-       addClassParamByClass("lightGQ", "none");
-    }
+    // 显示标注开关：用 none（Vue 项目原本就用 none 表示关闭）
+    $("[data-mapsize]").toggleClass("none", getMarkerChecked(switchChecked) == false);
 }
 
 function removeClassParam(objID, objClass) {
@@ -386,6 +336,25 @@ function addClassParamByClass(objID, objClass) {
 
 function removeClassParamByClass(objID, objClass) {
     $("." + objID).removeClass(objClass);
+}
+
+function getTextLevel(mapsize) {
+    var base = Number(mapsize);
+    if (mapsize == undefined || mapsize === "" || isNaN(base)) {
+        base = globallevel;
+    }
+    return base + textLevelOffset;
+}
+
+function getMarkerChecked(defaultChecked) {
+    try {
+        if (typeof SpanBiaoZhu == "function") {
+            var temp = SpanBiaoZhu();
+            return temp == true || temp == "checked";
+        }
+    } catch (e) {
+    }
+    return defaultChecked == true;
 }
 
 //地图放大缩小调用事件**************************************************************

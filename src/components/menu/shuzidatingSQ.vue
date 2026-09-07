@@ -496,21 +496,35 @@ function SpanItem(obj) {
     MapWaterfall(Points,WaterSsxMarker.value,"202508251434483318.png");
   }
 }
-function handleChange(val) {
+function handleChange(val) {  
+  var lgtd,lttd,centerLevel;
   AreaName.value="";
   // alert(val)
   if (val == 1) {
     pid.value = '2026031114184492913-3';//代表站
+    lgtd=3747.490803126537;
+    lttd=7980.5747690055;
+    centerLevel=10;
   } 
   else if (val == 2) {
     pid.value = '2026031114184492913-2,2026031114184492913-7,2026031114184492913-8';//所有水位监测站
+    lgtd=3747.490803126537;
+    lttd=7980.5747690055;
+    centerLevel=10;
   }
   else if (val == 3) {
-    pid.value = '2026031114184492913-7';//外省市共享点
+    pid.value = '2026031114184492913-7';//外省市共享点    
+    lgtd=-125073.700100;
+    lttd=-4113.130000;
+    centerLevel=10;
   }
   else if (val == 4) {
-    pid.value = '2026031114184492913-8';//海事
+    pid.value = '2026031114184492913-8';//海事    
+    lgtd=67443.160000;
+    lttd=-47122.270000;
+    centerLevel=10;
   }
+  addAreaLineQS(lgtd,lttd,centerLevel,"上海市");
   Weacontent();
 }
 function SWload() {

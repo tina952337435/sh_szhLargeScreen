@@ -214,6 +214,7 @@ function login() {
         } else {          
           if(strJson["groupid"]=="2022072016563745130"){  //其他区域
              ElMessage.error("您没有系统权限，请联系管理员！");
+             return;
           }
           ElMessage.success("登录成功");
           localStorage.setItem("TOKEN", token);

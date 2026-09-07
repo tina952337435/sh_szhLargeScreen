@@ -1856,6 +1856,18 @@ function addXSLMark(strJson, switchChecked) {
 
 //蓄水量-新版（科技感卡片+水滴定位点，全内联样式）
 var xslAreaNames = []; // 记录所有片区MC名，用于重置
+var xslDropClickHandler = null; // 水滴点击回调（shuzidatingCXL 传入）
+var xslDropBound = false;       // 是否已绑定水滴点击委托
+function bindXslDropClick() {
+    if (xslDropBound) return;
+    xslDropBound = true;
+    document.addEventListener('click', function (e) {
+        var el = e.target && e.target.closest ? e.target.closest('.xsl-drop') : null;
+        if (el && xslDropClickHandler) {
+            xslDropClickHandler(el.getAttribute('data-mc'));
+        }
+    });
+}
 function highlightXSLabel(mc) {
     // 重置所有卡片为默认样式
     xslAreaNames.forEach(function (name) {
@@ -1875,7 +1887,9 @@ function highlightXSLabel(mc) {
     }
 }
 
-function addXSLMarkNew(strJson, switchChecked) {
+function addXSLMarkNew(strJson, switchChecked, onDropClick) {
+    if (onDropClick) xslDropClickHandler = onDropClick;
+    bindXslDropClick();
     var layerId = "addXSLMarkNew";
     var xslLayerGraphicLayer = CreateLayer(layerId);
     if (SetNull(xslLayerGraphicLayer) != "") {
@@ -1984,7 +1998,7 @@ function addXSLMarkNew(strJson, switchChecked) {
                 }
 
                 // ===== 水滴定位锚点 =====
-                h += '<div style="flex-shrink:0;line-height:0;';
+                h += '<div class="xsl-drop" data-mc="' + properties.MC + '" style="flex-shrink:0;line-height:0;pointer-events:auto;cursor:pointer;';
                 h += 'filter:drop-shadow(0 0 6px rgba(0,229,255,0.4));">';
                 h += '<svg viewBox="0 0 24 32" style="width:16px;height:20px;display:block;">';
                 h += '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1">';

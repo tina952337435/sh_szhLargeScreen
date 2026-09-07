@@ -81,6 +81,9 @@
         <span :class="['tm-mode-item', { 'is-active': tmMode === 'shice' }]" @click="switchTmMode('shice')">实测</span>
     </div>
     <div id="tmCenter" class="tmCenter">{{ tmCenter }}</div>
+
+    <!-- 片区基本信息弹窗 -->
+    <SlpInfoDialog :visible="slpInfoVisible" :data="slpInfoData" @close="slpInfoVisible = false" />
 </template>
 
 <script setup>
@@ -93,6 +96,7 @@
 
 
     import EchartCXLGX from "@/components/menu/cxl/EchartCXLGX.vue";
+    import SlpInfoDialog from "@/components/menu/cxl/SlpInfoDialog.vue";
 
     import { ref, reactive, computed, onMounted, provide, inject, defineAsyncComponent, onUnmounted, h } from "vue";
     import { setZOOM, dyCenter, destroy, globallevel, globalalign, map, labels, setLayerToolTip, addAreaLineQS, removeEntityByName } from "@/utils/ArcGis/MapComm.js";
@@ -279,7 +283,18 @@
                 z: (e.sw != null) ? e.sw : "—"
             });
         });
-        PointMark.addXSLMarkNew(resSualt, true);
+        PointMark.addXSLMarkNew(resSualt, true, openSlpInfo);
+    }
+
+    // 水滴点击弹窗（片区基本信息）
+    const slpInfoVisible = ref(false);
+    const slpInfoData = ref({});
+    function openSlpInfo(mc) {
+        var row = tableData.value.find(function (e) { return e.slpName === mc; });
+        if (row) {
+            slpInfoData.value = row;
+            slpInfoVisible.value = true;
+        }
     }
 
     function parentMethodshowDynamicLayer(id) {
