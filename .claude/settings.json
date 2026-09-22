@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/MZ_XZQH_3857/MapServer?f=pjson\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/shsw_dfcmap/MapServer?f=pjson\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/fserverw4/rest/services/SHBDC/hehu2024_3857/MapServer?f=pjson\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/fserverw4/rest/services/hehu2024_3857/VectorTileServer?f=pjson\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/MZ_JDXZ_3857/MapServer?f=pjson\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/MZ_JDXZ_3857/VectorTileServer?f=pjson\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/MZ_XZQH_3857/MapServer?f=pjson&jcmp-token=d01b7f932ff44c04bd0b026e9daaae97\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/shsw_dfcmap/MapServer?f=pjson&jcmp-token=d01b7f932ff44c04bd0b026e9daaae97\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/MZ_JDXZ_3857/MapServer?f=pjson&jcmp-token=d01b7f932ff44c04bd0b026e9daaae97\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/fserverw4/rest/services/SHBDC/hehu2024_3857/MapServer?f=pjson&jcmp-token=d01b7f932ff44c04bd0b026e9daaae97\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/fserverw4/rest/services/hehu2024_3857/VectorTileServer?f=pjson&jcmp-token=d01b7f932ff44c04bd0b026e9daaae97\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/MZ_JDXZ_3857/VectorTileServer?f=pjson&jcmp-token=d01b7f932ff44c04bd0b026e9daaae97\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/fserverw4/rest/services/hehu2024_3857/VectorTileServer?f=pjson&jcmp-token=c674f960fe2a4cf6bb1745ec01f3aa39\")",
+      "Bash(curl -s \"https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/MZ_JDXZ_3857/VectorTileServer?f=pjson&jcmp-token=c674f960fe2a4cf6bb1745ec01f3aa39\")"
+    ]
+  }
+}

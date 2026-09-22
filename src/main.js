@@ -13,6 +13,8 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 // 引入全局字体样式
 import '@/assets/styles/fonts.css';
+// 业务图层点击弹窗外壳样式（覆盖 ArcGIS 3.x infoWindow 默认白底）
+import '@/assets/styles/esriPopup.css';
 // arcgis CSS 改为在 App.vue 的 initMapArcGis 中按需加载
 import store from "./stores/store.js";
 import App from './App.vue'

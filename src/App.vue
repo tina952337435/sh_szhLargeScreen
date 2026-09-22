@@ -127,6 +127,38 @@ onMounted(() => {
   localStorage.setItem("FullScreen", false);
 });
 const mapType=ref( "上海市");//地图的默认显示范围
+// 构建业务图层属性详情（点击弹窗内容，深色科技风）
+function buildBizAttrTable(result) {
+  var attrs = result.attributes || {};
+  var title = result.value || result.layerName || "";
+  // 优先用“名称”类字段做标题（堤防名称/区划名称/河道名称等），避免落到“序号”这类无意义字段
+  for (var nameKey in attrs) {
+    var nameVal = attrs[nameKey];
+    if ((nameKey.indexOf("名称") > -1 || nameKey === "name" || nameKey === "NAME") && nameVal !== null && nameVal !== undefined && nameVal !== "") {
+      title = nameVal;
+      break;
+    }
+  }
+  var skip = { shape: 1, shape_1: 1, objectid: 1, objectid_1: 1, gdb_geomat: 1 };
+  var html = '<div style="padding:10px 14px;">';
+  if (title) {
+    html += '<div style="position:relative;font-weight:bold;font-size:14px;color:#00e5ff;margin-bottom:8px;padding-left:10px;text-shadow:0 0 6px rgba(0,229,255,0.6);">'
+      + '<span style="position:absolute;left:0;top:2px;bottom:2px;width:3px;background:#00e5ff;box-shadow:0 0 6px #00e5ff;"></span>'
+      + title + '</div>';
+  }
+  html += '<table style="border-collapse:collapse;font-size:12px;width:100%;">';
+  for (var key in attrs) {
+    if (skip[key]) continue;
+    var val = attrs[key];
+    if (val === null || val === undefined || val === "") continue;
+    html += '<tr>'
+      + '<td style="padding:3px 10px 3px 0;color:#6fb3d0;white-space:nowrap;vertical-align:top;">' + key + '</td>'
+      + '<td style="padding:3px 0;color:#ffffff;word-break:break-all;">' + val + '</td>'
+      + '</tr>';
+  }
+  html += '</table></div>';
+  return html;
+}
 function initMapArcGis(container) {
   // 等待 ArcGIS AMD require 就绪（app.mount 提前后，ArcGIS SDK 可能尚未加载完成）
   if (typeof require === 'undefined') {
@@ -134,6 +166,8 @@ function initMapArcGis(container) {
     return;
   }
   require(["esri/config", "esri/tasks/GeometryService"], function (esriConfig, GeometryService) {
+    // 允许对业务服务域名直连请求（CORS），避免 esri/request 走未配置的代理而失败
+    esriConfig.defaults.io.corsEnabledServers.push("service-api.onemap.sh.cegn.cn");
     //esriConfig.defaults.geometryService = new GeometryService("https://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer");
     //esriConfig.defaults.io.alwaysUseProxy = true;
   });
@@ -147,13 +181,15 @@ function initMapArcGis(container) {
     "myJs/shsw_dfcmapMapServer",
     "myJs/LocalImgLayer",
     "myJs/LocalIboLayer",
+    "myJs/BizDynamicMapServiceLayer",
     "esri/layers/ArcGISTiledMapServiceLayer",
     "esri/layers/ArcGISDynamicMapServiceLayer",
     "esri/layers/FeatureLayer",
+    "esri/InfoTemplate",
     "esri/request",
     "dojo/domReady!"
-  ], function (Map, GraphicsLayer, Point, SpatialReference, shswOneMapj02_basemap_dark,shswOneMapServer,shswOneMapServer_wxyx,shsw_dfcmapMapServer,LocalImgLayer,LocalIboLayer,ArcGISTiledMapServiceLayer,
-  ArcGISDynamicMapServiceLayer,FeatureLayer,esriRequest) {
+  ], function (Map, GraphicsLayer, Point, SpatialReference, shswOneMapj02_basemap_dark,shswOneMapServer,shswOneMapServer_wxyx,shsw_dfcmapMapServer,LocalImgLayer,LocalIboLayer,BizDynamicMapServiceLayer,ArcGISTiledMapServiceLayer,
+  ArcGISDynamicMapServiceLayer,FeatureLayer,InfoTemplate,esriRequest) {
     var map = new Map(container, {
       logo: false,
       slider: false, //放大缩小按钮
@@ -182,6 +218,66 @@ function initMapArcGis(container) {
     // 本地影像注记
     var localIboLayer = new LocalIboLayer("local_ibo", { visible: false });
     map.addLayer(localIboLayer);
+
+    // 客户提供的业务叠加图层（动态要素服务，jcmp-token 鉴权）
+    var jcmpToken = "d01b7f932ff44c04bd0b026e9daaae97";
+    var businessLayerConfigs = [
+      { id: "hehu2024", url: "https://service-api.onemap.sh.cegn.cn/fserverw4/rest/services/SHBDC/hehu2024_3857/MapServer" },
+      { id: "mz_xzqh", url: "https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/MZ_XZQH_3857/MapServer" },
+      { id: "mz_jdxz", url: "https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/MZ_JDXZ_3857/MapServer" },
+      { id: "shsw_dfcmap", url: "https://service-api.onemap.sh.cegn.cn/geoscene/rest/services/SHBDC/shsw_dfcmap/MapServer" },
+    ];
+    var bizLayerLabels = {
+      hehu2024: "河湖",
+      mz_xzqh: "区划",
+      mz_jdxz: "街道乡镇",
+      shsw_dfcmap: "堤防"
+    };
+    for (var bi = 0; bi < businessLayerConfigs.length; bi++) {
+      var bizCfg = businessLayerConfigs[bi];
+      var bizLayer = new BizDynamicMapServiceLayer(
+        bizCfg.url + "?jcmp-token=" + jcmpToken,
+        { id: bizCfg.id, visible: false }
+      );
+      map.addLayer(bizLayer);
+    }
+
+    // 业务图层点击查看详情（手动 identify，带 jcmp-token，sr 用 102100 与服务一致）
+    map.on("click", function (evt) {
+      var mp = evt.mapPoint;
+      var visibleBiz = businessLayerConfigs.filter(function (cfg) {
+        var lyr = map.getLayer(cfg.id);
+        return lyr && lyr.visible;
+      });
+      if (visibleBiz.length === 0) return;
+
+      visibleBiz.forEach(function (cfg) {
+        esriRequest({
+          url: cfg.url + "/identify",
+          content: {
+            geometry: mp.x + "," + mp.y,
+            geometryType: "esriGeometryPoint",
+            sr: 102100,
+            layers: "visible",
+            mapExtent: map.extent.xmin + "," + map.extent.ymin + "," + map.extent.xmax + "," + map.extent.ymax,
+            imageDisplay: map.width + "," + map.height + ",96",
+            tolerance: 5,
+            returnGeometry: false,
+            f: "json",
+            "jcmp-token": jcmpToken
+          },
+          handleAs: "json"
+        }).then(function (res) {
+          if (res.results && res.results.length > 0) {
+            var r = res.results[0];
+            var title = bizLayerLabels[cfg.id] || r.layerName || cfg.id;
+            map.infoWindow.setTitle(title);
+            map.infoWindow.setContent(buildBizAttrTable(r));
+            map.infoWindow.show(evt.screenPoint, map.getInfoWindowAnchor(evt.screenPoint));
+          }
+        });
+      });
+    });
 
 
     //切换主题默认不同的地图

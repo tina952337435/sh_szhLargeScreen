@@ -1,0 +1,76 @@
+/* 业务图层点击弹窗外壳样式：覆盖 ArcGIS 3.x 内置 infoWindow 的默认白底（深色科技风） */
+.esriPopup {
+    background: transparent !important;
+    box-shadow: 0 0 16px rgba(0, 163, 255, 0.35) !important;
+}
+
+.esriPopup .titlePane {
+    background: linear-gradient(135deg, rgba(0, 163, 255, 0.95) 0%, rgba(0, 90, 180, 0.9) 60%, rgba(0, 40, 90, 0.95) 100%) !important;
+    border-bottom: 1px solid #00caff !important;
+    box-shadow: 0 0 12px rgba(0, 202, 255, 0.5) inset !important;
+}
+
+.esriPopup .titleButton.maximize {
+    top: 10px !important;
+}
+
+.esriPopup .titleButton {
+    top: 6px !important;
+}
+
+.titlePane .title {
+    height: 36px;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 36px;
+    padding-left: 14px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(0, 202, 255, 0.9);
+}
+
+.esriPopup .sizer {
+    width: 360px !important;
+}
+
+.esriPopup .sizer .lie1 {
+    background: #D8EAFC;
+    text-align: center;
+    color: #494949;
+}
+
+.esriPopup .contentPane {
+    max-height: 360px !important;
+    background: #031016f5 !important;
+    border: 1px solid #00a3ff44 !important;
+    border-top: none !important;
+}
+
+.esriPopup .contentPane::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.esriPopup .contentPane::-webkit-scrollbar-thumb {
+    background: #00a3ff99 !important;
+    border-radius: 2px !important;
+}
+
+.esriPopup .contentPane::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.esriPopup .pointer {
+    background: #031016 !important;
+    box-shadow: none !important;
+}
+
+.esriPopup .outerPointer {
+    background: #00a3ff !important;
+    box-shadow: none !important;
+}
+
+.esriPopup .actionsPane {
+    background: transparent !important;
+    border-top: none !important;
+    padding: 0 !important;
+}

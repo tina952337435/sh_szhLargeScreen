@@ -1914,9 +1914,9 @@ function addXSLMarkNew(strJson, switchChecked, onDropClick) {
                 });
 
                 var _align = "bottom";
-                if (properties.MC == "嘉宝北片") { _align = "left"; }
-                if (properties.MC == "蕰南片"||properties.MC == "淀南片"||properties.MC == "太南片") { _align = "right"; }
-                if (properties.MC == "青松片" || properties.MC == "淀北片") { _align = "left"; }
+                if (properties.MC == "嘉宝北片"|| properties.MC == "淀北片"||properties.MC == "太北片" ) { _align = "top"; }
+                if (properties.MC == "蕰南片"||properties.MC == "淀南片"||properties.MC == "浦南东片") { _align = "right"; }
+                // if () { _align = "left"; }
 
                 var isV = (_align == "top" || _align == "bottom");
                 var uid = "xslg" + num;
@@ -1941,34 +1941,28 @@ function addXSLMarkNew(strJson, switchChecked, onDropClick) {
                 h += '<div id="' + cardId + '" style="';
                 h += 'background:linear-gradient(180deg,rgba(5,25,45,0.94),rgba(2,12,25,0.97));';
                 h += 'border:1px solid rgba(0,180,210,0.35);border-radius:6px;';
-                h += 'padding:10px 14px;min-width:150px;position:relative;z-index:1;';
+                h += 'padding:5px 9px;min-width:122px;position:relative;z-index:1;';
                 h += 'box-shadow:0 0 20px rgba(0,160,180,0.12),inset 0 1px 0 rgba(255,255,255,0.03);';
-                h += 'font-family:Microsoft YaHei,sans-serif;font-size:13px;line-height:1.7;';
+                h += 'font-family:Microsoft YaHei,sans-serif;font-size:12px;line-height:1.45;';
                 h += '">';
 
                 // 标题栏
-                h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;';
-                h += 'padding-bottom:6px;border-bottom:1px solid rgba(0,200,220,0.2);">';
-                h += '<svg viewBox="0 0 24 24" style="width:14px;height:14px;flex-shrink:0;" fill="#14a3a8">';
+                h += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;';
+                h += 'padding-bottom:4px;border-bottom:1px solid rgba(0,200,220,0.2);">';
+                h += '<svg viewBox="0 0 24 24" style="width:13px;height:13px;flex-shrink:0;" fill="#14a3a8">';
                 h += '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>';
                 h += '</svg>';
-                h += '<span style="font-size:15px;font-weight:600;color:#b2ebf2;">' + properties.MC + '</span>';
+                h += '<span style="font-size:13px;font-weight:600;color:#b2ebf2;">' + properties.MC + '</span>';
+                h += '<span style="margin-left:auto;font-size:12px;color:#4fc3f7;">水位：' + (properties.z || "—") + '<small style="font-size:10px;color:#546e7a;"> m</small></span>';
                 h += '</div>';
 
-                var dotBlue = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#78909c"/></svg>';
                 var dotCyan = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#4fc3f7"/></svg>';
                 var dotGreen = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#69f0ae"/></svg>';
                 var dotOrange = '<svg style="width:8px;height:8px;vertical-align:middle;margin-right:3px;" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#ffb74d"/></svg>';
 
-                // 数据行：水位
-                h += '<div style="display:flex;align-items:center;">';
-                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotBlue + '水位</span>';
-                h += '<span style="color:#e0e0e0;flex:1;text-align:right;">' + (properties.z || "—") + ' <small style="font-size:11px;color:#546e7a;">m</small></span>';
-                h += '</div>';
-
                 // 数据行：蓄量
                 h += '<div style="display:flex;align-items:center;">';
-                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotCyan + '蓄量</span>';
+                h += '<span style="color:#78909c;width:62px;flex-shrink:0;">' + dotCyan + '蓄量</span>';
                 h += '<span style="color:#4fc3f7;font-weight:600;flex:1;text-align:right;">' + (properties.sl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">百万m³</small></span>';
                 h += '</div>';
 
@@ -1976,13 +1970,19 @@ function addXSLMarkNew(strJson, switchChecked, onDropClick) {
                 h += '<div style="display:flex;align-items:center;';
                 h += 'padding:2px 6px;margin:1px -6px 0;';
                 h += 'background:rgba(105,240,174,0.08);border-radius:3px;">';
-                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotGreen + '余量</span>';
+                h += '<span style="color:#78909c;width:62px;flex-shrink:0;">' + dotGreen + '余量</span>';
                 h += '<span style="color:#69f0ae;font-weight:600;flex:1;text-align:right;">' + (properties.ssl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">百万m³</small></span>';
+                h += '</div>';
+
+                // 数据行：动态蓄量
+                h += '<div style="display:flex;align-items:center;">';
+                h += '<span style="color:#78909c;width:62px;flex-shrink:0;">' + dotGreen + '动态余量</span>';
+                h += '<span style="color:#69f0ae;font-weight:600;flex:1;text-align:right;">' + (properties.dtxsl || "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">百万m³</small></span>';
                 h += '</div>';
 
                 // 数据行：纳雨量（保证水位）
                 h += '<div style="display:flex;align-items:center;">';
-                h += '<span style="color:#78909c;width:58px;flex-shrink:0;">' + dotOrange + '纳雨量</span>';
+                h += '<span style="color:#78909c;width:62px;flex-shrink:0;">' + dotOrange + '纳雨量</span>';
                 h += '<span style="color:#ffb74d;font-weight:600;flex:1;text-align:right;">' + (properties.drp != null ? properties.drp : "—") + ' <small style="font-size:11px;color:#546e7a;font-weight:400;">mm</small></span>';
                 h += '</div>';
 
@@ -1999,11 +1999,11 @@ function addXSLMarkNew(strJson, switchChecked, onDropClick) {
 
                 // ===== 水滴定位锚点 =====
                 h += '<div class="xsl-drop" data-mc="' + properties.MC + '" style="flex-shrink:0;line-height:0;pointer-events:auto;cursor:pointer;';
-                h += 'filter:drop-shadow(0 0 6px rgba(0,229,255,0.4));">';
+                h += 'filter:drop-shadow(0 0 6px rgba(105,240,174,0.5));">';
                 h += '<svg viewBox="0 0 24 32" style="width:16px;height:20px;display:block;">';
                 h += '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1">';
-                h += '<stop offset="0%" stop-color="#00e5ff"/>';
-                h += '<stop offset="100%" stop-color="#006064"/>';
+                h += '<stop offset="0%" stop-color="#69f0ae"/>';
+                h += '<stop offset="100%" stop-color="#1b5e20"/>';
                 h += '</linearGradient></defs>';
                 h += '<path d="M12 0C12 0 0 12 0 20c0 6.6 5.4 12 12 12s12-5.4 12-12C24 12 12 0 12 0z" fill="url(#' + uid + ')"/>';
                 h += '</svg></div>';

@@ -15,6 +15,7 @@
                     <div class="info-tooltip">
                         <div class="info-item"><b>蓄量</b>：当前蓄量</div>
                         <div class="info-item"><b>余量</b>：当前水位距保证水位可调蓄量</div>
+                        <div class="info-item"><b>动态余量</b>：余量 + 24h外排量</div>
                         <div class="info-item"><b>纳雨量</b>：24h最大纳雨能力</div>
                         <div class="info-formula">纳雨量 = (总余量 + 排涝能力÷100) ÷ (总面积 × 径流系数) × 1000</div>
                     </div>
@@ -22,6 +23,7 @@
             </div>
             <div class="summary-row">蓄量<span class="summary-val">{{ citySummary.xsl }}<span class="summary-unit">百万m³</span></span></div>
             <div class="summary-row">余量<span class="summary-val">{{ citySummary.bxsl }}<span class="summary-unit">百万m³</span></span></div>
+            <div class="summary-row">动态余量<span class="summary-val">{{ citySummary.dtXsl }}<span class="summary-unit">百万m³</span></span></div>
             <div class="summary-row">纳雨量<span class="summary-val">{{ citySummary.bzNyl }}<span class="summary-unit">mm</span></span></div>
         </div>
     </div>
@@ -234,10 +236,11 @@
     const modelTableData = ref([]);  // 模型数据（EchartCXLGC 始终用模型）
     // 全市汇总：蓄量 / 余量 / 纳雨量（口径同 CaoXuLiang.html 的“全市合计”）
     const citySummary = computed(() => {
-        var xsl = 0, bxsl = 0, area = 0, plnl = 0, jlxs2 = null;
+        var xsl = 0, bxsl = 0, dtXsl = 0, area = 0, plnl = 0, jlxs2 = null;
         allData.value.forEach(function (e) {
             if (e.xsl != null) xsl += Number(e.xsl);
             if (e.bxsl != null) bxsl += Number(e.bxsl);
+            if (e.dtXsl != null) dtXsl += Number(e.dtXsl);
             if (e.area != null) area += Number(e.area);
             if (e.plnl != null) plnl += Number(e.plnl);
             if (jlxs2 == null && e.jlxs2 != null) jlxs2 = Number(e.jlxs2);
@@ -250,6 +253,7 @@
         return {
             xsl: xsl.toFixed(1),
             bxsl: bxsl.toFixed(1),
+            dtXsl: dtXsl.toFixed(1),
             bzNyl: bzNyl.toFixed(1)
         };
     });
@@ -278,9 +282,10 @@
                 lgtd: e.lgtd,
                 lttd: e.lttd,
                 sl: (e.xsl != null) ? parseFloat(e.xsl).toFixed(1) : "—",
+                dtxsl: (e.dtXsl != null) ? parseFloat(e.dtXsl).toFixed(1) : "—",
                 ssl: (e.bxsl != null) ? parseFloat(e.bxsl).toFixed(1) : "—",
                 drp: e.bzNyl,
-                z: (e.sw != null) ? e.sw : "—"
+                z: (e.sw != null) ? Number(e.sw).toFixed(2) : "—"
             });
         });
         PointMark.addXSLMarkNew(resSualt, true, openSlpInfo);
@@ -343,7 +348,7 @@
     pointer-events: none;
 }
 .summary-box {
-    width: 170px;
+    width:195px;
     background: linear-gradient(180deg, rgba(5, 28, 50, 0.95), rgba(2, 12, 25, 0.97));
     /* border: 1px solid rgba(0, 180, 210, 0.35); */
     border-radius: 10px;

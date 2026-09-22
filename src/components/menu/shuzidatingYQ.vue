@@ -293,6 +293,17 @@
       </div>
     </div>
   </div>
+  <!-- 等值面图例（勾选雨量等值面时显示，放在左侧中间） -->
+  <div v-show="RainDZMMarker" class="dzhLegendBox">
+    <div
+      v-for="item in dzhLegend"
+      :key="item.label"
+      class="dzhLegendItem"
+    >
+      <span class="dzhColorBlock" :style="{ 'background-color': item.color }"></span>
+      <span class="dzhLegendLabel">{{ item.label }}</span>
+    </div>
+  </div>
   <!--左下角搜索-->
   <div class="top-left-icon" @click="opencz()">
     <div class="opencz1" style="left: 0px" title="搜索更多">
@@ -917,6 +928,15 @@ function YLload() {
 }
 var colors = ["#A6F28E", "#007B00", "#3DBCF9", "#0000F9", "#FB3DFA", "#7B0000"];
 var levels = [0.01,10,25,50,100,200];
+// 等值面图例（颜色 + 雨量等级范围）
+var dzhLegend = [
+  { color: "#7B0000", label: "200" },
+  { color: "#FB3DFA", label: "100" },
+  { color: "#0000F9", label: "50" },
+  { color: "#3DBCF9", label: "25" },
+  { color: "#007B00", label: "10" },
+  { color: "#A6F28E", label: "0" },
+];
 function MapRainfall() {
   var strParam = {
     interpolation_method: "trigonometric",
@@ -1417,6 +1437,39 @@ function onEtimeChange() {
 .colorL p {
   line-height: 16px;
   margin-bottom: -4px;
+}
+
+.dzhLegendBox {
+  position: fixed;
+  left: 28rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--title2);
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dzhLegendItem {
+  display: flex;
+  align-items: flex-end;
+}
+
+.dzhLegendLabel {
+  width: 34px;
+  text-align: left;
+  padding-left: 6px;
+  color: var(--title2);
+  line-height: 14px;
+}
+
+.dzhColorBlock {
+  display: block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 26px;
 }
 </style>
 

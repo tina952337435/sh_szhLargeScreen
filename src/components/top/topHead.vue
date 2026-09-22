@@ -227,11 +227,61 @@
         @click="ISfalse()"
       ></div>
     </div>
-    <div class="settingMap" style="margin: 30px 0px 0px 10px">
-      <el-icon size="22px" style="vertical-align: -5px">
-        <Orange />
-      </el-icon>
-      <span style="font-size: 16px">主题：</span>
+    <div class="config-card">
+      <div class="config-card-head">系统</div>
+      <div class="config-card-body">
+        <!-- <el-icon size="22px" style="vertical-align: -5px">
+          <MapLocation />
+        </el-icon>
+        <span style="font-size: 16px">智能：</span> -->
+        <el-radio-group>
+          <el-checkbox style="margin-left: 10px"
+            @click="handlerDraw('YUYIN')"
+            v-model="YUYINFalse"
+            label="AI"
+            size="large"
+          />
+        </el-radio-group>
+        <br />
+        <el-radio-group>
+          <span
+            id="countdown"
+            style="
+              position: relative;
+              left: 10px;
+              font-size: 18px;
+              top: -2px;
+              color: #ff0000;
+            "
+            >05:00</span
+          >
+          <el-checkbox
+            style="margin-left: 25px"
+            @click="handlerDraw('DataRefresh')"
+            id="DataRefresh"
+            v-model="DataRefreshFalse"
+            label="数据刷新"
+            size="large"
+          />
+          <!-- <el-checkbox
+            style="margin-left: 20px"
+            @click="FullScreen()"
+            id="FullScreen"
+            v-model="FullScreenFalse"
+            label="全屏"
+            size="large"
+          /> -->
+        </el-radio-group>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="config-card-head">主题</div>
+      <div class="config-card-body" style="padding-top:15px;">
+        <!-- <el-icon size="22px" style="vertical-align: -5px">
+          <Orange />
+        </el-icon>
+        <span style="font-size: 16px">主题：</span> -->
       <div
         style="display: inline-block"
         @click="TypeeChange('default')"
@@ -303,14 +353,12 @@
           紫色</span
         >
       </div>
+      </div>
     </div>
 
-    <div class="divider">
-      <span class="divider-horizontal"></span>
-      <span class="divider-text">底图设置</span>
-      <span class="divider-horizontal"></span>
-    </div>
-    <div class="settingMap">
+    <div class="config-card">
+      <div class="config-card-head">底图</div>
+      <div class="config-card-body">
       <!-- <el-icon size="22px" style="vertical-align: -5px">
         <Location />
       </el-icon>
@@ -327,52 +375,6 @@
         <el-radio @click="setMap('SCENE3D')" label="SCENE3D" name="sceneView">三维</el-radio>
       </el-radio-group>
       <br /> -->
-      <el-icon size="22px" style="vertical-align: -5px">
-        <Setting />
-      </el-icon>
-      <span style="font-size: 16px">工具：</span>
-      <el-radio-group
-        v-model="pathDraw"
-        style="height: 40px; line-height: 40px"
-      >
-        <el-radio @click="DrawIcon('drawLine')" label="drawLine">测距</el-radio>
-        <el-radio @click="DrawIcon('drawArea')" label="drawArea">测面</el-radio>
-        <el-radio @click="DrawIcon('removemeasure')" label="removemeasure"
-          >清除</el-radio
-        >
-      </el-radio-group>
-
-      <el-radio-group>
-        <span
-          id="countdown"
-          style="
-            position: relative;
-            left: 10px;
-            font-size: 18px;
-            top: -2px;
-            color: #ff0000;
-          "
-          >05:00</span
-        >
-        <!-- <br /> -->
-        <el-checkbox
-          style="margin-left: 25px"
-          @click="handlerDraw('DataRefresh')"
-          id="DataRefresh"
-          v-model="DataRefreshFalse"
-          label="数据刷新"
-          size="large"
-        />
-
-        <el-checkbox
-          style="margin-left: 20px"
-          @click="FullScreen()"
-          id="FullScreen"
-          v-model="FullScreenFalse"
-          label="全屏"
-          size="large"
-        />
-      </el-radio-group>
       <div class="settingMap-item">
         <div
           @click="setDtLayerKS('shsw_OneMapServerdark')"
@@ -398,14 +400,14 @@
           <span class="settingMaptext-xs">卫片图</span>
           <img src="/images/mapIcon/卫片图.png" alt="卫片图" />
         </div>
-        <div
+        <!-- <div
           @click="setDtLayerKS('local_img')"
           :class="mapName == 'local_img' && 'switch-imgSelect'"
           class="switch-img"
         >
           <span class="settingMaptext-xs">本地影像</span>
           <img src="/images/mapIcon/weixintu.png" alt="本地影像" />
-        </div>
+        </div> -->
       </div>
 
       <!-- <div class="settingMap-item">
@@ -436,14 +438,12 @@
           <img src="/images/mapIcon/suhcdt.png" alt="河道概化图" />
         </div>
       </div> -->
+      </div>
     </div>
 
-    <div class="divider">
-      <span class="divider-horizontal"></span>
-      <span class="divider-text">效果设置</span>
-      <span class="divider-horizontal"></span>
-    </div>
-    <div class="settingMap" style="margin: 0px 0px 0px 10px">
+    <div class="config-card">
+      <div class="config-card-head">图层</div>
+      <div class="config-card-body">
       <!-- <el-icon size="22px" style="vertical-align: -5px">
         <Opportunity />
       </el-icon> -->
@@ -476,14 +476,14 @@
       <!-- <el-radio-group style="margin-left: 70px;"> 
         <el-checkbox @click="handlerDraw('Windy')" v-model="WindySystemFlase" label="Windy" size="large" />
       </el-radio-group> -->
-      <br />
-      <el-icon size="22px" style="vertical-align: -5px">
+      <!-- <br /> -->
+      <!-- <el-icon size="22px" style="vertical-align: -5px">
         <MapLocation />
       </el-icon>
-      <span style="font-size: 16px">图层：</span>
+      <span style="font-size: 16px">图层：</span> -->
 
       <el-radio-group>
-        <el-checkbox
+        <!-- <el-checkbox
           @click="handlerDraw('RiverRoad')"
           v-model="RiverRoadFalse"
           label="河道"
@@ -494,6 +494,37 @@
           v-model="XingzhengFalse"
           label="行政"
           size="large"
+        /> -->
+        <el-checkbox
+          @change="toggleBusinessLayer('hehu2024', $event)"
+          v-model="hehu2024False"
+          label="河湖"
+          size="large"
+        />
+        <el-checkbox
+          @change="toggleBusinessLayer('mz_xzqh', $event)"
+          v-model="mzXzqhFalse"
+          label="行政"
+          size="large"
+        />
+        <!-- 街道乡镇 -->
+        <el-checkbox
+          @change="toggleBusinessLayer('mz_jdxz', $event)"
+          v-model="mzJdxzFalse"
+          label="街道"
+          size="large"
+        />
+        <el-checkbox
+          @change="toggleBusinessLayer('shsw_dfcmap', $event)"
+          v-model="dfcmapFalse"
+          label="堤防"
+          size="large"
+        />
+        <el-checkbox
+          @change="toggleWaterDistrict($event)"
+          v-model="shuiliPianFalse"
+          label="水利片"
+          size="large"
         />
         <!-- <el-checkbox id="Coverlayer" @click="handlerDraw('Coverlayer')" v-model="CoverlayerFalse" label="遮挡层"
           size="large" /> -->
@@ -501,20 +532,27 @@
       <!-- <el-radio-group style="margin-left: 70px;">
         <el-checkbox @click="handlerDraw('FengXian')" v-model="FengXianFalse" label="风险图" size="large" />
       </el-radio-group> -->
-      <br />
-      <el-icon size="22px" style="vertical-align: -5px">
-        <MapLocation />
-      </el-icon>
-      <span style="font-size: 16px">智能：</span>
+      </div>
+    </div>
 
-      <el-radio-group>
-        <el-checkbox
-          @click="handlerDraw('YUYIN')"
-          v-model="YUYINFalse"
-          label="AI"
-          size="large"
-        />
-      </el-radio-group>
+    <div class="config-card">
+      <div class="config-card-head">工具</div>
+      <div class="config-card-body">
+        <!-- <el-icon size="22px" style="vertical-align: -5px">
+          <Setting />
+        </el-icon>
+        <span style="font-size: 16px">工具：</span> -->
+        <el-radio-group
+          v-model="pathDraw"
+          style="height: 40px; line-height: 40px"
+        >
+          <el-radio @click="DrawIcon('drawLine')" label="drawLine">测距</el-radio>
+          <el-radio @click="DrawIcon('drawArea')" label="drawArea">测面</el-radio>
+          <el-radio @click="DrawIcon('removemeasure')" label="removemeasure"
+            >清除</el-radio
+          >
+        </el-radio-group>
+      </div>
     </div>
 
     <!-- 退出系统 -->
@@ -594,6 +632,7 @@ import dayjs from "dayjs";
 
 import { addAreaLineQS, CreateLayer, map } from "@/utils/ArcGis/MapComm.js";
 import { setMeasureTool } from "@/utils/ArcGis/CommonTool.js";
+import * as PointMark from "@/utils/ArcGis/PointMark.js";
 
 import domain from "@/assets/json/domain.json";
 
@@ -841,6 +880,23 @@ function setDtLayerKS(layerID) {
     console.error("setDtLayerKS-error", error);
   }
 }
+// 业务叠加图层（河湖/区划/街道乡镇/堤防）显隐切换
+function toggleBusinessLayer(layerId, checked) {
+  var myMap = window.myMap || map;
+  if (SetNull(myMap) == "") return;
+  var itemLayer = myMap.getLayer(layerId);
+  if (SetNull(itemLayer) != "") {
+    itemLayer.setVisibility(checked);
+  }
+}
+// 水利片区（json 绘制，非叠加服务图层）
+function toggleWaterDistrict(checked) {
+  if (checked) {
+    PointMark.addWaterDistrictMark("");
+  } else {
+    PointMark.removeRiverDistrictLayers();
+  }
+}
 //地图
 const pathMap = ref("SCENE2D");
 function setMap(layerID) {
@@ -1042,6 +1098,11 @@ const HeatMapRoadFalse = ref(false);
 //河道与行政
 const RiverRoadFalse = ref(true);
 const XingzhengFalse = ref(true);
+const hehu2024False = ref(false);
+const mzXzqhFalse = ref(false);
+const mzJdxzFalse = ref(false);
+const dfcmapFalse = ref(false);
+const shuiliPianFalse = ref(false); //水利片
 const JISHUIDIANFalse = ref(false);
 // 83条主干河流
 const WQRiverRoadFalse = ref(false);
@@ -1469,6 +1530,27 @@ function logout() {
   width: 24px;
   height: 24px;
   cursor: pointer;
+}
+
+/* 项目配置卡片：边框 + 圆角 + 标题栏左侧竖条 */
+.config-card {
+  border: 1px solid rgba(0, 228, 255, 0.25);
+  border-radius: 4px;
+  margin: 0 10px 10px;
+}
+
+.config-card-head {
+  border-left: 3px solid var(--titled1);
+  background: rgba(0, 228, 255, 0.08);
+  padding: 5px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--widgetcolor);
+  border-radius: 4px 4px 0 0;
+}
+
+.config-card-body {
+  padding: 5px 12px;
 }
 
 :deep(.el-radio) {

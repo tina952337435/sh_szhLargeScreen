@@ -87,7 +87,7 @@ function Weacontent() {
         var result = [];
         for (var num = 0; num < strJson.length; num++) {
             var item = strJson[num];
-            var upz = item.upz != undefined ? Number(item.upz).toFixed(2) : "—";
+            var upz = SetNull(item.upz) != "" ? Number(item.upz).toFixed(2) : "—";
             var wrz =SetNull( item.wrz) != "" ? Number(item.wrz).toFixed(2) : "—";
             var grz =SetNull( item.grz) != "" ? Number(item.grz).toFixed(2) : "—";
             var wrzCha = "—";
